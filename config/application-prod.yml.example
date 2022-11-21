@@ -1,0 +1,18 @@
+server:
+  port: PORT_NUMBER
+
+spring:
+  datasource:
+    url: PROJECT_DATABASE_URL
+    username: PROJECT_DATABASE_USERNAME
+    password: PROJECT_DATABASE_PASSWORD
+
+  # hibernate properties
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
+
+    # Hibernate ddl auto (create, create-drop, validate, update)
+    hibernate:
+      ddl-auto: update
