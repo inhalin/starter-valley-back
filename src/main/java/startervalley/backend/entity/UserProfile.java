@@ -27,15 +27,18 @@ public class UserProfile {
     @Column(columnDefinition = "TEXT")
     private String interests;
 
+    private String contact;
+
     public UserProfile() {
     }
 
-    public UserProfile(String mbti, String oneliner, String intro, String likes, String dislikes, String interests) {
+    public UserProfile(String mbti, String oneliner, String intro, String likes, String dislikes, String interests, String contact) {
         this.mbti = mbti;
         this.oneliner = oneliner;
         this.intro = intro;
         this.likes = likes;
         this.dislikes = dislikes;
         this.interests = interests;
+        this.contact = contact;
     }
 }
