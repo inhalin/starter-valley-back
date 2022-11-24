@@ -21,6 +21,9 @@ public class User extends BaseTimeEntity {
     private Long id;
 
     @Column(nullable = false, unique = true)
+    private String username;
+
+    @Column(nullable = false)
     private String email;
 
     private String name;
@@ -56,7 +59,8 @@ public class User extends BaseTimeEntity {
     private String imageUrl;
 
     @Builder
-    public User(String email, String name, Role role, Generation generation, Team team, Boolean isLeader, Devpart devpart, AuthProvider provider, String refreshToken, String githubUrl, UserProfile profile, String imageUrl) {
+    public User(String username, String email, String name, Role role, Generation generation, Team team, Boolean isLeader, Devpart devpart, AuthProvider provider, String refreshToken, String githubUrl, UserProfile profile, String imageUrl) {
+        this.username = username;
         this.email = email;
         this.name = name;
         this.role = role;
