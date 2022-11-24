@@ -70,4 +70,8 @@ public class User extends BaseTimeEntity {
         this.profile = profile;
         this.imageUrl = imageUrl;
     }
+
+    public void setGeneration(Generation generation) {
+        this.generation = generation;
+    }
 }
