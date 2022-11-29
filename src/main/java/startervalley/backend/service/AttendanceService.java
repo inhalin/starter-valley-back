@@ -69,7 +69,9 @@ public class AttendanceService {
         AttendanceId attendanceId = new AttendanceId(user.getId(), today);
         Attendance attendance = attendanceRepository.findById(attendanceId).orElseThrow();
 
-        AttendanceStatus status = checkIfOverAbsentTime(attendance);
+        checkIfAlreadyAttend(attendance.getStatus());
+
+        AttendanceStatus status = checkIfOverAbsentTime();
         attendance.setStatus(status);
         attendance.setAttendanceTime(LocalTime.now());
         return new BaseResponseDto<>(status.toString(), null);
@@ -153,7 +155,7 @@ public class AttendanceService {
         return false;
     }
 
-    private AttendanceStatus checkIfOverAbsentTime(Attendance attendance) {
+    private AttendanceStatus checkIfOverAbsentTime() {
         LocalTime now = LocalTime.now();
         return now.isAfter(ABSENT_TIME) ? LATE : PRESENT;
     }
