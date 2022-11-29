@@ -8,6 +8,7 @@ import startervalley.backend.dto.request.AttendanceExcuseDto;
 import startervalley.backend.dto.request.AttendanceYearMonthDto;
 import startervalley.backend.dto.response.AttendanceDto;
 import startervalley.backend.dto.response.BaseResponseDto;
+import startervalley.backend.dto.response.TodayAttendanceDto;
 import startervalley.backend.service.AttendanceService;
 
 import javax.validation.Valid;
@@ -26,6 +27,11 @@ public class AttendanceController {
         return attendanceService.findUserAttendances(attendanceYearMonthDto);
     }
 
+    @GetMapping("/attendances/today")
+    public BaseResponseDto<TodayAttendanceDto> checkIfCheckedToday() {
+        return attendanceService.checkIfCheckedToday();
+    }
+
     @PostMapping("/attendances/check")
     public BaseResponseDto<Void> checkAttendance(@RequestBody AttendanceCheckDto attendanceCheckDto) {
         log.info("attendanceCheckDto: {}", attendanceCheckDto);
@@ -35,5 +41,10 @@ public class AttendanceController {
     @PostMapping("/attendances/excuse")
     public BaseResponseDto<Void> excuseAttendance(@RequestBody AttendanceExcuseDto attendanceExcuseDto) {
         return attendanceService.excuseAttendance(attendanceExcuseDto);
+    }
+
+    @PostMapping("/attendances/post-google-form")
+    public BaseResponseDto<Void> postGoogleForm() {
+        return attendanceService.sendToGoogleForm();
     }
 }

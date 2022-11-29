@@ -13,6 +13,8 @@ public interface AttendanceRepository extends JpaRepository<Attendance, Attendan
 
     List<Attendance> findAllByUser(User user);
 
+    List<Attendance> findAllByStatusIsNull();
+
     @Query(value = "SELECT * FROM attendance WHERE user_id = :user_id " +
             "AND YEAR(attended_date) = :year " +
             "AND MONTH(attended_date) = :month", nativeQuery = true)

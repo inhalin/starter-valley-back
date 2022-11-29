@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import startervalley.backend.exception.AttendanceAlreadyPresentException;
-import startervalley.backend.exception.AttendanceOutOfLimitedRangeException;
+import startervalley.backend.exception.AttendanceOutOfRangeException;
 
 import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_ALREADY_PRESENT;
 import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_OUT_OF_RANGE;
@@ -20,8 +20,8 @@ import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_OUT_OF_
 public class ExceptionControllerAdvice {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(AttendanceOutOfLimitedRangeException.class)
-    public ErrorResult attendanceOutOfLimitedRangeExHandler(AttendanceOutOfLimitedRangeException e) {
+    @ExceptionHandler(AttendanceOutOfRangeException.class)
+    public ErrorResult attendanceOutOfLimitedRangeExHandler(AttendanceOutOfRangeException e) {
         return new ErrorResult(ATTENDANCE_OUT_OF_RANGE);
     }
 
