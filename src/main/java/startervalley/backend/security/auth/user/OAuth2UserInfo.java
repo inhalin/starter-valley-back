@@ -3,6 +3,7 @@ package startervalley.backend.security.auth.user;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import startervalley.backend.entity.AuthProvider;
 
 import java.util.Map;
 
@@ -16,10 +17,6 @@ public abstract class OAuth2UserInfo {
         this.attributes = attributes;
     }
 
-    public Map<String, Object> getAttributes() {
-        return attributes;
-    }
-
     public abstract String getId();
 
     public abstract String getEmail();
@@ -27,4 +24,12 @@ public abstract class OAuth2UserInfo {
     public abstract String getImageUrl();
 
     public abstract String getGithubUrl();
+
+    public abstract AuthProvider getProvider();
+
+    public String getUsername() {
+        return getProvider().getName() + "_" + getId();
+    }
+
+    ;
 }

@@ -1,5 +1,7 @@
 package startervalley.backend.security.auth.user;
 
+import startervalley.backend.entity.AuthProvider;
+
 import java.util.Map;
 
 public class GoogleUserInfo extends OAuth2UserInfo {
@@ -25,5 +27,10 @@ public class GoogleUserInfo extends OAuth2UserInfo {
     @Override
     public String getGithubUrl() {
         return null;
+    }
+
+    @Override
+    public AuthProvider getProvider() {
+        return AuthProvider.GOOGLE;
     }
 }

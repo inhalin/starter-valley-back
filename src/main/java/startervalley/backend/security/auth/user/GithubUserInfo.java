@@ -1,5 +1,7 @@
 package startervalley.backend.security.auth.user;
 
+import startervalley.backend.entity.AuthProvider;
+
 import java.util.Map;
 
 public class GithubUserInfo extends OAuth2UserInfo{
@@ -26,5 +28,10 @@ public class GithubUserInfo extends OAuth2UserInfo{
     @Override
     public String getGithubUrl() {
         return (String) attributes.get("html_url");
+    }
+
+    @Override
+    public AuthProvider getProvider() {
+        return AuthProvider.GITHUB;
     }
 }

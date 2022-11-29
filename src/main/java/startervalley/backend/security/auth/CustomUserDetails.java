@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
+import startervalley.backend.entity.Role;
 import startervalley.backend.entity.User;
 
 import java.util.ArrayList;
@@ -28,7 +29,12 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> collection = new ArrayList<>();
-        collection.add(()-> String.valueOf(user.getRole()));
+        collection.add(()-> {
+            if (user != null) {
+                return user.getRole().name();
+            }
+            return Role.ANONYMOUS.name();
+        });
 
         return collection;
     }
@@ -65,7 +71,10 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 
     @Override
     public String getName() {
-        return String.valueOf(user.getId());
+        if (user != null) {
+            return user.getUsername();
+        }
+        return "newUser";
     }
 }
 

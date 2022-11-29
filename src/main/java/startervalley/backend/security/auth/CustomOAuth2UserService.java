@@ -27,16 +27,17 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     }
 
     private OAuth2User process(OAuth2UserRequest userRequest, OAuth2User oAuth2User) {
+
         AuthProvider authProvider = AuthProvider.valueOf(userRequest.getClientRegistration().getRegistrationId().toUpperCase());
         OAuth2UserInfo oAuth2UserInfo = OAuth2UserInfoFactory.getOAuth2UserInfo(authProvider, oAuth2User.getAttributes());
 
-        User user = userRepository.findByEmailAndProvider(oAuth2UserInfo.getEmail(), authProvider);
+        User user = userRepository.findByUsername(oAuth2UserInfo.getUsername());
 
-        if (user == null) {   // 신규 유저
-            user = createUser(oAuth2UserInfo, authProvider);
-        }
+//        if (user == null) {   // 신규 유저
+//            user = createUser(oAuth2UserInfo, authProvider);
+//        }
 
-        return new CustomUserDetails(user, oAuth2User.getAttributes());
+        return new CustomUserDetails(user, oAuth2UserInfo.getAttributes());
     }
 
     private User createUser(OAuth2UserInfo userAttributes, AuthProvider authProvider) {
