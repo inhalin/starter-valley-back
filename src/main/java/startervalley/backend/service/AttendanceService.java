@@ -39,7 +39,7 @@ import static startervalley.backend.entity.AttendanceStatus.PRESENT;
 public class AttendanceService {
 
     private final static int LIMITED_RANGE = 100;
-    private final static LocalTime ABSENT_TIME = LocalTime.of(10, 0);
+    private final static LocalTime ABSENT_TIME = LocalTime.of(9, 0);
 
     @Value("${google-form-key}")
     private String GOOGLE_FORM_KEY;
@@ -71,7 +71,7 @@ public class AttendanceService {
 
         checkIfAlreadyAttend(attendance.getStatus());
 
-        AttendanceStatus status = checkIfOverAbsentTime();
+        AttendanceStatus status = checkIfOverPresentTime();
         attendance.setStatus(status);
         attendance.setAttendanceTime(LocalTime.now());
         return new BaseResponseDto<>(status.toString(), null);
@@ -105,7 +105,7 @@ public class AttendanceService {
             todayAttendanceDto.setChecked(checkIfAlreadyAttend(attendance.getStatus()));
         } catch (AttendanceAlreadyPresentException ignored) {
         }
-
+        todayAttendanceDto.setNeedReason(checkNeedReason(attendance));
         return new BaseResponseDto<>(ATTENDANCE_TODAY.toString(), todayAttendanceDto);
     }
 
@@ -133,7 +133,7 @@ public class AttendanceService {
         params.add("entry.1594954107", attendanceStatus);
 
         webClient.post()
-                .uri("/{key}/formResponse", GOOGLE_FORM_KEY)
+                .uri("https://docs.google.com/forms/d/e/{key}/formResponse", GOOGLE_FORM_KEY)
                 .body(BodyInserters.fromFormData(params))
                 .retrieve()
                 .bodyToMono(Void.class)
@@ -155,7 +155,14 @@ public class AttendanceService {
         return false;
     }
 
-    private AttendanceStatus checkIfOverAbsentTime() {
+    private boolean checkNeedReason(Attendance attendance) {
+        if (attendance.getStatus() == PRESENT || attendance.getStatus() == null) {
+            return false;
+        }
+        return attendance.getReason() == null;
+    }
+
+    private AttendanceStatus checkIfOverPresentTime() {
         LocalTime now = LocalTime.now();
         return now.isAfter(ABSENT_TIME) ? LATE : PRESENT;
     }

@@ -6,5 +6,5 @@ import lombok.Data;
 public class TodayAttendanceDto {
 
     private boolean isChecked = true;
-
+    private boolean needReason = false;
 }
