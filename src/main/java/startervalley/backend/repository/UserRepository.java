@@ -10,9 +10,12 @@ import startervalley.backend.entity.Devpart;
 import startervalley.backend.entity.Generation;
 import startervalley.backend.entity.User;
 
+import java.util.List;
+import java.util.Optional;
+
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByEmailAndProvider(String email, AuthProvider provider);
-    User findByUsername(String username);
+    Optional<User> findByUsername(String username);
 
     @Transactional
     @Modifying
@@ -27,4 +30,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             @Param("name") String name,
             @Param("devpart") Devpart devpart,
             @Param("generation") Generation generation);
+
+    @Query("select u from User u inner join u.generation g where g.id = :generationId")
+    List<User> findAllByGenerationId(@Param("generationId") Long generationId);
 }
