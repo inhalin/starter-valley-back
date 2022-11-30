@@ -2,6 +2,7 @@ package startervalley.backend.entity;
 
 import lombok.Builder;
 import lombok.Getter;
+import startervalley.backend.dto.user.UserProfileUpdateDto;
 
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
@@ -11,9 +12,6 @@ import javax.persistence.Embeddable;
 @Builder
 public class UserProfile {
     private String mbti;
-
-    @Column(columnDefinition = "TEXT")
-    private String oneliner;
 
     @Column(columnDefinition = "TEXT")
     private String intro;
@@ -32,13 +30,21 @@ public class UserProfile {
     public UserProfile() {
     }
 
-    public UserProfile(String mbti, String oneliner, String intro, String likes, String dislikes, String interests, String contact) {
+    public UserProfile(String mbti, String intro, String likes, String dislikes, String interests, String contact) {
         this.mbti = mbti;
-        this.oneliner = oneliner;
         this.intro = intro;
         this.likes = likes;
         this.dislikes = dislikes;
         this.interests = interests;
         this.contact = contact;
+    }
+
+    public void updateProfile(UserProfileUpdateDto dto) {
+        this.contact = dto.getContact();
+        this.intro = dto.getIntro();
+        this.mbti = dto.getMbti();
+        this.likes = dto.getLikes();
+        this.dislikes = dto.getDislikes();
+        this.interests = dto.getInterests();
     }
 }
