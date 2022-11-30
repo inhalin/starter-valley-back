@@ -10,7 +10,6 @@ public class WebClientConfig {
     @Bean
     public WebClient webClient() {
         return WebClient.builder()
-                .baseUrl("https://docs.google.com/forms/d/e")
                 .build();
     }
 
