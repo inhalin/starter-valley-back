@@ -19,17 +19,18 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Transactional
     @Modifying
-    @Query("update User u set u.refreshToken = :token where u.username = :username")
-    void updateRefreshToken(@Param("username") String username, @Param("token") String token);
+    @Query("update User u set u.refreshToken = :token where u.id = :userId")
+    void updateRefreshToken(@Param("userId") Long userId, @Param("token") String token);
 
     @Transactional
     @Modifying
-    @Query("update User u set u.name = :name, u.devpart = :devpart, u.generation = :generation where u.username = :username")
-    void signUpWithAdditionalInfo(
-            @Param("username") String username,
+    @Query("update User u set u.name = :name, u.devpart = :devpart, u.generation = :generation, u.profile.intro = :intro where u.id = :userId")
+    void signup(
+            @Param("userId") Long userId,
             @Param("name") String name,
             @Param("devpart") Devpart devpart,
-            @Param("generation") Generation generation);
+            @Param("generation") Generation generation,
+            @Param("intro") String intro);
 
     @Query("select u from User u inner join u.generation g where g.id = :generationId")
     List<User> findAllByGenerationId(@Param("generationId") Long generationId);

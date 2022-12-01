@@ -1,9 +1,9 @@
 package startervalley.backend.security.auth;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import startervalley.backend.entity.Role;
 import startervalley.backend.entity.User;
 
@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Map;
 
 @Getter
-public class CustomUserDetails implements UserDetails, OAuth2User {
+public class CustomUserDetails implements UserDetails {
 
     private final User user;
     private Map<String, Object> attributes;
@@ -26,15 +26,18 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
         this.attributes = attributes;
     }
 
+    public Long getId() {
+        return user.getId();
+    }
+
+    public String getEmail() {
+        return user.getEmail();
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> collection = new ArrayList<>();
-        collection.add(()-> {
-            if (user != null) {
-                return user.getRole().name();
-            }
-            return Role.ANONYMOUS.name();
-        });
+        collection.add(Role.ANONYMOUS::name);
 
         return collection;
     }
@@ -46,7 +49,7 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
 
     @Override
     public String getUsername() {
-        return (String) attributes.get("email");
+        return String.valueOf(user.getId());
     }
 
     @Override
@@ -68,13 +71,4 @@ public class CustomUserDetails implements UserDetails, OAuth2User {
     public boolean isEnabled() {
         return true;
     }
-
-    @Override
-    public String getName() {
-        if (user != null) {
-            return user.getUsername();
-        }
-        return "newUser";
-    }
 }
-

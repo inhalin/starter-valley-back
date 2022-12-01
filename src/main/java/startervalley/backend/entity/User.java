@@ -48,6 +48,7 @@ public class User extends BaseTimeEntity {
 
     @Enumerated(STRING)
     private AuthProvider provider;
+    private String providerId;
 
     private String refreshToken;
     private String githubUrl;
@@ -58,7 +59,7 @@ public class User extends BaseTimeEntity {
     private String imageUrl;
 
     @Builder
-    public User(String username, String email, String name, Role role, Generation generation, Team team, Boolean isLeader, Devpart devpart, AuthProvider provider, String refreshToken, String githubUrl, UserProfile profile, String imageUrl) {
+    public User(String username, String email, String name, Role role, Generation generation, Team team, Boolean isLeader, Devpart devpart, AuthProvider provider, String providerId, String refreshToken, String githubUrl, UserProfile profile, String imageUrl) {
         this.username = username;
         this.email = email;
         this.name = name;
@@ -68,6 +69,7 @@ public class User extends BaseTimeEntity {
         this.isLeader = isLeader;
         this.devpart = devpart;
         this.provider = provider;
+        this.providerId = providerId;
         this.refreshToken = refreshToken;
         this.githubUrl = githubUrl;
         this.profile = profile;
