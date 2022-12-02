@@ -47,4 +47,8 @@ public class Attendance extends BaseTimeEntity {
     public void setReason(String reason) {
         this.reason = reason;
     }
+
+    public void setAttendanceTime(LocalTime attendanceTime) {
+        this.attendanceTime = attendanceTime;
+    }
 }
