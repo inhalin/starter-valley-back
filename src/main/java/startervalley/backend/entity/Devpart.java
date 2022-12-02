@@ -13,5 +13,4 @@ public class Devpart {
     private Long id;
 
     private String name; // BE, FE, Android
-    private String language;
 }
