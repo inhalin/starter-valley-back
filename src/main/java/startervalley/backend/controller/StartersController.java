@@ -19,17 +19,17 @@ public class StartersController {
 
     @GetMapping({"/", ""})
     public BaseResponseDto<List<UserCardDto>> list(@RequestParam Long generationId) {
-        return userService.findUsersByGenerationId(generationId);
+        return new BaseResponseDto<>(null, userService.findUsersByGenerationId(generationId));
     }
 
     @GetMapping("/{id}")
     public BaseResponseDto<UserProfileReadDto> show(@PathVariable Long id) {
-        return userService.showUserProfile(id);
+        return new BaseResponseDto<>(null, userService.showUserProfile(id));
     }
 
     @PutMapping("/{id}")
     public BaseResponseDto<UserProfileUpdateDto> update(@PathVariable Long id, @RequestBody UserProfileUpdateDto userProfileUpdateDto) {
         // TODO: 본인이 아닌 경우 예외 발생
-        return userService.updateUserProfile(id, userProfileUpdateDto);
+        return new BaseResponseDto<>(null, userService.updateUserProfile(id, userProfileUpdateDto));
     }
 }

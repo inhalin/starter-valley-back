@@ -79,4 +79,9 @@ public class User extends BaseTimeEntity {
     public void setGeneration(Generation generation) {
         this.generation = generation;
     }
+
+    public UserProfile setProfile(UserProfile profile) {
+        this.profile = profile;
+        return profile;
+    }
 }

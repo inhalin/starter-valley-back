@@ -3,10 +3,9 @@ package startervalley.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import startervalley.backend.dto.response.BaseResponseDto;
 import startervalley.backend.dto.user.UserCardDto;
-import startervalley.backend.dto.user.UserProfileUpdateDto;
 import startervalley.backend.dto.user.UserProfileReadDto;
+import startervalley.backend.dto.user.UserProfileUpdateDto;
 import startervalley.backend.entity.User;
 import startervalley.backend.entity.UserProfile;
 import startervalley.backend.exception.ResourceNotFoundException;
@@ -22,7 +21,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public BaseResponseDto<List<UserCardDto>> findUsersByGenerationId(Long generationId) {
+    public List<UserCardDto> findUsersByGenerationId(Long generationId) {
         List<User> users = userRepository.findAllByGenerationId(generationId);
         List<UserCardDto> dtoList = new ArrayList<>();
 
@@ -30,14 +29,13 @@ public class UserService {
             dtoList.add(mapToUserCardDto(user));
         }
 
-        return new BaseResponseDto<>(null, dtoList);
+        return dtoList;
     }
 
-    public BaseResponseDto<UserProfileReadDto> showUserProfile(Long id) {
+    public UserProfileReadDto showUserProfile(Long id) {
         User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", String.valueOf(id)));
 
-        UserProfileReadDto dto = mapToUserProfileReadDto(user);
-        return new BaseResponseDto<>(null, dto);
+        return mapToUserProfileReadDto(user);
     }
 
     private String getUserContactEmail(User user) {
@@ -48,15 +46,19 @@ public class UserService {
     }
 
     @Transactional
-    public BaseResponseDto<UserProfileUpdateDto> updateUserProfile(Long id, UserProfileUpdateDto dto) {
-        UserProfile userProfile = userRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("User", "id", String.valueOf(id)))
-                .getProfile();
+    public UserProfileUpdateDto updateUserProfile(Long id, UserProfileUpdateDto dto) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", String.valueOf(id)));
+
+        UserProfile userProfile = user.getProfile();
+
+        if (userProfile == null) {
+            userProfile = user.setProfile(new UserProfile());
+        }
+
         userProfile.updateProfile(dto);
 
-        UserProfileUpdateDto updatedUserProfile = mapToUserProfileUpdateDto(userRepository.findById(id).orElseThrow().getProfile());
-
-        return new BaseResponseDto<>("Uer profile updated successfully", updatedUserProfile);
+        return mapToUserProfileUpdateDto(userRepository.findById(id).orElseThrow().getProfile());
     }
 
     private UserProfileReadDto mapToUserProfileReadDto(User user) {
