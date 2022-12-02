@@ -1,10 +1,10 @@
 package startervalley.backend.dto.user;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import startervalley.backend.entity.Team;
 
-@Data
+@Getter
 @Builder
 public class UserCardDto {
     private String username;
