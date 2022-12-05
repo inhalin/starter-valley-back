@@ -14,7 +14,7 @@ import javax.validation.constraints.Pattern;
 public class UserProfileUpdateDto {
     private String contact;
 
-    @Pattern(regexp = "([a-zA-Z]{4})*$", message = "MBTI는 영문자 네 글자로 적어주세요.")
+    @Pattern(regexp = "([EI][SN][TF][JP])*$", flags = {Pattern.Flag.CASE_INSENSITIVE}, message = "정확한 MBTI를 적어주세요.")
     private String mbti;
 
     private String intro;
