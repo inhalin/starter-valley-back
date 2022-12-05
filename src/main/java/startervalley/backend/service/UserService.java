@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.dto.user.UserCardDto;
 import startervalley.backend.dto.user.UserProfileReadDto;
 import startervalley.backend.dto.user.UserProfileUpdateDto;
+import startervalley.backend.dto.user.UserSelfProfileDto;
 import startervalley.backend.entity.User;
 import startervalley.backend.entity.UserProfile;
 import startervalley.backend.exception.ResourceNotFoundException;
@@ -107,6 +108,18 @@ public class UserService {
                 .likes(userProfile.getLikes())
                 .dislikes(userProfile.getDislikes())
                 .interests(userProfile.getInterests())
+                .build();
+    }
+
+    public UserSelfProfileDto getSelfProfile(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+
+        return UserSelfProfileDto.builder()
+                .name(user.getName())
+                .generationId(user.getGeneration().getId())
+                .consecutiveDays(user.getConsecutiveDays())
+                .imageUrl(user.getImageUrl())
+                .devpart(user.getDevpart().getName())
                 .build();
     }
 }

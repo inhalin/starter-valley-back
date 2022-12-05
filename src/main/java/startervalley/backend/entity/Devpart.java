@@ -12,5 +12,5 @@ public class Devpart {
     @Column(name = "devpart_id")
     private Long id;
 
-    private String name; // BE, FE, Android
+    private String name;
 }
