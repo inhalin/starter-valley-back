@@ -4,12 +4,13 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import startervalley.backend.dto.response.BaseResponseDto;
 import startervalley.backend.dto.user.UserCardListDto;
 import startervalley.backend.dto.user.UserProfileReadDto;
 import startervalley.backend.dto.user.UserProfileUpdateDto;
 import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.service.UserService;
+
+import javax.validation.Valid;
 
 @RestController
 @RequiredArgsConstructor
@@ -18,7 +19,7 @@ public class StartersController {
 
     private final UserService userService;
 
-    @GetMapping({"/", ""})
+    @GetMapping
     public ResponseEntity<UserCardListDto> list(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getId();
         Long generationId = userDetails.getUser().getGeneration().getId();
@@ -34,7 +35,7 @@ public class StartersController {
     @PutMapping("/{username}")
     public ResponseEntity<UserProfileUpdateDto> update(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @RequestBody UserProfileUpdateDto userProfileUpdateDto,
+            @Valid @RequestBody UserProfileUpdateDto userProfileUpdateDto,
             @PathVariable String username) {
         Long id = userDetails.getId();
 

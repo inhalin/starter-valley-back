@@ -3,10 +3,7 @@ package startervalley.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import startervalley.backend.dto.user.UserCardDto;
-import startervalley.backend.dto.user.UserCardListDto;
-import startervalley.backend.dto.user.UserProfileReadDto;
-import startervalley.backend.dto.user.UserProfileUpdateDto;
+import startervalley.backend.dto.user.*;
 import startervalley.backend.entity.User;
 import startervalley.backend.entity.UserProfile;
 import startervalley.backend.exception.ResourceNotFoundException;
@@ -74,23 +71,26 @@ public class UserService {
     }
 
     private UserProfileReadDto mapToUserProfileReadDto(User user) {
-        UserProfile userProfile = user.getProfile() != null ? user.getProfile() : new UserProfile();
+        UserProfile profile = user.getProfile() != null ? user.getProfile() : new UserProfile();
 
-        List<String> mainInfo = new ArrayList<>();
-        mainInfo.add(user.getDevpart().getName());
-        mainInfo.add(user.getTeam() != null ? user.getTeam().getName() : null);
-        mainInfo.add(userProfile.getMbti());
-        mainInfo.add(getUserContactEmail(user));
+        List<UserProfileInfoMap> mainInfo = new ArrayList<>();
+        mainInfo.add(UserProfileInfoMap.of("Team", user.getTeam() != null ? user.getTeam().getName() : null));
+        mainInfo.add(UserProfileInfoMap.of("MBTI", profile.getMbti()));
+        mainInfo.add(UserProfileInfoMap.of("Email", getUserContactEmail(user)));
 
-        List<String> subInfo = new ArrayList<>();
-        subInfo.add(userProfile.getLikes());
-        subInfo.add(userProfile.getDislikes());
-        subInfo.add(userProfile.getInterests());
+        List<UserProfileInfoMap> subInfo = new ArrayList<>();
+        subInfo.add(UserProfileInfoMap.of("I am", profile.getIntro()));
+        subInfo.add(UserProfileInfoMap.of("I like", profile.getLikes()));
+        subInfo.add(UserProfileInfoMap.of("I dislike", profile.getDislikes()));
+        subInfo.add(UserProfileInfoMap.of("My interests art", profile.getInterests()));
 
         return UserProfileReadDto.builder()
                 .imageUrl(user.getImageUrl())
+                .name(user.getName())
+                .isLeader(user.getIsLeader())
+                .devpart(user.getDevpart().getName())
+                .generationId(user.getGeneration().getId())
                 .mainInfo(mainInfo)
-                .intro(userProfile.getIntro())
                 .subInfo(subInfo)
                 .build();
     }
