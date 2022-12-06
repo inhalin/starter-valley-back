@@ -6,6 +6,8 @@ import lombok.NoArgsConstructor;
 import startervalley.backend.dto.request.StoreRequestDto;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -23,7 +25,13 @@ public class Store extends BaseTimeEntity {
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    Category category;
+    private Category category;
+
+    @OneToMany(mappedBy = "store")
+    private List<StoreImage> storeImageList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "store")
+    private List<StoreTag> storeTagList = new ArrayList<>();
 
     @Builder
     public Store(Long id, String name, String address, String description, Category category) {

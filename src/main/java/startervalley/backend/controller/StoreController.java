@@ -2,15 +2,16 @@ package startervalley.backend.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import startervalley.backend.dto.request.StoreQueryParameter;
 import startervalley.backend.dto.request.StoreRequestDto;
-import startervalley.backend.dto.response.BaseResponseDto;
-import startervalley.backend.dto.response.CategoryResponseDto;
-import startervalley.backend.dto.response.CommentResponseDto;
-import startervalley.backend.dto.response.StoreResponseDto;
+import startervalley.backend.dto.response.*;
 import startervalley.backend.service.StoreService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @Slf4j
@@ -21,8 +22,8 @@ public class StoreController {
 
     private final StoreService storeService;
 
-    @GetMapping("")
-    public BaseResponseDto<List<StoreResponseDto>> getStoreList(@ModelAttribute StoreQueryParameter queryParameter) {
+    @GetMapping
+    public BaseResponseDto<List<StoreResponseDto>> getStoreList(@Valid @ModelAttribute StoreQueryParameter queryParameter) {
         return storeService.findAllStore(queryParameter);
     }
 
@@ -36,14 +37,16 @@ public class StoreController {
         return storeService.findAllCategory();
     }
 
-    @PostMapping("")
-    public BaseResponseDto<Long> createStore(@RequestBody StoreRequestDto storeRequestDto) {
-        return storeService.createStore(storeRequestDto);
+    @PostMapping
+    public BaseResponseDto<Long> createStore(@RequestPart(value = "storeRequestDto") StoreRequestDto storeRequestDto,
+                                             @RequestPart(value = "uploadFiles", required = false) List<MultipartFile> uploadFiles) {
+        return storeService.createStore(storeRequestDto, uploadFiles);
     }
 
     @GetMapping("/{id}")
-    public BaseResponseDto<StoreResponseDto> getStore(@PathVariable Long id) {
-        return storeService.findStore(id);
+    public ResponseEntity<StoreDetailDto> getStore(@PathVariable Long id) {
+        StoreDetailDto dto = storeService.findStore(id);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @GetMapping("/{id}/comments")
