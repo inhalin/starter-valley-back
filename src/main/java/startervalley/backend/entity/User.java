@@ -33,7 +33,7 @@ public class User extends BaseTimeEntity {
 
     @Enumerated(STRING)
     @Column(columnDefinition = "varchar(255) default 'ANONYMOUS'", nullable = false)
-    private Role role = Role.ANONYMOUS;
+    private Role role;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "generation_id")
@@ -44,7 +44,7 @@ public class User extends BaseTimeEntity {
     private Team team;
 
     @Column(columnDefinition="tinyint(1) default 0")
-    private Boolean isLeader = false;
+    private Boolean isLeader;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "devpart_id")

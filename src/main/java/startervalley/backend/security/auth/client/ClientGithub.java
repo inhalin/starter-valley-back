@@ -11,7 +11,7 @@ import startervalley.backend.dto.auth.GithubEmailResponse;
 import startervalley.backend.dto.auth.GithubTokenResponse;
 import startervalley.backend.dto.auth.GithubUserResponse;
 import startervalley.backend.entity.AuthProvider;
-import startervalley.backend.exception.TokenValidFailedException;
+import startervalley.backend.exception.TokenNotValidException;
 
 @Component
 @RequiredArgsConstructor
@@ -51,8 +51,8 @@ public class ClientGithub implements ClientProxy {
                 .uri("https://api.github.com/user")
                 .header("Authorization", "Bearer " + accessToken)
                 .retrieve()
-                .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new TokenValidFailedException("Social Access Token is unauthorized")))
-                .onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new TokenValidFailedException("Internal Server Error")))
+                .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new TokenNotValidException("Social Access Token is unauthorized")))
+                .onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new TokenNotValidException("Internal Server Error")))
                 .bodyToMono(GithubUserResponse.class)
                 .block();
 
@@ -70,8 +70,8 @@ public class ClientGithub implements ClientProxy {
                 .header("Authorization", "Bearer " + accessToken)
                 .header("Accept", "application/vnd.github+json")
                 .retrieve()
-                .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new TokenValidFailedException("Social Access Token is unauthorized")))
-                .onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new TokenValidFailedException("Internal Server Error")))
+                .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new TokenNotValidException("Social Access Token is unauthorized")))
+                .onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new TokenNotValidException("Internal Server Error")))
                 .bodyToMono(GithubEmailResponse[].class)
                 .block();
 

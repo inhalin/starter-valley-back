@@ -8,8 +8,12 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
 import startervalley.backend.exception.AttendanceAlreadyPresentException;
 import startervalley.backend.exception.AttendanceOutOfRangeException;
+import startervalley.backend.exception.TokenNotValidException;
+
+import java.util.Date;
 
 import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_ALREADY_PRESENT;
 import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_OUT_OF_RANGE;
@@ -37,5 +41,17 @@ public class ExceptionControllerAdvice {
         BindingResult bindingResult = e.getBindingResult();
         String defaultMessage = bindingResult.getFieldError().getDefaultMessage();
         return new ErrorResult(defaultMessage);
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ExceptionHandler(TokenNotValidException.class)
+    public ErrorDetails handleTokenValidationException(TokenNotValidException e, WebRequest request) {
+        return new ErrorDetails(new Date(System.currentTimeMillis()), e.getMessage(), request.getDescription(false));
+    }
+
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ExceptionHandler(Exception.class)
+    public ErrorDetails handleGlobalException(Exception e, WebRequest request) {
+        return new ErrorDetails(new Date(System.currentTimeMillis()), e.getMessage(), request.getDescription(false));
     }
 }

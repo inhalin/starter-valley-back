@@ -30,6 +30,10 @@ public class UserProfile {
     public UserProfile() {
     }
 
+    public UserProfile(String intro) {
+        this.intro = intro;
+    }
+
     public UserProfile(String mbti, String intro, String likes, String dislikes, String interests, String contact) {
         this.mbti = mbti;
         this.intro = intro;

@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import startervalley.backend.dto.user.UserCardDto;
-import startervalley.backend.dto.user.UserProfileReadDto;
-import startervalley.backend.dto.user.UserProfileUpdateDto;
-import startervalley.backend.dto.user.UserSelfProfileDto;
+import startervalley.backend.dto.user.*;
 
 import startervalley.backend.entity.User;
 import startervalley.backend.entity.UserProfile;
