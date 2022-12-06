@@ -3,7 +3,6 @@ package startervalley.backend.security.jwt;
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,7 +17,6 @@ import startervalley.backend.repository.UserRepository;
 import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.security.auth.client.GithubUser;
 
-import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -27,7 +25,7 @@ import java.util.stream.Collectors;
 public class JwtTokenProvider {
 
     private final String SECRET_KEY;
-    private final String COOKIE_REFRESH_TOKEN_KEY;
+    private final UserRepository userRepository;
 
     @Value("${app.auth.token.expiry.access-token}")
     private Long ACCESS_TOKEN_EXPIRE_LENGTH;
@@ -38,14 +36,8 @@ public class JwtTokenProvider {
     private final String ISSUER = "startervalley";
     private final String AUTHORITIES_KEY = "role";
 
-    private final UserRepository userRepository;
-
-    public JwtTokenProvider(
-            @Value("${app.auth.token.secret-key}") String secretKey,
-            @Value("${app.auth.token.refresh-key}") String refreshKey,
-            UserRepository userRepository) {
+    public JwtTokenProvider(@Value("${app.auth.token.secret-key}") String secretKey, UserRepository userRepository) {
         this.SECRET_KEY = Base64.getEncoder().encodeToString(secretKey.getBytes());
-        this.COOKIE_REFRESH_TOKEN_KEY = refreshKey;
         this.userRepository = userRepository;
     }
 

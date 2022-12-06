@@ -59,11 +59,11 @@ public class AuthService {
 
     public JwtTokenDto createJwtToken(Authentication authentication) {
         String accessToken = tokenProvider.createAccessToken(authentication);
-//        String refreshToken = tokenProvider.createRefreshToken(authentication);
+        String refreshToken = tokenProvider.createRefreshToken(authentication);
 
         return JwtTokenDto.builder()
                 .accessToken(accessToken)
-//                .refreshToken(refreshToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 }
