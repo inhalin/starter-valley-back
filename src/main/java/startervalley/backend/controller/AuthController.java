@@ -30,9 +30,8 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public BaseResponseDto<Void> signup(Authentication authentication, @RequestBody SignupRequest signupRequest) {
+    public BaseResponseDto signup(Authentication authentication, @RequestBody SignupRequest signupRequest) {
         authService.signup(authentication, signupRequest);
-
-        return new BaseResponseDto<>("user signed up successfully", null);
+        return new BaseResponseDto("user signed up successfully");
     }
 }

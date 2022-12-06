@@ -2,6 +2,8 @@ package startervalley.backend.controller;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import startervalley.backend.dto.request.AttendanceCheckDto;
 import startervalley.backend.dto.request.AttendanceExcuseDto;
@@ -17,34 +19,36 @@ import java.util.List;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
+@RequestMapping("/api/attendances")
 public class AttendanceController {
 
     private final AttendanceService attendanceService;
 
-    @GetMapping("/attendances")
-    public BaseResponseDto<List<AttendanceDto>> getUserAttendances(@Valid @ModelAttribute AttendanceYearMonthDto attendanceYearMonthDto) {
-        log.info("attendanceDto: {}", attendanceYearMonthDto);
-        return attendanceService.findUserAttendances(attendanceYearMonthDto);
+    @GetMapping
+    public ResponseEntity<List<AttendanceDto>> getUserAttendances(@Valid @ModelAttribute AttendanceYearMonthDto attendanceYearMonthDto) {
+        List<AttendanceDto> dto = attendanceService.findUserAttendances(attendanceYearMonthDto);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @GetMapping("/attendances/today")
-    public BaseResponseDto<TodayAttendanceDto> checkIfCheckedToday() {
-        return attendanceService.checkIfCheckedToday();
+    @GetMapping("/today")
+    public ResponseEntity<TodayAttendanceDto> checkIfCheckedToday() {
+        TodayAttendanceDto dto = attendanceService.checkIfCheckedToday();
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @PostMapping("/attendances/check")
-    public BaseResponseDto<Void> checkAttendance(@RequestBody AttendanceCheckDto attendanceCheckDto) {
-        log.info("attendanceCheckDto: {}", attendanceCheckDto);
-        return attendanceService.checkAttendance(attendanceCheckDto);
+    @PostMapping("/check")
+    public ResponseEntity<BaseResponseDto> checkAttendance(@RequestBody AttendanceCheckDto attendanceCheckDto) {
+        BaseResponseDto dto = attendanceService.checkAttendance(attendanceCheckDto);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
-    @PostMapping("/attendances/excuse")
-    public BaseResponseDto<Void> excuseAttendance(@RequestBody AttendanceExcuseDto attendanceExcuseDto) {
-        return attendanceService.excuseAttendance(attendanceExcuseDto);
+    @PostMapping("/excuse")
+    public void excuseAttendance(@RequestBody AttendanceExcuseDto attendanceExcuseDto) {
+        attendanceService.excuseAttendance(attendanceExcuseDto);
     }
 
-    @PostMapping("/attendances/post-google-form")
-    public BaseResponseDto<Void> postGoogleForm() {
-        return attendanceService.sendToGoogleForm();
+    @PostMapping("/post-google-form")
+    public void postGoogleForm() {
+        attendanceService.sendToGoogleForm();
     }
 }
