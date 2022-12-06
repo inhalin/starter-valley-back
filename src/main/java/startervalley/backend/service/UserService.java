@@ -3,12 +3,11 @@ package startervalley.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import startervalley.backend.dto.user.UserCardDto;
-import startervalley.backend.dto.user.UserProfileReadDto;
-import startervalley.backend.dto.user.UserProfileUpdateDto;
+import startervalley.backend.dto.user.*;
 import startervalley.backend.entity.User;
 import startervalley.backend.entity.UserProfile;
 import startervalley.backend.exception.ResourceNotFoundException;
+import startervalley.backend.exception.UserInvalidException;
 import startervalley.backend.repository.UserRepository;
 
 import java.util.ArrayList;
@@ -21,28 +20,29 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public List<UserCardDto> findUsersByGenerationId(Long generationId) {
+    public UserCardListDto findUsersByGeneration(Long userId, Long generationId) {
+        User me = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", String.valueOf(userId)));
+        List<UserCardDto> meDto = new ArrayList<>();
+        meDto.add(mapToUserCardDto(me));
+
         List<User> users = userRepository.findAllByGenerationId(generationId);
         List<UserCardDto> dtoList = new ArrayList<>();
-
         for (User user : users) {
             dtoList.add(mapToUserCardDto(user));
         }
 
-        return dtoList;
+        return UserCardListDto.builder()
+                .me(meDto)
+                .list(dtoList)
+                .build();
     }
 
-    public UserProfileReadDto showUserProfile(Long id) {
-        User user = userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("User", "id", String.valueOf(id)));
+    public UserProfileReadDto showUserProfile(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
 
         return mapToUserProfileReadDto(user);
-    }
-
-    private String getUserContactEmail(User user) {
-        if (user.getProfile() != null && user.getProfile().getContact() != null) {
-            return user.getProfile().getContact();
-        }
-        return user.getEmail();
     }
 
     @Transactional
@@ -61,26 +61,45 @@ public class UserService {
         return mapToUserProfileUpdateDto(userRepository.findById(id).orElseThrow().getProfile());
     }
 
+    public void validateUser(Long id, String username) {
+        User updateUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", String.valueOf(username)));
+
+        if (!updateUser.getId().equals(id)) {
+            throw new UserInvalidException("회원 정보가 일치하지 않습니다.");
+        }
+    }
+
     private UserProfileReadDto mapToUserProfileReadDto(User user) {
-        UserProfile userProfile = user.getProfile() != null ? user.getProfile() : new UserProfile();
+        UserProfile profile = user.getProfile() != null ? user.getProfile() : new UserProfile();
 
-        List<String> mainInfo = new ArrayList<>();
-        mainInfo.add(user.getDevpart().getName());
-        mainInfo.add(user.getTeam() != null ? user.getTeam().getName() : null);
-        mainInfo.add(userProfile.getMbti());
-        mainInfo.add(getUserContactEmail(user));
+        List<UserProfileInfoMap> mainInfo = new ArrayList<>();
+        mainInfo.add(UserProfileInfoMap.of("Team", user.getTeam() != null ? user.getTeam().getName() : null));
+        mainInfo.add(UserProfileInfoMap.of("MBTI", profile.getMbti()));
+        mainInfo.add(UserProfileInfoMap.of("Email", getUserContactEmail(user)));
 
-        List<String> subInfo = new ArrayList<>();
-        subInfo.add(userProfile.getLikes());
-        subInfo.add(userProfile.getDislikes());
-        subInfo.add(userProfile.getInterests());
+        List<UserProfileInfoMap> subInfo = new ArrayList<>();
+        subInfo.add(UserProfileInfoMap.of("I am", profile.getIntro()));
+        subInfo.add(UserProfileInfoMap.of("I like", profile.getLikes()));
+        subInfo.add(UserProfileInfoMap.of("I dislike", profile.getDislikes()));
+        subInfo.add(UserProfileInfoMap.of("My interests art", profile.getInterests()));
 
         return UserProfileReadDto.builder()
                 .imageUrl(user.getImageUrl())
+                .name(user.getName())
+                .isLeader(user.getIsLeader())
+                .devpart(user.getDevpart().getName())
+                .generationId(user.getGeneration().getId())
                 .mainInfo(mainInfo)
-                .intro(userProfile.getIntro())
                 .subInfo(subInfo)
                 .build();
+    }
+
+    private String getUserContactEmail(User user) {
+        if (user.getProfile() != null && user.getProfile().getContact() != null) {
+            return user.getProfile().getContact();
+        }
+        return user.getEmail();
     }
 
     private UserCardDto mapToUserCardDto(User user) {

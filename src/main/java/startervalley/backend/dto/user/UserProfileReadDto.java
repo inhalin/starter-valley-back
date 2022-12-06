@@ -10,7 +10,9 @@ import java.util.List;
 public class UserProfileReadDto {
     private String imageUrl;
     private String name;
-    private List<String> mainInfo;
-    private String intro;
-    private List<String> subInfo;
+    private Boolean isLeader;
+    private String devpart;
+    private Long generationId;
+    private List<UserProfileInfoMap> mainInfo;
+    private List<UserProfileInfoMap> subInfo;
 }
