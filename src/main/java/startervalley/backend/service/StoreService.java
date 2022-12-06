@@ -2,20 +2,21 @@ package startervalley.backend.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.multipart.MultipartFile;
 import startervalley.backend.dto.request.StoreQueryParameter;
 import startervalley.backend.dto.request.StoreRequestDto;
-import startervalley.backend.dto.response.BaseResponseDto;
-import startervalley.backend.dto.response.CommentResponseDto;
-import startervalley.backend.dto.response.StoreResponseDto;
+import startervalley.backend.dto.response.*;
 import startervalley.backend.entity.*;
+import startervalley.backend.exception.CategoryFoundException;
+import startervalley.backend.exception.StoreNotFoundException;
 import startervalley.backend.repository.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static startervalley.backend.constant.ResponseMessage.*;
 
@@ -30,12 +31,24 @@ public class StoreService {
     private final CategoryRepository categoryRepository;
     private final UserLikeStoreRepository userLikeStoreRepository;
     private final CommentRepository commentRepository;
+
+    private final StoreImageService storeImageService;
+
     private final static List<StoreResponseDto> recommendStoreList = new ArrayList<>();
 
-    public BaseResponseDto<List<StoreResponseDto>> findAllStore(StoreQueryParameter queryParameter) {
-        log.info("queryParameter {}", queryParameter);
+    public BaseResponseDto<List<StoreResponseDto>> findAllStore(@ModelAttribute StoreQueryParameter queryParameter) {
         User user = userRepository.findById(1L).orElseThrow();
-        List<Store> storeList = storeRepository.findAll();
+        Pageable pageable = queryParameter.getPageable();
+        Page<Store> storePage;
+        String queryCategory = queryParameter.getCategory();
+        if (queryCategory == null) {
+            storePage = storeRepository.findAll(pageable);
+        } else {
+            Category category = getCategory(queryCategory);
+            storePage = storeRepository.findAllByCategory(pageable, category);
+        }
+
+        List<Store> storeList = storePage.getContent();
         List<StoreResponseDto> result = storeList.stream().map(store -> {
             long likeCount = userLikeStoreRepository.countByStore(store);
             boolean myLikeStatus = userLikeStoreRepository.existsByUserAndStore(user, store);
@@ -54,7 +67,7 @@ public class StoreService {
     }
 
     @Transactional
-    public BaseResponseDto<Long> createStore(StoreRequestDto storeRequestDto) {
+    public BaseResponseDto<Long> createStore(StoreRequestDto storeRequestDto, List<MultipartFile> uploadFiles) {
         Category category = getCategory(storeRequestDto.getCategory());
         Store store = Store.builder()
                 .name(storeRequestDto.getName())
@@ -63,15 +76,17 @@ public class StoreService {
                 .category(category)
                 .build();
         storeRepository.save(store);
+        storeImageService.createImage(store, uploadFiles);
         return new BaseResponseDto<>(STORE_CREATE.toString(), store.getId());
     }
 
-    public BaseResponseDto<StoreResponseDto> findStore(Long id) {
+    public StoreDetailDto findStore(Long id) {
         User user = userRepository.findById(1L).orElseThrow();
         Store store = getStore(id);
         long likeCount = userLikeStoreRepository.countByStore(store);
         boolean myLikeStatus = userLikeStoreRepository.existsByUserAndStore(user, store);
-        StoreResponseDto dto = StoreResponseDto.builder()
+
+        StoreResponseDto storeDto = StoreResponseDto.builder()
                 .id(id)
                 .name(store.getName())
                 .address(store.getAddress())
@@ -80,7 +95,17 @@ public class StoreService {
                 .myLikeStatus(myLikeStatus)
                 .category(store.getCategory().getName())
                 .build();
-        return new BaseResponseDto<>(STORE.toString(), dto);
+
+        List<StoreImageDto> imageDto = store.getStoreImageList().stream()
+                .map(image -> new StoreImageDto(image.getUuid(), image.getImgName(), image.getPath()))
+                .toList();
+
+        List<TagDto> tagDto = store.getStoreTagList().stream().map(storeTag -> {
+            Tag tag = storeTag.getTag();
+            return TagDto.of(tag.getContent());
+        }).toList();
+
+        return new StoreDetailDto(storeDto, imageDto, tagDto);
     }
 
     @Transactional
@@ -177,7 +202,7 @@ public class StoreService {
     private Store getStore(Long id) {
         Optional<Store> optional = storeRepository.findById(id);
         if (optional.isEmpty()) {
-            throw new RuntimeException();
+            throw new StoreNotFoundException("가게를 찾을 수 없습니다.");
         }
         return optional.get();
     }
@@ -185,7 +210,7 @@ public class StoreService {
     private Category getCategory(String name) {
         Optional<Category> optional = categoryRepository.findByName(name);
         if (optional.isEmpty()) {
-            throw new RuntimeException();
+            throw new CategoryFoundException("카테고리를 찾을 수 없습니다.");
         }
         return optional.get();
     }
