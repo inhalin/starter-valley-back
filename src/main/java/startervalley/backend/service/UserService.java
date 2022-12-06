@@ -1,6 +1,8 @@
 package startervalley.backend.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +23,14 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+
+    public User getUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = Long.parseLong(authentication.getName());
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", String.valueOf(userId)));
+        return user;
+    }
 
     public UserCardListDto findUsersByGeneration(Long userId, Long generationId) {
         User me = userRepository.findById(userId)
