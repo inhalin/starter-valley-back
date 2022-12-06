@@ -36,7 +36,7 @@ public class StoreService {
 
     private final static List<StoreResponseDto> recommendStoreList = new ArrayList<>();
 
-    public BaseResponseDto<List<StoreResponseDto>> findAllStore(@ModelAttribute StoreQueryParameter queryParameter) {
+    public BaseResponseDto<List<StoreResponseDto>> findAllStores(@ModelAttribute StoreQueryParameter queryParameter) {
         User user = userRepository.findById(1L).orElseThrow();
         Pageable pageable = queryParameter.getPageable();
         Page<Store> storePage;

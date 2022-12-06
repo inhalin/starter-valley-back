@@ -24,7 +24,7 @@ public class StoreController {
 
     @GetMapping
     public BaseResponseDto<List<StoreResponseDto>> getStoreList(@Valid @ModelAttribute StoreQueryParameter queryParameter) {
-        return storeService.findAllStore(queryParameter);
+        return storeService.findAllStores(queryParameter);
     }
 
     @GetMapping("/like")
