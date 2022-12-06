@@ -8,10 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import startervalley.backend.exception.AttendanceAlreadyPresentException;
-import startervalley.backend.exception.AttendanceOutOfRangeException;
-import startervalley.backend.exception.NotFoundException;
-import startervalley.backend.exception.StoreImageUploadException;
+import startervalley.backend.exception.*;
 
 import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_ALREADY_PRESENT;
 import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_OUT_OF_RANGE;
@@ -47,9 +44,9 @@ public class ExceptionControllerAdvice {
         return new ErrorResult(defaultMessage);
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    @ExceptionHandler(NotFoundException.class)
-    public ErrorResult notFoundExHandler(NotFoundException e) {
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ErrorResult resourceNotFoundException(ResourceNotFoundException e) {
         return new ErrorResult(e.getMessage());
     }
 }

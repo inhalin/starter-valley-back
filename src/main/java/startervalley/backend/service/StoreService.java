@@ -12,8 +12,7 @@ import startervalley.backend.dto.request.StoreQueryParameter;
 import startervalley.backend.dto.request.StoreRequestDto;
 import startervalley.backend.dto.response.*;
 import startervalley.backend.entity.*;
-import startervalley.backend.exception.CategoryFoundException;
-import startervalley.backend.exception.StoreNotFoundException;
+import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.*;
 
 import java.util.*;
@@ -202,7 +201,7 @@ public class StoreService {
     private Store getStore(Long id) {
         Optional<Store> optional = storeRepository.findById(id);
         if (optional.isEmpty()) {
-            throw new StoreNotFoundException("가게를 찾을 수 없습니다.");
+            throw new ResourceNotFoundException("Store", "id", id.toString());
         }
         return optional.get();
     }
@@ -210,7 +209,7 @@ public class StoreService {
     private Category getCategory(String name) {
         Optional<Category> optional = categoryRepository.findByName(name);
         if (optional.isEmpty()) {
-            throw new CategoryFoundException("카테고리를 찾을 수 없습니다.");
+            throw new ResourceNotFoundException("Category", "name", name);
         }
         return optional.get();
     }
