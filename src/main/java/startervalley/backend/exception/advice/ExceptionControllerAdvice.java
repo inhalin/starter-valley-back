@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import startervalley.backend.exception.AttendanceAlreadyPresentException;
 import startervalley.backend.exception.AttendanceOutOfRangeException;
+import startervalley.backend.exception.NotFoundException;
+import startervalley.backend.exception.StoreImageUploadException;
 
 import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_ALREADY_PRESENT;
 import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_OUT_OF_RANGE;
@@ -32,10 +34,22 @@ public class ExceptionControllerAdvice {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(StoreImageUploadException.class)
+    public ErrorResult StoreImageUploadExceptionExHandler(StoreImageUploadException e) {
+        return new ErrorResult(e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
-    public ErrorResult validatorExceptionExHandler(BindException e) {
+    public ErrorResult validatorExHandler(BindException e) {
         BindingResult bindingResult = e.getBindingResult();
         String defaultMessage = bindingResult.getFieldError().getDefaultMessage();
         return new ErrorResult(defaultMessage);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(NotFoundException.class)
+    public ErrorResult notFoundExHandler(NotFoundException e) {
+        return new ErrorResult(e.getMessage());
     }
 }
