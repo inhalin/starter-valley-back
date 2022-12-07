@@ -5,8 +5,6 @@ import org.springframework.stereotype.Service;
 import startervalley.backend.dto.auth.AuthRequest;
 import startervalley.backend.dto.auth.AuthResponse;
 import startervalley.backend.dto.auth.GithubUserResponse;
-import startervalley.backend.entity.AuthProvider;
-import startervalley.backend.entity.Role;
 import startervalley.backend.entity.User;
 import startervalley.backend.repository.UserRepository;
 import startervalley.backend.security.auth.client.ClientGithub;
@@ -33,7 +31,7 @@ public class GithubAuthService {
         Map<String, String> attributes = userData.getAttributes();
 
         if (user == null) {
-            user = new GithubUser(userData.getLogin(), Role.USER, AuthProvider.GITHUB);
+            user = new GithubUser();
             isNewMember = true;
         }
 

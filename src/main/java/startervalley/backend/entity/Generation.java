@@ -35,5 +35,5 @@ public class Generation extends BaseTimeEntity {
     private LocalDate courseEndDate;
 
     @OneToMany(mappedBy = "generation")
-    private List<User> users = new ArrayList<>();
+    private List<User> users;
 }

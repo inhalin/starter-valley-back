@@ -9,8 +9,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-import startervalley.backend.entity.AuthProvider;
-import startervalley.backend.entity.Role;
 import startervalley.backend.entity.User;
 import startervalley.backend.exception.TokenNotValidException;
 import startervalley.backend.repository.UserRepository;
@@ -70,12 +68,11 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date validity = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_LENGTH);
         Map<String, Object> claims = new HashMap<>(userData);
-        claims.put(AUTHORITIES_KEY, user.getRole());
 
         return Jwts.builder()
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
-                .setSubject(user.getUsername())
                 .setClaims(claims)
+                .setSubject(user.getUsername())
                 .setIssuer(ISSUER)
                 .setIssuedAt(now)
                 .setExpiration(validity)
@@ -119,8 +116,8 @@ public class JwtTokenProvider {
         Map<String, String> attributes = new HashMap<>();
 
         if (userOptional.isEmpty()) {
-            user = new GithubUser((String) claims.get("username"), Role.valueOf((String) claims.get(AUTHORITIES_KEY)), AuthProvider.GITHUB);
-            attributes = getGithubAttributes(claims);
+            user = new GithubUser();
+            attributes = getAttributes(claims);
         } else {
             user = userOptional.get();
         }
@@ -131,30 +128,22 @@ public class JwtTokenProvider {
     }
 
     public Boolean validateToken(String token) {
-        String msg;
         try {
             Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            msg = "만료된 JWT 토큰입니다.";
-            log.info(msg);
-            throw new TokenNotValidException(msg);
+            throw new TokenNotValidException("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException e) {
-            msg = "지원되지 않는 JWT 토큰입니다.";
-            log.info(msg);
-            throw new TokenNotValidException(msg);
+            throw new TokenNotValidException("지원되지 않는 JWT 토큰입니다.");
         } catch (IllegalStateException e) {
-            msg = "JWT 토큰이 잘못되었습니다";
-            log.info(msg);
-            throw new TokenNotValidException(msg);
+            throw new TokenNotValidException("JWT 토큰이 잘못되었습니다");
         } catch (Exception e) {
-            log.info(e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
     }
 
     // Access Token 만료시 갱신때 사용할 정보를 얻기 위해 Claim 리턴
-    private Claims parseClaims(String accessToken) {
+    public Claims parseClaims(String accessToken) {
         try {
             return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(accessToken).getBody();
         } catch (ExpiredJwtException e) {
@@ -162,13 +151,16 @@ public class JwtTokenProvider {
         }
     }
 
-    private Map<String, String> getGithubAttributes(Claims claims) {
+    private Map<String, String> getAttributes(Claims claims) {
         Map<String, String> attributes = new HashMap<>();
 
+        attributes.put("username", (String) claims.get("username"));
         attributes.put("email", (String) claims.get("email"));
         attributes.put("imageUrl", (String) claims.get("imageUrl"));
         attributes.put("githubUrl", (String) claims.get("githubUrl"));
-        attributes.put("providerId", (String) claims.get("providerId"));
+        attributes.put("id", (String) claims.get("id"));
+        attributes.put("provider", (String) claims.get("provider"));
+        attributes.put("role", (String) claims.get("role"));
 
         return attributes;
     }
