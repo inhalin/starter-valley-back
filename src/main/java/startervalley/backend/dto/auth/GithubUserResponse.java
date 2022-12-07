@@ -7,6 +7,10 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import startervalley.backend.entity.AuthProvider;
+import startervalley.backend.entity.Role;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -20,4 +24,18 @@ public class GithubUserResponse {
     private String avatarUrl;
     private String htmlUrl;
     private AuthProvider provider;
+
+    public Map<String, String> getAttributes() {
+        Map<String, String> attributes = new HashMap<>();
+
+        attributes.put("username", login);
+        attributes.put("email", email);
+        attributes.put("imageUrl", avatarUrl);
+        attributes.put("githubUrl", htmlUrl);
+        attributes.put("id", id);
+        attributes.put("provider", AuthProvider.GITHUB.name());
+        attributes.put("role", Role.USER.name());
+
+        return attributes;
+    }
 }

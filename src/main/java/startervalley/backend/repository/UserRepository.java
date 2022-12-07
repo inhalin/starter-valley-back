@@ -34,4 +34,9 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("select u from User u inner join u.generation g where g.id = :generationId")
     List<User> findAllByGenerationId(@Param("generationId") Long generationId);
+
+    @Transactional
+    @Modifying
+    @Query("update User u set u.imageUrl = :imageUrl")
+    void updateImageUrl(@Param("imageUrl") String imageUrl);
 }

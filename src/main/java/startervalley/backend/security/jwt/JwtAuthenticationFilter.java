@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
+import startervalley.backend.security.auth.CustomUserDetails;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -32,7 +33,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
             log.debug(authentication.getName() + "의 인증정보 저장");
         } else {
-            log.debug("유효한 JWT 토큰이 없습니다.");
+            log.info("유효한 JWT 토큰이 없습니다.");
         }
 
         filterChain.doFilter(request, response);
