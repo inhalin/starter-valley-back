@@ -33,6 +33,8 @@ public class GithubAuthService {
         if (user == null) {
             user = new GithubUser();
             isNewMember = true;
+        } else {
+            userRepository.updateImageUrl(userData.getAvatarUrl());
         }
 
         return AuthResponse.builder()
