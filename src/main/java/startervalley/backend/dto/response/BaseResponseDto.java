@@ -1,16 +1,14 @@
 package startervalley.backend.dto.response;
 
 import lombok.Data;
+import lombok.Getter;
 
-@Data
-public class BaseResponseDto<T> {
+@Getter
+public class BaseResponseDto {
 
-    private String message;
+    private Object message;
 
-    private T data;
-
-    public BaseResponseDto(String message, T data) {
+    public BaseResponseDto(Object message) {
         this.message = message;
-        this.data = data;
     }
 }

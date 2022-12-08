@@ -9,7 +9,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import startervalley.backend.constant.ResponseMessage;
 import startervalley.backend.dto.request.AttendanceCheckDto;
 import startervalley.backend.dto.request.AttendanceExcuseDto;
 import startervalley.backend.dto.request.AttendanceYearMonthDto;
@@ -19,16 +18,16 @@ import startervalley.backend.dto.response.TodayAttendanceDto;
 import startervalley.backend.entity.*;
 import startervalley.backend.exception.AttendanceAlreadyPresentException;
 import startervalley.backend.exception.AttendanceOutOfRangeException;
+import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.AttendanceRepository;
 import startervalley.backend.repository.UserRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static startervalley.backend.constant.ResponseMessage.ATTENDANCE_LIST;
-import static startervalley.backend.constant.ResponseMessage.ATTENDANCE_TODAY;
 import static startervalley.backend.entity.AttendanceStatus.LATE;
 import static startervalley.backend.entity.AttendanceStatus.PRESENT;
 
@@ -47,20 +46,20 @@ public class AttendanceService {
     private final AttendanceRepository attendanceRepository;
     private final WebClient webClient;
 
-    public BaseResponseDto<List<AttendanceDto>> findUserAttendances(AttendanceYearMonthDto attendanceYearMonthDto) {
-        User user = userRepository.findById(1L).orElseThrow();
+    public List<AttendanceDto> findUserAttendances(Long userId, AttendanceYearMonthDto attendanceYearMonthDto) {
+        User user = getUser(userId);
         LocalDate currentDate = getCurrentDate(attendanceYearMonthDto.getYear(), attendanceYearMonthDto.getMonth());
         List<Attendance> attendances = attendanceRepository.findAllByUserForMonth(user.getId(), currentDate.getYear(), currentDate.getMonthValue());
         List<AttendanceDto> result = attendances.stream().map(attendance ->
                         new AttendanceDto(attendance.getId().getAttendedDate(), attendance.getStatus()))
                 .collect(Collectors.toList());
 
-        return new BaseResponseDto<>(ATTENDANCE_LIST.toString(), result);
+        return result;
     }
 
     @Transactional
-    public BaseResponseDto<Void> checkAttendance(AttendanceCheckDto attendanceCheckDto) {
-        User user = userRepository.findById(1L).orElseThrow();
+    public BaseResponseDto checkAttendance(Long userId, AttendanceCheckDto attendanceCheckDto) {
+        User user = getUser(userId);
         Generation generation = user.getGeneration();
 
         checkRange(generation.getLatitude(), generation.getLongitude(), attendanceCheckDto.getLatitude(), attendanceCheckDto.getLongtitude());
@@ -74,12 +73,12 @@ public class AttendanceService {
         AttendanceStatus status = checkIfOverPresentTime();
         attendance.setStatus(status);
         attendance.setAttendanceTime(LocalTime.now());
-        return new BaseResponseDto<>(status.toString(), null);
+        return new BaseResponseDto(status);
     }
 
     @Transactional
-    public BaseResponseDto<Void> excuseAttendance(AttendanceExcuseDto attendanceExcuseDto) {
-        User user = userRepository.findById(1L).orElseThrow();
+    public void excuseAttendance(Long userId, AttendanceExcuseDto attendanceExcuseDto) {
+        User user = getUser(userId);
         LocalDate today = LocalDate.now();
         AttendanceId attendanceId = new AttendanceId(user.getId(), today);
         Attendance attendance = attendanceRepository.findById(attendanceId).orElseThrow();
@@ -90,15 +89,22 @@ public class AttendanceService {
 
         String description = attendanceExcuseDto.getDescription();
         attendance.setReason(description);
-        return new BaseResponseDto<>(ResponseMessage.ATTENDANCE_EXCUSE.toString(), null);
     }
 
-    public BaseResponseDto<TodayAttendanceDto> checkIfCheckedToday() {
-        User user = userRepository.findById(1L).orElseThrow();
+    @Transactional
+    public TodayAttendanceDto checkIfCheckedToday(Long userId) {
+        User user = getUser(userId);
+
         LocalDate today = LocalDate.now();
         AttendanceId attendanceId = new AttendanceId(user.getId(), today);
-        Attendance attendance = attendanceRepository.findById(attendanceId).orElseThrow();
-
+        Optional<Attendance> optional = attendanceRepository.findById(attendanceId);
+        Attendance attendance;
+        if (optional.isEmpty()) {
+            attendance = Attendance.builder().id(attendanceId).user(user).build();
+            attendanceRepository.save(attendance);
+        } else {
+            attendance = optional.get();
+        }
 
         TodayAttendanceDto todayAttendanceDto = new TodayAttendanceDto();
         try {
@@ -106,11 +112,11 @@ public class AttendanceService {
         } catch (AttendanceAlreadyPresentException ignored) {
         }
         todayAttendanceDto.setNeedReason(checkNeedReason(attendance));
-        return new BaseResponseDto<>(ATTENDANCE_TODAY.toString(), todayAttendanceDto);
+        return todayAttendanceDto;
     }
 
-    public BaseResponseDto<Void> sendToGoogleForm() {
-        User user = userRepository.findById(1L).orElseThrow();
+    public void sendToGoogleForm(Long userId) {
+        User user = getUser(userId);
         LocalDate today = LocalDate.now();
         AttendanceId attendanceId = new AttendanceId(user.getId(), today);
         Attendance attendance = attendanceRepository.findById(attendanceId).orElseThrow();
@@ -138,7 +144,11 @@ public class AttendanceService {
                 .retrieve()
                 .bodyToMono(Void.class)
                 .block();
-        return new BaseResponseDto<>("웹 클라이언트", null);
+    }
+
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", String.valueOf(userId)));
     }
 
     private LocalDate getCurrentDate(Integer month, Integer year) {
