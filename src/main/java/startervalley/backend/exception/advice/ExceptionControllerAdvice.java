@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
 import startervalley.backend.exception.AttendanceAlreadyPresentException;
 import startervalley.backend.exception.AttendanceOutOfRangeException;
+import startervalley.backend.exception.StoreImageUploadFailedException;
 import startervalley.backend.exception.TokenNotValidException;
 
 import java.util.Date;
@@ -41,6 +42,12 @@ public class ExceptionControllerAdvice {
         BindingResult bindingResult = e.getBindingResult();
         String defaultMessage = bindingResult.getFieldError().getDefaultMessage();
         return new ErrorResult(defaultMessage);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(StoreImageUploadFailedException.class)
+    public ErrorResult handleStoreImageUploadFailedException(StoreImageUploadFailedException e) {
+        return new ErrorResult(e.getMessage());
     }
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
