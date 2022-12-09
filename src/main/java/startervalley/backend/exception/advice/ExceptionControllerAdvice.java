@@ -25,19 +25,19 @@ public class ExceptionControllerAdvice {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(AttendanceOutOfRangeException.class)
-    public ErrorResult attendanceOutOfLimitedRangeExHandler(AttendanceOutOfRangeException e) {
+    public ErrorResult handleAttendanceOutOfLimitedRangeException(AttendanceOutOfRangeException e) {
         return new ErrorResult(ATTENDANCE_OUT_OF_RANGE);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(AttendanceAlreadyPresentException.class)
-    public ErrorResult attendanceAlreadyPresentExHandler(AttendanceAlreadyPresentException e) {
+    public ErrorResult handleAttendanceAlreadyPresentException(AttendanceAlreadyPresentException e) {
         return new ErrorResult(ATTENDANCE_ALREADY_PRESENT);
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
-    public ErrorResult validatorExceptionExHandler(BindException e) {
+    public ErrorResult handleValidatorException(BindException e) {
         BindingResult bindingResult = e.getBindingResult();
         String defaultMessage = bindingResult.getFieldError().getDefaultMessage();
         return new ErrorResult(defaultMessage);
