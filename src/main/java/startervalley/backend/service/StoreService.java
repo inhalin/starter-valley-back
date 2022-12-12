@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.multipart.MultipartFile;
-import startervalley.backend.dto.request.StoreQueryParameter;
+import startervalley.backend.dto.request.PageRequestDto;
 import startervalley.backend.dto.request.StoreRequestDto;
 import startervalley.backend.dto.response.*;
 import startervalley.backend.entity.*;
@@ -36,11 +36,11 @@ public class StoreService {
 
     private final static List<StoreResponseDto> recommendStoreList = new ArrayList<>();
 
-    public List<StoreResponseDto> findAllStores(Long userId, @ModelAttribute StoreQueryParameter queryParameter) {
+    public PageResultDTO<Store, StoreResponseDto> findAllStores(Long userId, @ModelAttribute PageRequestDto pageRequestDto) {
         User user = getUser(userId);
-        Pageable pageable = queryParameter.getPageable();
+        Pageable pageable = pageRequestDto.getPageable();
         Page<Store> storePage;
-        String queryCategory = queryParameter.getCategory();
+        Long queryCategory = pageRequestDto.getCategoryId();
         if (queryCategory == null) {
             storePage = storeRepository.findAll(pageable);
         } else {
@@ -63,14 +63,14 @@ public class StoreService {
                     .build();
         }).toList();
 
-        return result;
+        return new PageResultDTO<>(storePage, result);
     }
 
     // TODO: 최초 등록자 관리해주기?
     @Transactional
     public Long createStore(Long userId, StoreRequestDto storeRequestDto, List<MultipartFile> uploadFiles) {
         User user = getUser(userId);
-        Category category = getCategory(storeRequestDto.getCategory());
+        Category category = getCategory(storeRequestDto.getCategoryId());
         Store store = Store.builder()
                 .name(storeRequestDto.getName())
                 .address(storeRequestDto.getAddress())
@@ -95,6 +95,7 @@ public class StoreService {
                 .name(store.getName())
                 .address(store.getAddress())
                 .description(store.getDescription())
+                .url(store.getUrl())
                 .likeCount(likeCount)
                 .myLikeStatus(myLikeStatus)
                 .category(store.getCategory().getName())
@@ -118,12 +119,11 @@ public class StoreService {
         store.update(storeRequestDto);
     }
 
-    public List<String> findAllCategory() {
+    public List<CategoryResponseDto> findAllCategory() {
         List<Category> categoryList = categoryRepository.findAll();
-        List<String> result = categoryList.stream()
-                .map(Category::getName)
+        return categoryList.stream()
+                .map(category -> new CategoryResponseDto(category.getId(), category.getName()))
                 .toList();
-        return result;
     }
 
     public List<StoreResponseDto> findMyStoreLikeList(Long userId) {
@@ -165,12 +165,14 @@ public class StoreService {
         return message;
     }
 
-    public List<CommentResponseDto> findStoreComments(Long userId, Long storeId) {
+    public PageResultDTO<Comment, CommentResponseDto> findStoreComments(Long userId, Long storeId, PageRequestDto pageRequestDto) {
         User user = getUser(userId);
         Store store = getStore(storeId);
-        List<Comment> comments = commentRepository.findAllByStore(store);
+        Pageable pageable = pageRequestDto.getPageable();
+        Page<Comment> commentPage = commentRepository.findAllByStore(store, pageable);
 
-        List<CommentResponseDto> result = comments.stream().map(comment -> {
+
+        List<CommentResponseDto> result = commentPage.getContent().stream().map(comment -> {
             boolean isOwn = Objects.equals(comment.getUser().getId(), user.getId());
             return CommentResponseDto   .builder()
                     .id(comment.getId())
@@ -180,7 +182,7 @@ public class StoreService {
                     .modifiedDate(comment.getModifiedDate())
                     .build();
         }).toList();
-        return result;
+        return new PageResultDTO<>(commentPage, result);
     }
 
     public List<StoreResponseDto> findRecommendStoreList() {
@@ -209,10 +211,10 @@ public class StoreService {
         return optional.get();
     }
 
-    private Category getCategory(String name) {
-        Optional<Category> optional = categoryRepository.findByName(name);
+    private Category getCategory(Long categoryId) {
+        Optional<Category> optional = categoryRepository.findById(categoryId);
         if (optional.isEmpty()) {
-            throw new ResourceNotFoundException("Category", "name", name);
+            throw new ResourceNotFoundException("Category", "categoryId", categoryId.toString());
         }
         return optional.get();
     }

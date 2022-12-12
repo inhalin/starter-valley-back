@@ -7,9 +7,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import startervalley.backend.dto.request.StoreQueryParameter;
+import startervalley.backend.dto.request.PageRequestDto;
 import startervalley.backend.dto.request.StoreRequestDto;
 import startervalley.backend.dto.response.*;
+import startervalley.backend.entity.Comment;
+import startervalley.backend.entity.Store;
 import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.service.StoreService;
 
@@ -25,10 +27,10 @@ public class StoreController {
     private final StoreService storeService;
 
     @GetMapping
-    public ResponseEntity<List<StoreResponseDto>> getStoreList(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                               @Valid @ModelAttribute StoreQueryParameter queryParameter) {
+    public ResponseEntity<PageResultDTO<Store, StoreResponseDto>> getStoreList(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                               @Valid @ModelAttribute PageRequestDto pageRequestDto) {
         Long userId = userDetails.getId();
-        List<StoreResponseDto> result = storeService.findAllStores(userId, queryParameter);
+        PageResultDTO<Store, StoreResponseDto> result = storeService.findAllStores(userId, pageRequestDto);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
@@ -40,8 +42,8 @@ public class StoreController {
     }
 
     @GetMapping("/categories")
-    public ResponseEntity<List<String>> getCategoryList() {
-        List<String> result = storeService.findAllCategory();
+    public ResponseEntity<List<CategoryResponseDto>> getCategoryList() {
+        List<CategoryResponseDto> result = storeService.findAllCategory();
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
@@ -64,10 +66,11 @@ public class StoreController {
     }
 
     @GetMapping("/{id}/comments")
-    public ResponseEntity<List<CommentResponseDto>> getStoreComments(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                     @PathVariable Long id) {
+    public ResponseEntity<PageResultDTO<Comment, CommentResponseDto>> getStoreComments(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                     @PathVariable Long id,
+                                                                     @Valid @ModelAttribute PageRequestDto pageRequestDto) {
         Long userId = userDetails.getId();
-        List<CommentResponseDto> result = storeService.findStoreComments(userId, id);
+        PageResultDTO<Comment, CommentResponseDto> result = storeService.findStoreComments(userId, id, pageRequestDto);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
