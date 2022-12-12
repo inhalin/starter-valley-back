@@ -1,18 +1,16 @@
 package startervalley.backend.dto.response;
 
-import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 
 @Getter
-@Setter
-@ToString
 public class CategoryResponseDto {
+
+    private Long id;
 
     private String name;
 
-    public CategoryResponseDto(String name) {
+    public CategoryResponseDto(Long id, String name) {
+        this.id = id;
         this.name = name;
     }
 }
