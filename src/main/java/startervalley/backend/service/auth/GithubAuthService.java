@@ -5,12 +5,13 @@ import org.springframework.stereotype.Service;
 import startervalley.backend.dto.auth.AuthRequest;
 import startervalley.backend.dto.auth.AuthResponse;
 import startervalley.backend.dto.auth.GithubUserResponse;
+import startervalley.backend.entity.Role;
 import startervalley.backend.entity.User;
 import startervalley.backend.repository.UserRepository;
 import startervalley.backend.security.auth.client.ClientGithub;
-import startervalley.backend.security.auth.client.GithubUser;
 import startervalley.backend.security.jwt.JwtTokenProvider;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @Service
@@ -28,13 +29,15 @@ public class GithubAuthService {
 
         User user = userRepository.findByEmailAndProvider(userData.getEmail(), userData.getProvider());
         boolean isNewMember = false;
-        Map<String, String> attributes = userData.getAttributes();
+        Map<String, String> attributes = new HashMap<>();
 
         if (user == null) {
-            user = new GithubUser();
+            user = new User();
             isNewMember = true;
+            attributes = userData.getAttributes();
         } else {
-            userRepository.updateImageUrl(userData.getAvatarUrl());
+            attributes.put("role", Role.USER.name());
+            userRepository.updateImageUrl(userData.getLogin(), userData.getAvatarUrl());
         }
 
         return AuthResponse.builder()
