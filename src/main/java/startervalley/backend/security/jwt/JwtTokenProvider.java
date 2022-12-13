@@ -9,13 +9,15 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import startervalley.backend.entity.User;
 import startervalley.backend.exception.TokenNotValidException;
 import startervalley.backend.repository.UserRepository;
 import startervalley.backend.security.auth.CustomUserDetails;
-import startervalley.backend.security.auth.client.GithubUser;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -39,26 +41,6 @@ public class JwtTokenProvider {
         this.userRepository = userRepository;
     }
 
-    public String createAccessToken(Authentication authentication) {
-
-        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_LENGTH);
-        String username = user.getUsername();
-        String role = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-
-        return Jwts.builder()
-                .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
-                .setSubject(username)
-                .claim(AUTHORITIES_KEY, role)
-                .setIssuer(ISSUER)
-                .setIssuedAt(now)
-                .setExpiration(validity)
-                .compact();
-    }
-
     public String createAccessToken(User user, Map<String, String> userData) {
 
         CustomUserDetails userDetails = new CustomUserDetails(user, userData);
@@ -72,7 +54,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 .setClaims(claims)
-                .setSubject(user.getUsername())
+                .setSubject(Optional.ofNullable(user.getUsername()).orElse(userData.get("username")))
                 .setIssuer(ISSUER)
                 .setIssuedAt(now)
                 .setExpiration(validity)
@@ -102,7 +84,6 @@ public class JwtTokenProvider {
         userRepository.updateRefreshToken(user.getId(), refreshToken);
     }
 
-    // Access Token을 검사하고 얻은 정보로 Authentication 객체 생성
     public Authentication getAuthentication(String accessToken) {
 
         Claims claims = parseClaims(accessToken);
@@ -116,7 +97,7 @@ public class JwtTokenProvider {
         Map<String, String> attributes = new HashMap<>();
 
         if (userOptional.isEmpty()) {
-            user = new GithubUser();
+            user = new User();
             attributes = getAttributes(claims);
         } else {
             user = userOptional.get();
@@ -130,7 +111,7 @@ public class JwtTokenProvider {
     public Boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
-            return true;
+            return userRepository.existsRefreshTokenByUsername(getUsername(token)) != null || parseClaims(token).get("email") != null;
         } catch (ExpiredJwtException e) {
             throw new TokenNotValidException("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException e) {
@@ -142,13 +123,30 @@ public class JwtTokenProvider {
         }
     }
 
-    // Access Token 만료시 갱신때 사용할 정보를 얻기 위해 Claim 리턴
+    public String parseBearerToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
+    }
+
     public Claims parseClaims(String accessToken) {
         try {
             return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(accessToken).getBody();
         } catch (ExpiredJwtException e) {
             return e.getClaims();
         }
+    }
+
+    public String getUsername(String accessToken) {
+        return resolveClaims(accessToken, Claims::getSubject);
+    }
+
+    private <T> T resolveClaims(String accessToken, Function<Claims, T> claimsResolver) {
+        final Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(accessToken).getBody();
+        return claimsResolver.apply(claims);
     }
 
     private Map<String, String> getAttributes(Claims claims) {

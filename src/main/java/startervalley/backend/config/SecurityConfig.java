@@ -3,7 +3,6 @@ package startervalley.backend.config;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -11,10 +10,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import startervalley.backend.security.jwt.JwtAccessDeniedHandler;
-import startervalley.backend.security.jwt.JwtAuthenticationEntryPoint;
-import startervalley.backend.security.jwt.JwtAuthenticationFilter;
-import startervalley.backend.security.jwt.JwtLogoutSuccessHandler;
+import startervalley.backend.security.jwt.*;
 
 @Configuration
 @EnableWebSecurity
@@ -22,7 +18,8 @@ import startervalley.backend.security.jwt.JwtLogoutSuccessHandler;
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig {
 
-    private final JwtLogoutSuccessHandler jwtLogoutSuccessHandler;
+    private final JwtLogoutHandler jwtLogoutHandler;
+//    private final JwtLogoutSuccessHandler jwtLogoutSuccessHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
@@ -36,18 +33,20 @@ public class SecurityConfig {
     protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.cors().and()
-                .csrf().disable()
+                .csrf().ignoringAntMatchers("/auth/login").disable()
                 .httpBasic().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeRequests()
-                .antMatchers(HttpMethod.POST, "/auth/**").permitAll()
+                .antMatchers("/auth/**").permitAll()
                 .antMatchers("/api/**").authenticated()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll();
 
         http.logout()
-                .logoutSuccessHandler(jwtLogoutSuccessHandler);
+                .logoutUrl("/auth/logout")
+                .addLogoutHandler(jwtLogoutHandler);
+//                .logoutSuccessHandler(jwtLogoutSuccessHandler);
 
         http.exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)  // 401

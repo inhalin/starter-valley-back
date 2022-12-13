@@ -2,6 +2,7 @@ package startervalley.backend.exception.advice;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,8 +14,6 @@ import startervalley.backend.exception.AttendanceAlreadyPresentException;
 import startervalley.backend.exception.AttendanceOutOfRangeException;
 import startervalley.backend.exception.StoreImageUploadFailedException;
 import startervalley.backend.exception.TokenNotValidException;
-
-import java.util.Date;
 
 import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_ALREADY_PRESENT;
 import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_OUT_OF_RANGE;
@@ -52,13 +51,8 @@ public class ExceptionControllerAdvice {
 
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(TokenNotValidException.class)
-    public ErrorDetails handleTokenValidationException(TokenNotValidException e, WebRequest request) {
-        return new ErrorDetails(new Date(System.currentTimeMillis()), e.getMessage(), request.getDescription(false));
-    }
-
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    @ExceptionHandler(Exception.class)
-    public ErrorDetails handleGlobalException(Exception e, WebRequest request) {
-        return new ErrorDetails(new Date(System.currentTimeMillis()), e.getMessage(), request.getDescription(false));
+    public ResponseEntity<ErrorResult> handleTokenValidationException(TokenNotValidException e, WebRequest request) {
+        ErrorResult errorResult = new ErrorResult(e.getMessage(), request.getDescription(false));
+        return new ResponseEntity<>(errorResult, HttpStatus.UNAUTHORIZED);
     }
 }
