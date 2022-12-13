@@ -89,7 +89,6 @@ public class StoreService {
         Store store = getStore(storeId);
         long likeCount = userLikeStoreRepository.countByStore(store);
         boolean myLikeStatus = userLikeStoreRepository.existsByUserAndStore(user, store);
-
         StoreResponseDto storeDto = StoreResponseDto.builder()
                 .id(storeId)
                 .name(store.getName())
@@ -107,7 +106,7 @@ public class StoreService {
 
         List<TagDto> tagDto = store.getStoreTagList().stream().map(storeTag -> {
             Tag tag = storeTag.getTag();
-            return TagDto.of(tag.getContent());
+            return TagDto.builder().id(tag.getId()).content(tag.getContent()).build();
         }).toList();
 
         return new StoreDetailDto(storeDto, imageDto, tagDto);
