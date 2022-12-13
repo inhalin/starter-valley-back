@@ -2,23 +2,22 @@ package startervalley.backend.security.jwt;
 
 import io.jsonwebtoken.*;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 import startervalley.backend.entity.User;
+import startervalley.backend.exception.TokenNotValidException;
 import startervalley.backend.repository.UserRepository;
 import startervalley.backend.security.auth.CustomUserDetails;
 
-import javax.servlet.http.HttpServletResponse;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Date;
+import javax.servlet.http.HttpServletRequest;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
 public class JwtTokenProvider {
 
     private final String SECRET_KEY;
-    private final String COOKIE_REFRESH_TOKEN_KEY;
+    private final UserRepository userRepository;
 
     @Value("${app.auth.token.expiry.access-token}")
     private Long ACCESS_TOKEN_EXPIRE_LENGTH;
@@ -34,61 +33,49 @@ public class JwtTokenProvider {
     @Value("${app.auth.token.expiry.refresh-token}")
     private Long REFRESH_TOKEN_EXPIRE_LENGTH;
 
+    private final String ISSUER = "startervalley";
     private final String AUTHORITIES_KEY = "role";
 
-    @Autowired
-    private UserRepository userRepository;
-
-    public JwtTokenProvider(
-            @Value("${app.auth.token.secret-key}") String secretKey,
-            @Value("${app.auth.token.refresh-key}") String refreshKey) {
+    public JwtTokenProvider(@Value("${app.auth.token.secret-key}") String secretKey, UserRepository userRepository) {
         this.SECRET_KEY = Base64.getEncoder().encodeToString(secretKey.getBytes());
-        this.COOKIE_REFRESH_TOKEN_KEY = refreshKey;
+        this.userRepository = userRepository;
     }
 
-    public String createAccessToken(Authentication authentication) {
+    public String createAccessToken(User user, Map<String, String> userData) {
 
-        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        CustomUserDetails userDetails = new CustomUserDetails(user, userData);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
         Date now = new Date();
         Date validity = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_LENGTH);
-        String id = user.getUsername();
-        String role = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(",")); // 신규 anonymous
+        Map<String, Object> claims = new HashMap<>(userData);
 
         return Jwts.builder()
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
-                .setSubject(id)
-                .claim(AUTHORITIES_KEY, role)
-                .setIssuer("startervalley")
+                .setClaims(claims)
+                .setSubject(Optional.ofNullable(user.getUsername()).orElse(userData.get("username")))
+                .setIssuer(ISSUER)
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .compact();
     }
 
-    public void createRefreshToken(Authentication authentication, HttpServletResponse response) {
+    public String createRefreshToken(Authentication authentication) {
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + REFRESH_TOKEN_EXPIRE_LENGTH);
 
         String refreshToken = Jwts.builder()
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
-                .setIssuer("startervalley")
+                .setIssuer(ISSUER)
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .compact();
 
-//        saveRefreshToken(authentication, refreshToken);
+        saveRefreshToken(authentication, refreshToken);
 
-        ResponseCookie cookie = ResponseCookie.from(COOKIE_REFRESH_TOKEN_KEY, refreshToken)
-                .httpOnly(true)
-                .secure(true)
-                .sameSite("Lax")
-                .maxAge(REFRESH_TOKEN_EXPIRE_LENGTH)
-                .path("/")
-                .build();
-
-        response.addHeader("Set-Cookie", cookie.toString());
+        return refreshToken;
     }
 
     private void saveRefreshToken(Authentication authentication, String refreshToken) {
@@ -97,7 +84,6 @@ public class JwtTokenProvider {
         userRepository.updateRefreshToken(user.getId(), refreshToken);
     }
 
-    // Access Token을 검사하고 얻은 정보로 Authentication 객체 생성
     public Authentication getAuthentication(String accessToken) {
 
         Claims claims = parseClaims(accessToken);
@@ -106,9 +92,18 @@ public class JwtTokenProvider {
                 Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
                         .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 
-        User user = userRepository.findById(Long.valueOf(claims.getSubject())).orElseThrow();
+        Optional<User> userOptional = userRepository.findByUsername(claims.getSubject());
+        User user;
+        Map<String, String> attributes = new HashMap<>();
 
-        CustomUserDetails principal = new CustomUserDetails(user);
+        if (userOptional.isEmpty()) {
+            user = new User();
+            attributes = getAttributes(claims);
+        } else {
+            user = userOptional.get();
+        }
+
+        CustomUserDetails principal = new CustomUserDetails(user, attributes);
 
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
@@ -116,25 +111,55 @@ public class JwtTokenProvider {
     public Boolean validateToken(String token) {
         try {
             Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
-            return true;
+            return userRepository.existsRefreshTokenByUsername(getUsername(token)) != null || parseClaims(token).get("email") != null;
         } catch (ExpiredJwtException e) {
-            log.info("만료된 JWT 토큰입니다.");
+            throw new TokenNotValidException("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException e) {
-            log.info("지원되지 않는 JWT 토큰입니다.");
+            throw new TokenNotValidException("지원되지 않는 JWT 토큰입니다.");
         } catch (IllegalStateException e) {
-            log.info("JWT 토큰이 잘못되었습니다");
+            throw new TokenNotValidException("JWT 토큰이 잘못되었습니다");
         } catch (Exception e) {
-            log.info(e.getMessage());
+            throw new RuntimeException(e.getMessage());
         }
-        return false;
     }
 
-    // Access Token 만료시 갱신때 사용할 정보를 얻기 위해 Claim 리턴
-    private Claims parseClaims(String accessToken) {
+    public String parseBearerToken(HttpServletRequest request) {
+        String bearerToken = request.getHeader("Authorization");
+
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return null;
+    }
+
+    public Claims parseClaims(String accessToken) {
         try {
             return Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(accessToken).getBody();
         } catch (ExpiredJwtException e) {
             return e.getClaims();
         }
+    }
+
+    public String getUsername(String accessToken) {
+        return resolveClaims(accessToken, Claims::getSubject);
+    }
+
+    private <T> T resolveClaims(String accessToken, Function<Claims, T> claimsResolver) {
+        final Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(accessToken).getBody();
+        return claimsResolver.apply(claims);
+    }
+
+    private Map<String, String> getAttributes(Claims claims) {
+        Map<String, String> attributes = new HashMap<>();
+
+        attributes.put("username", (String) claims.get("username"));
+        attributes.put("email", (String) claims.get("email"));
+        attributes.put("imageUrl", (String) claims.get("imageUrl"));
+        attributes.put("githubUrl", (String) claims.get("githubUrl"));
+        attributes.put("id", (String) claims.get("id"));
+        attributes.put("provider", (String) claims.get("provider"));
+        attributes.put("role", (String) claims.get("role"));
+
+        return attributes;
     }
 }

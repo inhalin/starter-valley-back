@@ -15,13 +15,13 @@ import java.util.Map;
 public class CustomUserDetails implements UserDetails {
 
     private final User user;
-    private Map<String, Object> attributes;
+    private Map<String, String> attributes;
 
     public CustomUserDetails(User user) {
         this.user = user;
     }
 
-    public CustomUserDetails(User user, Map<String, Object> attributes) {
+    public CustomUserDetails(User user, Map<String, String> attributes) {
         this.user = user;
         this.attributes = attributes;
     }
@@ -37,7 +37,7 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> collection = new ArrayList<>();
-        collection.add(Role.ANONYMOUS::name);
+        collection.add(() -> user.getRole().name());
 
         return collection;
     }
@@ -49,7 +49,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return String.valueOf(user.getId());
+        return user.getUsername();
     }
 
     @Override

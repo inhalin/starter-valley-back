@@ -3,17 +3,17 @@ package startervalley.backend.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import startervalley.backend.dto.auth.AuthRequest;
-import startervalley.backend.dto.auth.AuthResponse;
-import startervalley.backend.dto.auth.SignupRequest;
-import startervalley.backend.dto.response.BaseResponseDto;
+import startervalley.backend.dto.auth.*;
+import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.service.auth.AuthService;
 import startervalley.backend.service.auth.GithubAuthService;
+
+import javax.validation.Valid;
 
 @Slf4j
 @RestController
@@ -30,9 +30,15 @@ public class AuthController {
     }
 
     @PostMapping("/signup")
-    public BaseResponseDto<Void> signup(Authentication authentication, @RequestBody SignupRequest signupRequest) {
-        authService.signup(authentication, signupRequest);
+    public ResponseEntity<JwtTokenDto> signup(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody SignupRequest request) {
+        return ResponseEntity.ok(authService.signup(userDetails.getAttributes(), request));
+    }
 
-        return new BaseResponseDto<>("user signed up successfully", null);
+    @PostMapping("/signup/validate")
+    public ResponseEntity<Void> validateCode(@Valid @RequestBody CodeValidationRequest request) {
+        authService.validateGenerationCode(request.getCode(), request.getGenerationId());
+        return ResponseEntity.ok(null);
     }
 }

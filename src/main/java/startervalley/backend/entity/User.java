@@ -1,8 +1,10 @@
 package startervalley.backend.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.ColumnDefault;
 
 import javax.persistence.*;
 
@@ -13,6 +15,8 @@ import static javax.persistence.GenerationType.*;
 @Entity
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class User extends BaseTimeEntity {
 
     @Id
@@ -29,7 +33,7 @@ public class User extends BaseTimeEntity {
 
     @Enumerated(STRING)
     @Column(columnDefinition = "varchar(255) default 'ANONYMOUS'", nullable = false)
-    private Role role = Role.ANONYMOUS;
+    private Role role;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "generation_id")
@@ -40,7 +44,7 @@ public class User extends BaseTimeEntity {
     private Team team;
 
     @Column(columnDefinition="tinyint(1) default 0")
-    private Boolean isLeader = false;
+    private Boolean isLeader;
 
     @ManyToOne(fetch = LAZY)
     @JoinColumn(name = "devpart_id")
@@ -58,23 +62,8 @@ public class User extends BaseTimeEntity {
 
     private String imageUrl;
 
-    @Builder
-    public User(String username, String email, String name, Role role, Generation generation, Team team, Boolean isLeader, Devpart devpart, AuthProvider provider, String providerId, String refreshToken, String githubUrl, UserProfile profile, String imageUrl) {
-        this.username = username;
-        this.email = email;
-        this.name = name;
-        this.role = role;
-        this.generation = generation;
-        this.team = team;
-        this.isLeader = isLeader;
-        this.devpart = devpart;
-        this.provider = provider;
-        this.providerId = providerId;
-        this.refreshToken = refreshToken;
-        this.githubUrl = githubUrl;
-        this.profile = profile;
-        this.imageUrl = imageUrl;
-    }
+    @ColumnDefault(value = "0")
+    private Integer consecutiveDays;
 
     public void setGeneration(Generation generation) {
         this.generation = generation;

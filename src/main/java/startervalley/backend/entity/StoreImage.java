@@ -9,26 +9,27 @@ import javax.persistence.*;
 @Getter
 @NoArgsConstructor
 @Entity
-public class Comment extends BaseTimeEntity {
+public class StoreImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String description;
+    private String uuid;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId")
-    private User user;
+    private String imgName;
+
+    private String path;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Store store;
 
     @Builder
-    public Comment(Long id, String description, User user, Store store) {
+    public StoreImage(Long id, String uuid, String imgName, String path, Store store) {
         this.id = id;
-        this.description = description;
-        this.user = user;
+        this.uuid = uuid;
+        this.imgName = imgName;
+        this.path = path;
         this.store = store;
     }
 }
