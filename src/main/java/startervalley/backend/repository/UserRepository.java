@@ -29,13 +29,13 @@ public interface UserRepository extends JpaRepository<User, Long> {
     @Transactional
     @Modifying
     @Query("update User u set u.imageUrl = :imageUrl where u.username = :username")
-    void updateImageUrl(String username, String imageUrl);
+    void updateImageUrl(@Param("username") String username, @Param("imageUrl") String imageUrl);
 
     @Transactional
     @Modifying
     @Query("update User u set u.refreshToken = null where u.username = :username")
-    void deleteRefreshToken(String username);
+    void deleteRefreshToken(@Param("username") String username);
 
     @Query("select u from User u where u.username = :username")
-    User existsRefreshTokenByUsername(String username);
+    User existsRefreshTokenByUsername(@Param("username") String username);
 }
