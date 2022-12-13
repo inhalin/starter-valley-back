@@ -2,7 +2,6 @@ package startervalley.backend.dto.user;
 
 import lombok.Builder;
 import lombok.Getter;
-import startervalley.backend.entity.Team;
 
 @Getter
 @Builder
@@ -16,6 +15,6 @@ public class UserCardDto {
     private String intro;
     private String githubUrl;
     private String imageUrl;
-    private Team team;
+    private String team;
     private String mbti;
 }
