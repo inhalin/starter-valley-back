@@ -13,10 +13,10 @@ import java.util.Optional;
 
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
-    @Query(value = "select s, i, t from Store s " +
-            "left outer join fetch StoreImage i on s = i.store " +
-            "left outer join fetch StoreTag st on s = st.store " +
-            "left outer join fetch Tag t on st.tag = t " +
+    @Query(value = "select distinct s from Store s " +
+            "join fetch StoreImage i on s = i.store " +
+            "join fetch StoreTag st on s = st.store " +
+            "join fetch Tag t on st.tag = t " +
             "where s.id = :id")
     Optional<Store> findById(@Param("id") Long id);
 
