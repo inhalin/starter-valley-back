@@ -1,11 +1,12 @@
 package startervalley.backend.entity;
 
-import lombok.Getter;
+import lombok.*;
 
 import javax.persistence.*;
 
 @Entity
 @Getter
+@NoArgsConstructor
 public class Devpart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -13,4 +14,10 @@ public class Devpart {
     private Long id;
 
     private String name;
+
+    @Builder
+    public Devpart(Long id, String name) {
+        this.id = id;
+        this.name = name;
+    }
 }

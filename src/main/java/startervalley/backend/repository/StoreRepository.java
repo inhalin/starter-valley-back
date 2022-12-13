@@ -13,14 +13,7 @@ import java.util.Optional;
 
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
-    @Query(value = "select distinct s from Store s " +
-            "join fetch StoreImage i on s = i.store " +
-            "join fetch StoreTag st on s = st.store " +
-            "join fetch Tag t on st.tag = t " +
-            "where s.id = :id")
-    Optional<Store> findById(@Param("id") Long id);
-
-    @Query(value = "SELECT * FROM store s join category c on s.category_id = c.id order by RAND() limit 3", nativeQuery = true)
+    @Query(value = "select * from store s join category c on s.category_id = c.id order by RAND() limit 3", nativeQuery = true)
     List<Store> findAllRandom();
 
     Page<Store> findAll(Pageable pageable);
