@@ -1,5 +1,6 @@
 package startervalley.backend.dto.user;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -13,6 +14,14 @@ public class UserProfileReadDto {
     private Boolean isLeader;
     private String devpart;
     private Long generationId;
-    private List<UserProfileInfoMap> mainInfo;
-    private List<UserProfileInfoMap> subInfo;
+    private List<InfoMap> mainInfo;
+    private List<InfoMap> subInfo;
+
+    @Getter
+    @AllArgsConstructor(staticName = "of")
+    @Builder
+    public static class InfoMap {
+        private String title;
+        private String description;
+    }
 }

@@ -37,10 +37,8 @@ public class StartersController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody UserProfileUpdateDto userProfileUpdateDto,
             @PathVariable String username) {
-        Long id = userDetails.getId();
+        Long validatedId = userService.validateUser(userDetails.getId(), username);
 
-        userService.validateUser(id, username);
-
-        return ResponseEntity.ok(userService.updateUserProfile(id, userProfileUpdateDto));
+        return ResponseEntity.ok(userService.updateUserProfile(validatedId, userProfileUpdateDto));
     }
 }

@@ -6,12 +6,13 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(value = HttpStatus.UNAUTHORIZED)
 @Getter
-public class UserInvalidException extends RuntimeException {
+public class UserNotValidException extends RuntimeException {
 
-    public UserInvalidException() {
+    public UserNotValidException() {
+        super();
     }
 
-    public UserInvalidException(String message) {
+    public UserNotValidException(String message) {
         super(message);
     }
 }
