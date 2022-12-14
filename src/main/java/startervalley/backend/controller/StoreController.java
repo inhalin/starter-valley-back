@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import startervalley.backend.dto.request.CommentRequestDto;
 import startervalley.backend.dto.request.PageRequestDto;
 import startervalley.backend.dto.request.StoreRequestDto;
 import startervalley.backend.dto.response.*;
@@ -71,6 +72,15 @@ public class StoreController {
                                                                      @Valid @ModelAttribute PageRequestDto pageRequestDto) {
         Long userId = userDetails.getId();
         PageResultDTO<Comment, CommentResponseDto> result = storeService.findStoreComments(userId, id, pageRequestDto);
+        return new ResponseEntity<>(result, HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<Long> createComment(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                              @PathVariable("id") Long storeId,
+                                              @Valid @RequestBody CommentRequestDto commentRequestDto) {
+        Long userId = userDetails.getId();
+        Long result = storeService.createComment(userId, storeId, commentRequestDto);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
