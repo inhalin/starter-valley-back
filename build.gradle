@@ -28,11 +28,30 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-webflux'
     implementation 'net.coobird:thumbnailator:0.4.18'
     implementation 'org.apache.tika:tika-core:2.6.0'
+
+    implementation 'com.querydsl:querydsl-jpa:5.0.0'
+    annotationProcessor(
+            'javax.persistence:javax.persistence-api',
+            'javax.annotation:javax.annotation-api',
+            'com.querydsl:querydsl-apt:5.0.0:jpa')
+
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ["$projectDir/src/main/java", "$projectDir/build/generated"]
+        }
+    }
+}
+
+clean {
+    delete file("$projectDir/build/generated")
 }
 
 tasks.named('test') {

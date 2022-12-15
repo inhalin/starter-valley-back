@@ -134,4 +134,8 @@ public class UserService {
                 .devpart(user.getDevpart().getName())
                 .build();
     }
+
+    public User findUserOrThrow(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString()));
+    }
 }
