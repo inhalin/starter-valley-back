@@ -56,6 +56,17 @@ dependencies {
 }
 
 
+sourceSets {
+    main {
+        java {
+            srcDirs = ["$projectDir/src/main/java", "$projectDir/build/generated"]
+        }
+    }
+}
+
+clean {
+    delete file("$projectDir/build/generated")
+}
 
 tasks.named('test') {
     useJUnitPlatform()

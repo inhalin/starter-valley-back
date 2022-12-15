@@ -37,10 +37,10 @@ public class ExceptionControllerAdvice {
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
-    public ErrorResult handleValidatorException(BindException e) {
+    public ErrorResult handleValidatorException(BindException e, WebRequest request) {
         BindingResult bindingResult = e.getBindingResult();
         String defaultMessage = bindingResult.getFieldError().getDefaultMessage();
-        return new ErrorResult(defaultMessage);
+        return new ErrorResult(defaultMessage, request.getDescription(false));
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
