@@ -1,0 +1,19 @@
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
+    hibernate:
+      ddl-auto: none
+
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: ${db.rds.url}
+    username: ${db.rds.username}
+    password: ${db.rds.password}
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false

@@ -1,0 +1,13 @@
+spring:
+  profiles:
+    include:
+      - SECRET
+    active: prod
+
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+      location: ${user.home}/images
+
+google-form-key: 1FAIpQLSdagB1Mu-4l2qGvPtPabdIDuuTs78XjzuI5mJ260Zi1cJt3IQ

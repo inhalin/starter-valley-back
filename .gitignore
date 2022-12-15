@@ -39,3 +39,4 @@ out/
 # Config
 /config/*
 !/config/*.example
+/src/main/resources/application-SECRET.yml
