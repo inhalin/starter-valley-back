@@ -7,14 +7,15 @@ import lombok.ToString;
 @ToString
 public class StoreImageDto {
 
+    private static final String S3_URL = "https://starter-valley-bucket.s3.ap-northeast-2.amazonaws.com/";
     private String imageUrl;
 
     private String getImageURL(String uuid, String imgName, String path) {
-        return "/images/" + path + "/" + uuid + "_" + imgName;
+        return S3_URL + uuid + "_" + imgName;
     }
 
     private String getThumbnailURL(String uuid, String imgName, String path) {
-        return "/images" + path + "/s_" + uuid + "_" + imgName;
+        return S3_URL + uuid + "_" + imgName;
     }
 
     public StoreImageDto(String uuid, String imgName, String path) {
