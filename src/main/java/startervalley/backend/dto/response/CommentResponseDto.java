@@ -2,12 +2,9 @@ package startervalley.backend.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
-import startervalley.backend.entity.Store;
-import startervalley.backend.entity.User;
 
-import javax.persistence.FetchType;
-import javax.persistence.ManyToOne;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -18,7 +15,11 @@ public class CommentResponseDto {
 
     private String description;
 
+    private String author;
+
     private boolean isOwn;
+
+    private List<TagDto> tagList;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd h:m:s", timezone = "Asia/Seoul")
     private LocalDateTime createdDate;
@@ -27,10 +28,12 @@ public class CommentResponseDto {
     private LocalDateTime modifiedDate;
 
     @Builder
-    public CommentResponseDto(Long id, String description, boolean isOwn, LocalDateTime createdDate, LocalDateTime modifiedDate) {
+    public CommentResponseDto(Long id, String description, String author, boolean isOwn, List<TagDto> tagList, LocalDateTime createdDate, LocalDateTime modifiedDate) {
         this.id = id;
         this.description = description;
+        this.author = author;
         this.isOwn = isOwn;
+        this.tagList = tagList;
         this.createdDate = createdDate;
         this.modifiedDate = modifiedDate;
     }

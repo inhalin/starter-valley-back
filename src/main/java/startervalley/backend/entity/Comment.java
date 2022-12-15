@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor
@@ -23,6 +25,9 @@ public class Comment extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Store store;
+
+    @OneToMany(mappedBy = "comment")
+    private List<CommentTag> commentTagList = new ArrayList<>();
 
     @Builder
     public Comment(Long id, String description, User user, Store store) {
