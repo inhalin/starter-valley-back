@@ -14,11 +14,9 @@ import startervalley.backend.repository.GenerationRepository;
 import startervalley.backend.repository.UserRepository;
 import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.security.jwt.JwtTokenProvider;
-import startervalley.backend.service.UserService;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
