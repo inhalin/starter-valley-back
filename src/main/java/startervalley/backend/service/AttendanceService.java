@@ -40,8 +40,15 @@ public class AttendanceService {
     private final static int LIMITED_RANGE = 100;
     private final static LocalTime ABSENT_TIME = LocalTime.of(9, 0);
 
-    @Value("${google-form-key}")
+    @Value("${google-form.key}")
     private String GOOGLE_FORM_KEY;
+    @Value("${google-form.entry.name}")
+    private String entryName;
+    @Value("${google-form.entry.reason}")
+    private String entryReason;
+    @Value("${google-form.entry.status}")
+    private String entryStatus;
+
     private final UserRepository userRepository;
     private final AttendanceRepository attendanceRepository;
     private final WebClient webClient;
@@ -123,20 +130,20 @@ public class AttendanceService {
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         String name = user.getName();
-        params.add("entry.1822023989", name);
+        params.add(entryName, name);
         String attendanceStatus;
         attendanceStatus = switch (attendance.getStatus()) {
             case PRESENT -> "정상 출석 (~09:00)";
             case LATE -> {
-                params.add("entry.1488509836", attendance.getReason());
-                yield  "지각 (09:01~09:30)";
+                params.add(entryReason, attendance.getReason());
+                yield "지각 (09:01~09:30)";
             }
             case ABSENT -> {
-                params.add("entry.1488509836", attendance.getReason());
+                params.add(entryReason, attendance.getReason());
                 yield "결석 (09:30~)";
             }
         };
-        params.add("entry.1594954107", attendanceStatus);
+        params.add(entryStatus, attendanceStatus);
 
         webClient.post()
                 .uri("https://docs.google.com/forms/d/e/{key}/formResponse", GOOGLE_FORM_KEY)
