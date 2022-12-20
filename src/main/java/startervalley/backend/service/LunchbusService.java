@@ -10,6 +10,7 @@ import startervalley.backend.dto.lunchbus.LunchbusSimpleDto;
 import startervalley.backend.dto.lunchbus.LunchbusUserDto;
 import startervalley.backend.entity.Lunchbus;
 import startervalley.backend.entity.User;
+import startervalley.backend.exception.CustomLimitExceededException;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.UserNotValidException;
 import startervalley.backend.repository.LunchbusCustomRepository;
@@ -18,6 +19,8 @@ import startervalley.backend.service.auth.AuthService;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static startervalley.backend.constant.LimitMessage.ACTIVE_LUNCHBUS;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,10 @@ public class LunchbusService {
     @Transactional
     public BasicResponse saveLunchbus(Long userId, LunchbusInsertRequest request) {
         User driver = userService.findUserOrThrow(userId);
+
+        if (!lunchbusCustomRepository.isAvailableToInsert(userId)) {
+            throw new CustomLimitExceededException(ACTIVE_LUNCHBUS.getMessage(), ACTIVE_LUNCHBUS.getLimit());
+        }
 
         Lunchbus bus = Lunchbus.builder()
                 .driver(driver)
