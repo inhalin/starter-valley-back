@@ -40,3 +40,4 @@ out/
 /config/*
 !/config/*.example
 /src/main/resources/application-SECRET.yml
+/src/main/resources/credentials.json
