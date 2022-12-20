@@ -73,4 +73,8 @@ public class User extends BaseTimeEntity {
         this.profile = profile;
         return profile;
     }
+
+    public void setConsecutiveDays(Integer consecutiveDays) {
+        this.consecutiveDays = consecutiveDays;
+    }
 }
