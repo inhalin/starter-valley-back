@@ -15,6 +15,8 @@ import startervalley.backend.exception.AttendanceOutOfRangeException;
 import startervalley.backend.exception.StoreImageUploadFailedException;
 import startervalley.backend.exception.TokenNotValidException;
 
+import java.util.Map;
+
 import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_ALREADY_PRESENT;
 import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_OUT_OF_RANGE;
 
@@ -54,5 +56,15 @@ public class ExceptionControllerAdvice {
     public ResponseEntity<ErrorResult> handleTokenValidationException(TokenNotValidException e, WebRequest request) {
         ErrorResult errorResult = new ErrorResult(e.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorResult, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(CustomLimitExceededException.class)
+    public ResponseEntity<ErrorResult> handleLimitExceededException(CustomLimitExceededException e, WebRequest request) {
+        Map<String, Object> message = Map.ofEntries(
+                Map.entry("errorMessage", e.getMessage()),
+                Map.entry("limit", e.getLimit())
+        );
+        return new ResponseEntity<>(new ErrorResult(message, request.getDescription(false)), HttpStatus.BAD_REQUEST);
     }
 }

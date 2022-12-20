@@ -10,6 +10,7 @@ import startervalley.backend.entity.Lunchbus;
 import java.time.LocalDate;
 import java.util.List;
 
+import static startervalley.backend.constant.LimitMessage.ACTIVE_LUNCHBUS;
 import static startervalley.backend.entity.QLunchbus.lunchbus;
 
 @Repository
@@ -68,5 +69,17 @@ public class LunchbusCustomRepository {
                         lunchbus.createdDate.after(LocalDate.now().atStartOfDay().minusDays(days)),
                         lunchbus.driver.generation.id.eq(generationId))
                 .fetch();
+    }
+
+    public boolean isAvailableToInsert(Long userId) {
+        Long count = queryFactory
+                .select(lunchbus.count())
+                .from(lunchbus)
+                .where(lunchbus.driver.id.eq(userId), lunchbus.active.eq(true))
+                .fetchOne();
+
+        if (count == null) return true;
+
+        return count <= ACTIVE_LUNCHBUS.getLimit();
     }
 }
