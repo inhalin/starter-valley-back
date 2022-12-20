@@ -14,6 +14,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    @Query("select u from User u join fetch u.generation where u.id = :userId")
+    Optional<User> findByIdWithGeneration(@Param("userId") Long userId);
+
     User findByEmailAndProvider(String email, AuthProvider provider);
 
     Optional<User> findByUsername(String username);
