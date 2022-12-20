@@ -3,11 +3,11 @@ package startervalley.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.dto.lunchbus.LunchbusDto;
 import startervalley.backend.dto.lunchbus.LunchbusInsertRequest;
 import startervalley.backend.dto.lunchbus.LunchbusSimpleDto;
 import startervalley.backend.dto.lunchbus.LunchbusUserDto;
-import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.entity.Lunchbus;
 import startervalley.backend.entity.User;
 import startervalley.backend.exception.ResourceNotFoundException;
@@ -49,10 +49,16 @@ public class LunchbusService {
         return BasicResponse.of(bus.getId(), "버스가 정상적으로 생성되었습니다.");
     }
 
-    public List<LunchbusSimpleDto> findAllByActive(Boolean active) {
+    public List<LunchbusSimpleDto> findAllActiveLunchbuses() {
         User loginUser = authService.getLoginUser();
 
-        return lunchbusCustomRepository.findAllByActiveAndGenerationId(active, loginUser.getGeneration().getId());
+        return lunchbusCustomRepository.findAllActiveByGenerationId(loginUser.getGeneration().getId());
+    }
+
+    public List<LunchbusSimpleDto> findPastLunchbusesInLimitedDays(int days) {
+        User loginUser = authService.getLoginUser();
+
+        return lunchbusCustomRepository.findAllNotActiveInLimitedDaysByGenerationId(days, loginUser.getGeneration().getId());
     }
 
     public LunchbusDto findLunchbus(Long busId) {
