@@ -25,7 +25,7 @@ public class GithubAuthService {
 
     public AuthResponse login(AuthRequest authRequest) {
         String accessToken = clientGithub.getAccessToken(authRequest.getCode());
-        GithubUserResponse userData = clientGithub.getUserData(accessToken);
+	GithubUserResponse userData = clientGithub.getUserData(accessToken);
 
         User user = userRepository.findByEmailAndProvider(userData.getEmail(), userData.getProvider());
         boolean isNewMember = false;
