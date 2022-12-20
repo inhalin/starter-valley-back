@@ -11,4 +11,7 @@ public class UserSelfProfileDto {
     private Integer consecutiveDays;
     private String imageUrl;
     private String devpart;
+    private Integer presentDays;
+    private Integer lateDays;
+    private Integer absentDays;
 }
