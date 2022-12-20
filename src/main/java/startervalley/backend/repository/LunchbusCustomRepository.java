@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import startervalley.backend.dto.lunchbus.LunchbusSimpleDto;
 import startervalley.backend.entity.Lunchbus;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import static startervalley.backend.entity.QLunchbus.lunchbus;
@@ -25,7 +26,15 @@ public class LunchbusCustomRepository {
                 .fetchFirst();
     }
 
-    public List<LunchbusSimpleDto> findAllByActiveAndGenerationId(Boolean active, Long generationId) {
+    public void deleteOneById(Long busId) {
+
+        queryFactory
+                .delete(lunchbus)
+                .where(lunchbus.id.eq(busId))
+                .execute();
+    }
+
+    public List<LunchbusSimpleDto> findAllActiveByGenerationId(Long generationId) {
 
         return queryFactory
                 .select(Projections.bean(
@@ -33,19 +42,31 @@ public class LunchbusCustomRepository {
                         lunchbus.id.as("busId"),
                         lunchbus.title,
                         lunchbus.occupancy.as("limit"),
-                        lunchbus.driver.name.as("driverName"),
                         lunchbus.count,
-                        lunchbus.driver.imageUrl.as("driverImageUrl")))
+                        lunchbus.driver.name.as("driverName"),
+                        lunchbus.driver.imageUrl.as("driverImageUrl")
+                ))
                 .from(lunchbus)
-                .where(lunchbus.active.eq(active), lunchbus.driver.generation.id.eq(generationId))
+                .where(lunchbus.active.eq(true), lunchbus.driver.generation.id.eq(generationId))
                 .fetch();
     }
 
-    public void deleteOneById(Long busId) {
+    public List<LunchbusSimpleDto> findAllNotActiveInLimitedDaysByGenerationId(int days, Long generationId) {
 
-        queryFactory
-                .delete(lunchbus)
-                .where(lunchbus.id.eq(busId))
-                .execute();
+        return queryFactory
+                .select(Projections.bean(
+                        LunchbusSimpleDto.class,
+                        lunchbus.id.as("busId"),
+                        lunchbus.title,
+                        lunchbus.occupancy.as("limit"),
+                        lunchbus.count,
+                        lunchbus.driver.name.as("driverName"),
+                        lunchbus.driver.imageUrl.as("driverImageUrl")
+                ))
+                .from(lunchbus)
+                .where(lunchbus.active.eq(false),
+                        lunchbus.createdDate.after(LocalDate.now().atStartOfDay().minusDays(days)),
+                        lunchbus.driver.generation.id.eq(generationId))
+                .fetch();
     }
 }

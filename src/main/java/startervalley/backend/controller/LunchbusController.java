@@ -4,10 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.dto.lunchbus.LunchbusDto;
 import startervalley.backend.dto.lunchbus.LunchbusInsertRequest;
 import startervalley.backend.dto.lunchbus.LunchbusSimpleDto;
-import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.service.LunchbusService;
 
@@ -29,13 +29,14 @@ public class LunchbusController {
     }
 
     @GetMapping
-    public ResponseEntity<List<LunchbusSimpleDto>> list() {
-        return ResponseEntity.ok(lunchbusService.findAllByActive(true));
+    public ResponseEntity<List<LunchbusSimpleDto>> listActive() {
+        return ResponseEntity.ok(lunchbusService.findAllActiveLunchbuses());
     }
 
     @GetMapping("/past")
     public ResponseEntity<List<LunchbusSimpleDto>> listPast() {
-        return ResponseEntity.ok(lunchbusService.findAllByActive(false));
+        final int LIMITED_DAYS = 3;
+        return ResponseEntity.ok(lunchbusService.findPastLunchbusesInLimitedDays(LIMITED_DAYS));
     }
 
     @GetMapping("/{busId}")
