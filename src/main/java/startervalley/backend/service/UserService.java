@@ -136,7 +136,6 @@ public class UserService {
             AttendanceStatus status = attendance.getStatus();
 
             if (status == null) {
-                absentDays += 1;
                 continue;
             }
 
