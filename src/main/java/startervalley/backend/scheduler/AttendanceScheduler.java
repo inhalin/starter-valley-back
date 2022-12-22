@@ -45,6 +45,7 @@ public class AttendanceScheduler {
         List<Attendance> allByStatusIsNull = attendanceRepository.findAllByStatusIsNull();
         for (Attendance attendance : allByStatusIsNull) {
             attendance.setStatus(ABSENT);
+            attendance.getUser().setConsecutiveDays(1);
         }
     }
 }

@@ -41,6 +41,12 @@ public class ExceptionControllerAdvice {
         return new ErrorResult(defaultMessage, request.getDescription(false));
     }
 
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(StoreImageUploadFailedException.class)
+    public ErrorResult handleStoreImageUploadFailedException(StoreImageUploadFailedException e) {
+        return new ErrorResult(e.getMessage());
+    }
+
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler({TokenNotValidException.class, UserNotValidException.class})
     public ResponseEntity<ErrorResult> handleTokenValidationException(CustomValidationException e, WebRequest request) {

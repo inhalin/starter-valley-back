@@ -1,6 +1,6 @@
 package startervalley.backend.exception;
 
-public class TokenNotValidException extends CustomValidationException {
+public class TokenNotValidException extends RuntimeException {
 
     public TokenNotValidException() {
         super();

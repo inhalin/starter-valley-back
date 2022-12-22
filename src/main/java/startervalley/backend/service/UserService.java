@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.dto.user.*;
 
-import startervalley.backend.entity.User;
-import startervalley.backend.entity.UserProfile;
+import startervalley.backend.entity.*;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.UserNotValidException;
+import startervalley.backend.repository.AttendanceRepository;
 import startervalley.backend.repository.UserRepository;
 
 import java.util.ArrayList;
@@ -20,6 +20,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class UserService {
 
+    private final AttendanceRepository attendanceRepository;
     private final UserRepository userRepository;
     private final ObjectMapper mapper;
 
@@ -126,16 +127,41 @@ public class UserService {
     public UserSelfProfileDto getSelfProfile(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
 
+        List<Attendance> userList = attendanceRepository.findAllByUser(user);
+        int presentDays = 0;
+        int lateDays = 0;
+        int absentDays = 0;
+
+        for (Attendance attendance : userList) {
+            AttendanceStatus status = attendance.getStatus();
+
+            if (status == null) {
+                absentDays += 1;
+                continue;
+            }
+
+            switch (status) {
+                case PRESENT -> presentDays += 1;
+                case LATE -> lateDays += 1;
+                case ABSENT -> absentDays += 1;
+            }
+        }
+
         return UserSelfProfileDto.builder()
                 .name(user.getName())
                 .generationId(user.getGeneration().getId())
                 .consecutiveDays(user.getConsecutiveDays())
                 .imageUrl(user.getImageUrl())
                 .devpart(user.getDevpart().getName())
+                .presentDays(presentDays)
+                .lateDays(lateDays)
+                .absentDays(absentDays)
                 .build();
     }
 
-    public User findUserOrThrow(Long userId) {
-        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString()));
+    public UserEducationTermDto getEducationTerm(Long userId) {
+        User user = userRepository.findByIdWithGeneration(userId).orElseThrow();
+        Generation generation = user.getGeneration();
+        return UserEducationTermDto.of(generation.getCourseStartDate(), generation.getCourseEndDate());
     }
 }

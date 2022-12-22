@@ -6,14 +6,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.entity.AuthProvider;
-import startervalley.backend.entity.Devpart;
-import startervalley.backend.entity.Generation;
 import startervalley.backend.entity.User;
 
 import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    @Query("select u from User u join fetch u.generation where u.id = :userId")
+    Optional<User> findByIdWithGeneration(@Param("userId") Long userId);
+
     User findByEmailAndProvider(String email, AuthProvider provider);
 
     Optional<User> findByUsername(String username);

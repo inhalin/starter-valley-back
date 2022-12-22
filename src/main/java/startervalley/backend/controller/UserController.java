@@ -6,6 +6,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import startervalley.backend.dto.user.UserEducationTermDto;
 import startervalley.backend.dto.user.UserSelfProfileDto;
 import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.service.UserService;
@@ -20,5 +21,10 @@ public class UserController {
     @GetMapping("/profile")
     public ResponseEntity<UserSelfProfileDto> selfProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
         return ResponseEntity.ok(userService.getSelfProfile(userDetails.getId()));
+    }
+
+    @GetMapping("/education-term")
+    public ResponseEntity<UserEducationTermDto> getEducationTerm(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(userService.getEducationTerm(userDetails.getId()));
     }
 }
