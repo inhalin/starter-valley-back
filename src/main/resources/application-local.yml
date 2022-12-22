@@ -13,3 +13,10 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     username: ${db.local.username}
     password: ${db.local.password}
+
+app:
+  oauth2:
+    client:
+      github:
+        client-id: ${github.local.client-id}
+        client-secret: ${github.local.client-secret}

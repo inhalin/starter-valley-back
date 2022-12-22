@@ -2,7 +2,7 @@ spring:
   profiles:
     include:
       - SECRET
-    active: local
+    active: dev
 
   servlet:
     multipart:
@@ -28,3 +28,11 @@ google-form:
     name: entry.246568632
     reason: entry.1336473987
     status: entry.199576355
+
+app:
+  oauth2:
+    client:
+      github:
+        access-token-uri: https://github.com/login/oauth/access_token
+        user-data-uri: https://api.github.com/user
+        user-email-uri: https://api.github.com/user/emails
