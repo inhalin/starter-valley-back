@@ -1,11 +1,11 @@
 spring:
   config:
     activate:
-      on-profile: dev
+      on-profile: local
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: true
 
   datasource:
@@ -18,5 +18,5 @@ app:
   oauth2:
     client:
       github:
-        client-id: ${github.dev.client-id}
-        client-secret: ${github.dev.client-secret}
+        client-id: ${github.local.client-id}
+        client-secret: ${github.local.client-secret}

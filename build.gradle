@@ -39,6 +39,13 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.14.1'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.14.1'
     implementation group: 'com.google.http-client', name: 'google-http-client-jackson2', version: '1.36.0'
+
+    implementation 'com.querydsl:querydsl-jpa:5.0.0'
+    annotationProcessor(
+            'javax.persistence:javax.persistence-api',
+            'javax.annotation:javax.annotation-api',
+            'com.querydsl:querydsl-apt:5.0.0:jpa')
+
     compileOnly 'org.projectlombok:lombok'
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
     runtimeOnly 'org.mariadb.jdbc:mariadb-java-client'
@@ -49,7 +56,17 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
 }
 
+sourceSets {
+    main {
+        java {
+            srcDirs = ["$projectDir/src/main/java", "$projectDir/build/generated"]
+        }
+    }
+}
 
+clean {
+    delete file("$projectDir/build/generated")
+}
 
 tasks.named('test') {
     useJUnitPlatform()

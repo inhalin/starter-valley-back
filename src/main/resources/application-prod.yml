@@ -17,3 +17,10 @@ spring:
   jackson:
     serialization:
       fail-on-empty-beans: false
+
+app:
+  oauth2:
+    client:
+      github:
+        client-id: ${github.prod.client-id}
+        client-secret: ${github.prod.client-secret}
