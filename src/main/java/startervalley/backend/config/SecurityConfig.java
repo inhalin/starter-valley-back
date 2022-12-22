@@ -19,6 +19,7 @@ import startervalley.backend.security.jwt.*;
 public class SecurityConfig {
 
     private final JwtLogoutHandler jwtLogoutHandler;
+//    private final JwtLogoutSuccessHandler jwtLogoutSuccessHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
@@ -45,6 +46,7 @@ public class SecurityConfig {
         http.logout()
                 .logoutUrl("/auth/logout")
                 .addLogoutHandler(jwtLogoutHandler);
+//                .logoutSuccessHandler(jwtLogoutSuccessHandler);
 
         http.exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)  // 401

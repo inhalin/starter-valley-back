@@ -5,7 +5,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: create
     show-sql: true
 
   datasource:
@@ -13,10 +13,3 @@ spring:
     driver-class-name: org.mariadb.jdbc.Driver
     username: ${db.local.username}
     password: ${db.local.password}
-
-app:
-  oauth2:
-    client:
-      github:
-        client-id: ${github.dev.client-id}
-        client-secret: ${github.dev.client-secret}

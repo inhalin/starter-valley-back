@@ -2,7 +2,7 @@ spring:
   profiles:
     include:
       - SECRET
-    active: dev
+    active: prod
 
   servlet:
     multipart:
@@ -10,29 +10,4 @@ spring:
       max-request-size: 50MB
       location: ${user.home}/images
 
-  jpa:
-    open-in-view: false
-    generate-ddl: true
-    show-sql: true
-    hibernate:
-      ddl-auto: update
-    # hibernate properties
-    properties:
-      hibernate:
-        dialect: org.hibernate.dialect.MySQL5InnoDBDialect
-        format-sql: true
-
-google-form:
-  key: 1FAIpQLSd7A2PRigVgoBGjRZGtDHCVSFxJVI8nl8m3lGp7ZTXmSEuqDQ
-  entry:
-    name: entry.246568632
-    reason: entry.1336473987
-    status: entry.199576355
-
-app:
-  oauth2:
-    client:
-      github:
-        access-token-uri: https://github.com/login/oauth/access_token
-        user-data-uri: https://api.github.com/user
-        user-email-uri: https://api.github.com/user/emails
+google-form-key: 1FAIpQLSdagB1Mu-4l2qGvPtPabdIDuuTs78XjzuI5mJ260Zi1cJt3IQ
