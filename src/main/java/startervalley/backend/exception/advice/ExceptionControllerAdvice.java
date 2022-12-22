@@ -10,16 +10,12 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
-import startervalley.backend.exception.AttendanceAlreadyPresentException;
-import startervalley.backend.exception.AttendanceOutOfRangeException;
-import startervalley.backend.exception.StoreImageUploadFailedException;
-import startervalley.backend.exception.TokenNotValidException;
+import startervalley.backend.exception.*;
 
 import java.util.Map;
 
 import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_ALREADY_PRESENT;
 import static startervalley.backend.constant.ExceptionMessage.ATTENDANCE_OUT_OF_RANGE;
-
 
 @Slf4j
 @RestControllerAdvice
