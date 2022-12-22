@@ -50,4 +50,14 @@ public class LunchbusController {
 
         return ResponseEntity.ok(lunchbusService.deleteLunchbus(busId));
     }
+
+    @PostMapping("/{busId}/on")
+    public ResponseEntity<Void> getOn() {
+        return null;
+    }
+
+    @PostMapping("/{busId}/off")
+    public ResponseEntity<Void> getOff() {
+        return null;
+    }
 }

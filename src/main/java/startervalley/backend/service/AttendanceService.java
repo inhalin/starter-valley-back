@@ -21,7 +21,10 @@ import startervalley.backend.exception.AttendanceOutOfRangeException;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.AttendanceRepository;
 import startervalley.backend.repository.UserRepository;
+import startervalley.backend.util.GoogleSpreadSheet;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -37,6 +40,7 @@ import static startervalley.backend.entity.AttendanceStatus.PRESENT;
 @Transactional(readOnly = true)
 public class AttendanceService {
 
+    private final GoogleSpreadSheet googleSpreadSheet;
     private final static int LIMITED_RANGE = 100;
     private final static LocalTime ABSENT_TIME = LocalTime.of(9, 0);
 
@@ -48,13 +52,52 @@ public class AttendanceService {
 
     public List<AttendanceDto> findUserAttendances(Long userId, AttendanceYearMonthDto attendanceYearMonthDto) {
         User user = getUser(userId);
-        LocalDate currentDate = getCurrentDate(attendanceYearMonthDto.getYear(), attendanceYearMonthDto.getMonth());
-        List<Attendance> attendances = attendanceRepository.findAllByUserForMonth(user.getId(), currentDate.getYear(), currentDate.getMonthValue());
+        LocalDate currentDate = getDate(attendanceYearMonthDto.getYear(), attendanceYearMonthDto.getMonth());
+        List<Attendance> attendances;
+        attendances = (currentDate == null) ? attendanceRepository.findAllByUser(user) :
+                attendanceRepository.findAllByUserForMonth(user.getId(), currentDate.getYear(), currentDate.getMonthValue());
+
         List<AttendanceDto> result = attendances.stream().map(attendance ->
                         new AttendanceDto(attendance.getId().getAttendedDate(), attendance.getStatus()))
                 .collect(Collectors.toList());
 
         return result;
+    }
+
+    @Transactional
+    public void saveAttendancesFromGoogleSpreadSheet(Long userId) {
+        User user = getUser(userId);
+        String name = user.getName();
+        try {
+            List<AttendanceDto> attendanceDtos = googleSpreadSheet.makeAttendanceList(name);
+
+            for (AttendanceDto attendanceDto : attendanceDtos) {
+                AttendanceId attendanceId = new AttendanceId(userId, attendanceDto.getLocalDate());
+                Attendance attendance = Attendance.builder()
+                        .id(attendanceId)
+                        .user(user)
+                        .status(attendanceDto.getAttendanceStatus())
+                        .build();
+                attendanceRepository.save(attendance);
+            }
+        } catch (GeneralSecurityException | IOException e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    @Transactional
+    public void updateConsecutiveDays(Long userId) {
+        User user = userRepository.findById(userId).orElseThrow();
+        List<Attendance> attendanceList = attendanceRepository.findAllByUserOrderByDate(user.getId());
+        int consecutiveDays = 1;
+        for (Attendance attendance : attendanceList) {
+            if (attendance.getStatus() == AttendanceStatus.ABSENT) {
+                break;
+            }
+            consecutiveDays += 1;
+        }
+        System.out.println(consecutiveDays);
+        user.setConsecutiveDays(consecutiveDays);
     }
 
     @Transactional
@@ -73,6 +116,7 @@ public class AttendanceService {
         AttendanceStatus status = checkIfOverPresentTime();
         attendance.setStatus(status);
         attendance.setAttendanceTime(LocalTime.now());
+        user.setConsecutiveDays(user.getConsecutiveDays() + 1);
         return new BaseResponseDto(status);
     }
 
@@ -151,9 +195,9 @@ public class AttendanceService {
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", String.valueOf(userId)));
     }
 
-    private LocalDate getCurrentDate(Integer month, Integer year) {
+    private LocalDate getDate(Integer month, Integer year) {
         if (month == null || year == null) {
-            return LocalDate.now();
+            return null;
         }
         return LocalDate.of(month, year, 1);
     }
