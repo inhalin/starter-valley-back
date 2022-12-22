@@ -1,7 +1,6 @@
 package startervalley.backend.service.auth;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.dto.auth.JwtTokenDto;
@@ -12,7 +11,6 @@ import startervalley.backend.exception.TokenNotValidException;
 import startervalley.backend.repository.DevpartRepository;
 import startervalley.backend.repository.GenerationRepository;
 import startervalley.backend.repository.UserRepository;
-import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.security.jwt.JwtTokenProvider;
 
 import java.util.HashMap;
@@ -73,11 +71,5 @@ public class AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
-    }
-
-    public User getLoginUser() {
-        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        return userRepository.findById(userDetails.getId()).orElseThrow(() -> new ResourceNotFoundException("User", "id", userDetails.getId().toString()));
     }
 }
