@@ -29,7 +29,7 @@ public class StoreController {
 
     @GetMapping
     public ResponseEntity<PageResultDTO<Store, StoreResponseDto>> getStoreList(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                               @Valid @ModelAttribute PageRequestDto pageRequestDto) {
+                                                                               @Valid @ModelAttribute PageRequestDto pageRequestDto) {
         Long userId = userDetails.getId();
         PageResultDTO<Store, StoreResponseDto> result = storeService.findAllStores(userId, pageRequestDto);
         return new ResponseEntity<>(result, HttpStatus.OK);
@@ -68,8 +68,8 @@ public class StoreController {
 
     @GetMapping("/{id}/comments")
     public ResponseEntity<PageResultDTO<Comment, CommentResponseDto>> getStoreComments(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                     @PathVariable Long id,
-                                                                     @Valid @ModelAttribute PageRequestDto pageRequestDto) {
+                                                                                       @PathVariable Long id,
+                                                                                       @Valid @ModelAttribute PageRequestDto pageRequestDto) {
         Long userId = userDetails.getId();
         PageResultDTO<Comment, CommentResponseDto> result = storeService.findStoreComments(userId, id, pageRequestDto);
         return new ResponseEntity<>(result, HttpStatus.OK);

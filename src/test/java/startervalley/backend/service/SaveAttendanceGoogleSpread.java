@@ -1,27 +1,18 @@
 package startervalley.backend.service;
 
 import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.junit.jupiter.api.Test;\
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Sort;
+import org.springframework.boot.test.context.SpringBootTest;\
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Transactional;
-import startervalley.backend.entity.Attendance;
-import startervalley.backend.entity.AttendanceStatus;
+import org.springframework.transaction.annotation.Transactional;\
 import startervalley.backend.entity.User;
 import startervalley.backend.repository.AttendanceRepository;
 import startervalley.backend.repository.UserRepository;
 
-import java.time.LocalDate;
 import java.util.List;
-import java.util.Stack;
 
 @Transactional
 @ActiveProfiles("dev")

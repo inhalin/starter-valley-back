@@ -3,14 +3,12 @@ package startervalley.backend.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.coobird.thumbnailator.Thumbnailator;
-import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import startervalley.backend.entity.Store;
 import startervalley.backend.entity.StoreImage;
-import startervalley.backend.exception.StoreImageUploadFailedException;
 import startervalley.backend.repository.StoreImageRepository;
 
 import java.io.File;
@@ -21,8 +19,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
-
-import static startervalley.backend.constant.ExceptionMessage.FILE_TYPE_NOT_IMAGE;
 
 @Slf4j
 @RequiredArgsConstructor
