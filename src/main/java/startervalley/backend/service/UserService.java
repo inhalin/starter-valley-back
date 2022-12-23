@@ -163,4 +163,8 @@ public class UserService {
         Generation generation = user.getGeneration();
         return UserEducationTermDto.of(generation.getCourseStartDate(), generation.getCourseEndDate());
     }
+
+    public User findUserOrThrow(Long userId) {
+        return userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString()));
+    }
 }

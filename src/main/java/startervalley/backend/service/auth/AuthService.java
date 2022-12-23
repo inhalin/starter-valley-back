@@ -1,6 +1,8 @@
 package startervalley.backend.service.auth;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.dto.auth.JwtTokenDto;
@@ -11,11 +13,13 @@ import startervalley.backend.exception.TokenNotValidException;
 import startervalley.backend.repository.DevpartRepository;
 import startervalley.backend.repository.GenerationRepository;
 import startervalley.backend.repository.UserRepository;
+import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.security.jwt.JwtTokenProvider;
 
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -71,5 +75,18 @@ public class AuthService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    public User getLoginUser() {
+        CustomUserDetails userDetails = (CustomUserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        return userRepository.findById(userDetails.getId()).orElseThrow(() -> new ResourceNotFoundException("User", "id", userDetails.getId().toString()));
+    }
+
+    @Transactional
+    public void logout(String username) {
+        userRepository.deleteRefreshToken(username);
+        SecurityContextHolder.clearContext();
+        log.debug("{username} 회원 로그아웃 처리 및 refresh token 삭제 완료");
     }
 }

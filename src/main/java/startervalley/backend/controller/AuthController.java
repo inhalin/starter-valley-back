@@ -41,4 +41,10 @@ public class AuthController {
         authService.validateGenerationCode(request.getCode(), request.getGenerationId());
         return ResponseEntity.ok(null);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        authService.logout(userDetails.getUsername());
+        return ResponseEntity.ok().build();
+    }
 }
