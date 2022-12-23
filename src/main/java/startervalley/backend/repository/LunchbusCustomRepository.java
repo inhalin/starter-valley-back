@@ -82,4 +82,11 @@ public class LunchbusCustomRepository {
 
         return count <= ACTIVE_LUNCHBUS.getLimit();
     }
+
+    public void updateCountByBusId(int count, Long busId) {
+        queryFactory.update(lunchbus)
+                .set(lunchbus.count, count)
+                .where(lunchbus.id.eq(busId))
+                .execute();
+    }
 }
