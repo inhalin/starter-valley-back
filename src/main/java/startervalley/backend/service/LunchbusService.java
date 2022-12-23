@@ -21,7 +21,6 @@ import startervalley.backend.repository.PassengerCustomRepository;
 import startervalley.backend.repository.PassengerRepository;
 import startervalley.backend.service.auth.AuthService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static startervalley.backend.constant.LimitMessage.ACTIVE_LUNCHBUS;
@@ -78,6 +77,8 @@ public class LunchbusService {
         Lunchbus bus = lunchbusRepository.findById(busId).orElseThrow(() -> new ResourceNotFoundException("Lunchbus", "id", busId.toString()));
         User driver = bus.getDriver();
         User loginUser = authService.getLoginUser();
+        List<LunchbusUserDto> passengers = passengerCustomRepository.findAllPassengersByBusId(busId);
+        boolean isPassenger = passengers.stream().anyMatch(passenger -> passenger.getUserId().equals(loginUser.getId()));
 
         return LunchbusDto.builder()
                 .busId(bus.getId())
@@ -86,12 +87,13 @@ public class LunchbusService {
                 .limit(bus.getOccupancy())
                 .count(bus.getCount())
                 .isDriver(bus.getDriver().getId().equals(loginUser.getId()))
-                .isPassenger(false) // TODO: 승객 부분 만들면 반영 필요
+                .isPassenger(isPassenger)
                 .driver(LunchbusUserDto.builder()
+                        .userId(driver.getId())
                         .imageUrl(driver.getImageUrl())
                         .name(driver.getName())
                         .build())
-                .passengers(new ArrayList<>()) // TODO: 승객 부분 만들면 반영 필요
+                .passengers(passengers)
                 .storeName(bus.getStoreName())
                 .storeUrl(bus.getStoreUrl())
                 .build();
