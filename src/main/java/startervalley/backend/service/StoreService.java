@@ -11,8 +11,10 @@ import org.springframework.web.multipart.MultipartFile;
 import startervalley.backend.dto.request.CommentRequestDto;
 import startervalley.backend.dto.request.PageRequestDto;
 import startervalley.backend.dto.request.StoreRequestDto;
+import startervalley.backend.dto.request.StoreUpdateDto;
 import startervalley.backend.dto.response.*;
 import startervalley.backend.entity.*;
+import startervalley.backend.exception.NotOwnerException;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.*;
 
@@ -37,6 +39,36 @@ public class StoreService {
     private final TagService tagService;
 
     private final static List<StoreResponseDto> recommendStoreList = new ArrayList<>();
+
+    public StoreDetailDto findStore(Long userId, Long storeId) {
+        User user = getUserElseThrow(userId);
+        Store store = getStoreOrElseThrow(storeId);
+        long likeCount = userLikeStoreRepository.countByStore(store);
+        boolean myLikeStatus = userLikeStoreRepository.existsByUserAndStore(user, store);
+        boolean own = Objects.equals(store.getUser().getId(), userId);
+        StoreResponseDto storeDto = StoreResponseDto.builder()
+                .id(storeId)
+                .name(store.getName())
+                .address(store.getAddress())
+                .description(store.getDescription())
+                .url(store.getUrl())
+                .likeCount(likeCount)
+                .myLikeStatus(myLikeStatus)
+                .category(store.getCategory().getName())
+                .own(own)
+                .build();
+
+        List<StoreImageDto> imageDto = store.getStoreImageList().stream()
+                .map(image -> new StoreImageDto(image.getId(), image.getUuid(), image.getImgName(), image.getPath()))
+                .toList();
+
+        List<TagDto> tagDto = store.getStoreTagList().stream().map(storeTag -> {
+            Tag tag = storeTag.getTag();
+            return TagDto.builder().id(tag.getId()).content(tag.getContent()).build();
+        }).toList();
+
+        return new StoreDetailDto(storeDto, imageDto, tagDto);
+    }
 
     public PageResultDTO<Store, StoreResponseDto> findAllStores(Long userId, @ModelAttribute PageRequestDto pageRequestDto) {
         User user = getUserElseThrow(userId);
@@ -68,7 +100,6 @@ public class StoreService {
         return new PageResultDTO<>(storePage, result);
     }
 
-    // TODO: 최초 등록자 관리해주기?
     @Transactional
     public Long createStore(Long userId, StoreRequestDto storeRequestDto, List<MultipartFile> uploadFiles) {
         User user = getUserElseThrow(userId);
@@ -79,6 +110,7 @@ public class StoreService {
                 .description(storeRequestDto.getDescription())
                 .url(storeRequestDto.getUrl())
                 .category(category)
+                .user(user)
                 .build();
         storeRepository.save(store);
         try {
@@ -90,38 +122,30 @@ public class StoreService {
         return store.getId();
     }
 
-    public StoreDetailDto findStore(Long userId, Long storeId) {
-        User user = getUserElseThrow(userId);
+    @Transactional
+    public void updateStore(Long userId, Long storeId, StoreUpdateDto storeUpdateDto, List<MultipartFile> uploadFiles) throws IOException {
         Store store = getStoreOrElseThrow(storeId);
-        long likeCount = userLikeStoreRepository.countByStore(store);
-        boolean myLikeStatus = userLikeStoreRepository.existsByUserAndStore(user, store);
-        StoreResponseDto storeDto = StoreResponseDto.builder()
-                .id(storeId)
-                .name(store.getName())
-                .address(store.getAddress())
-                .description(store.getDescription())
-                .url(store.getUrl())
-                .likeCount(likeCount)
-                .myLikeStatus(myLikeStatus)
-                .category(store.getCategory().getName())
-                .build();
+        Category category = getCategoryElseThrow(storeUpdateDto.getCategoryId());
 
-        List<StoreImageDto> imageDto = store.getStoreImageList().stream()
-                .map(image -> new StoreImageDto(image.getUuid(), image.getImgName(), image.getPath()))
-                .toList();
+        if (!Objects.equals(store.getUser().getId(), userId)) {
+            throw new NotOwnerException();
+        }
 
-        List<TagDto> tagDto = store.getStoreTagList().stream().map(storeTag -> {
-            Tag tag = storeTag.getTag();
-            return TagDto.builder().id(tag.getId()).content(tag.getContent()).build();
-        }).toList();
-
-        return new StoreDetailDto(storeDto, imageDto, tagDto);
+        store.getStoreTagList().clear();
+        tagService.createTag(store, storeUpdateDto.getTagList());
+        storeImageService.deleteFilesAndUpdate(store, storeUpdateDto.getDeleteImgIdList(), uploadFiles);
+        store.update(storeUpdateDto, category);
     }
 
     @Transactional
-    public void modify(Long id, StoreRequestDto storeRequestDto) {
-        Store store = getStoreOrElseThrow(id);
-        store.update(storeRequestDto);
+    public void deleteStore(Long userId, Long storeId) {
+        Store store = getStoreOrElseThrow(storeId);
+
+        if (!Objects.equals(store.getUser().getId(), userId)) {
+            throw new NotOwnerException();
+        }
+
+        storeRepository.deleteById(storeId);
     }
 
     public List<CategoryResponseDto> findAllCategory() {
@@ -198,6 +222,7 @@ public class StoreService {
         return new PageResultDTO<>(commentPage, result);
     }
 
+    @Transactional
     public Long createComment(Long userId, Long storeId, CommentRequestDto commentRequestDto) {
         User user = getUserElseThrow(userId);
         Store store = getStoreOrElseThrow(storeId);
@@ -210,6 +235,30 @@ public class StoreService {
         tagService.createTag(comment, tagList);
 
         return comment.getId();
+    }
+
+    @Transactional
+    public void updateComment(Long userId, Long commentId, CommentRequestDto commentRequestDto) {
+        Comment comment = getCommentOrElseThrow(commentId);
+
+        if (!Objects.equals(comment.getUser().getId(), userId)) {
+            throw new NotOwnerException();
+        }
+
+        comment.getCommentTagList().clear();
+        tagService.createTag(comment, commentRequestDto.getTagList());
+        comment.update(commentRequestDto);
+    }
+
+    @Transactional
+    public void deleteComment(Long userId, Long commentId) {
+        Comment comment = getCommentOrElseThrow(commentId);
+
+        if (!Objects.equals(comment.getUser().getId(), userId)) {
+            throw new NotOwnerException();
+        }
+
+        commentRepository.deleteById(commentId);
     }
 
     public List<StoreResponseDto> findRecommendStoreList() {
@@ -233,6 +282,11 @@ public class StoreService {
     private Store getStoreOrElseThrow(Long id) {
         return storeRepository.findById(id).orElseThrow(() ->
                 new ResourceNotFoundException("Store", "id", id.toString()));
+    }
+
+    private Comment getCommentOrElseThrow(Long id) {
+        return commentRepository.findById(id).orElseThrow(() ->
+                new ResourceNotFoundException("Comment", "id", id.toString()));
     }
 
     private Category getCategoryElseThrow(Long categoryId) {

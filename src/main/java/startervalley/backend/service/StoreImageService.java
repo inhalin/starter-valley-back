@@ -14,6 +14,13 @@ public interface StoreImageService {
 
     void uploadAndSave(Store store, List<MultipartFile> uploadFiles) throws IOException;
 
+    default void deleteFiles(List<Long> deleteFiles) {}
+
+    default void deleteFilesAndUpdate(Store store, List<Long> deleteImgList, List<MultipartFile> uploadFiles) throws IOException {
+        deleteFiles(deleteImgList);
+        uploadAndSave(store, uploadFiles);
+    }
+
     default void checkIfImageType(String originalName) {
         String mimeType = new Tika().detect(originalName);
         if (!mimeType.startsWith("image")) {
