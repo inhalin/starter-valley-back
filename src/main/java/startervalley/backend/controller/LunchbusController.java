@@ -50,4 +50,14 @@ public class LunchbusController {
 
         return ResponseEntity.ok(lunchbusService.deleteLunchbus(busId));
     }
+
+    @PostMapping("/{busId}/join")
+    public ResponseEntity<BasicResponse> join(@PathVariable Long busId) {
+        return ResponseEntity.ok(lunchbusService.joinLunchbus(busId));
+    }
+
+    @PostMapping("/{busId}/leave")
+    public ResponseEntity<BasicResponse> leave(@PathVariable Long busId) {
+        return ResponseEntity.ok(lunchbusService.leaveLunchbus(busId));
+    }
 }
