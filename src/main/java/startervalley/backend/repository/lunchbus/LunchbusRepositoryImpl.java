@@ -67,7 +67,7 @@ public class LunchbusRepositoryImpl implements LunchbusRepositoryCustom {
                 .where(lunchbus.driver.id.eq(userId), lunchbus.active.eq(true))
                 .fetchOne();
 
-        if (count == null) return true;
+        if (count == null) return false;
 
         return count <= ACTIVE_LUNCHBUS.getLimit();
     }
