@@ -60,4 +60,11 @@ public class LunchbusController {
     public ResponseEntity<BasicResponse> leave(@PathVariable Long busId) {
         return ResponseEntity.ok(lunchbusService.leaveLunchbus(busId));
     }
+
+    @PostMapping("/{busId}/close")
+    public ResponseEntity<BasicResponse> close(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long busId) {
+        lunchbusService.validateDriver(userDetails.getId(), busId);
+
+        return ResponseEntity.ok(lunchbusService.closeLunchbus(busId));
+    }
 }

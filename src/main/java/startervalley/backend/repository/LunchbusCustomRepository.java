@@ -8,6 +8,7 @@ import startervalley.backend.dto.lunchbus.LunchbusSimpleDto;
 import startervalley.backend.entity.Lunchbus;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static startervalley.backend.constant.LimitMessage.ACTIVE_LUNCHBUS;
@@ -48,7 +49,9 @@ public class LunchbusCustomRepository {
                         lunchbus.driver.imageUrl.as("driverImageUrl")
                 ))
                 .from(lunchbus)
-                .where(lunchbus.active.eq(true), lunchbus.driver.generation.id.eq(generationId))
+                .where(lunchbus.active.eq(true),
+                        lunchbus.driver.generation.id.eq(generationId))
+                .orderBy(lunchbus.createdDate.desc())
                 .fetch();
     }
 
@@ -68,6 +71,7 @@ public class LunchbusCustomRepository {
                 .where(lunchbus.active.eq(false),
                         lunchbus.createdDate.after(LocalDate.now().atStartOfDay().minusDays(days)),
                         lunchbus.driver.generation.id.eq(generationId))
+                .orderBy(lunchbus.createdDate.desc())
                 .fetch();
     }
 
@@ -86,6 +90,14 @@ public class LunchbusCustomRepository {
     public void updateCountByBusId(int count, Long busId) {
         queryFactory.update(lunchbus)
                 .set(lunchbus.count, count)
+                .where(lunchbus.id.eq(busId))
+                .execute();
+    }
+
+    public void closeById(Long busId) {
+        queryFactory.update(lunchbus)
+                .set(lunchbus.closedDate, LocalDateTime.now())
+                .set(lunchbus.active, false)
                 .where(lunchbus.id.eq(busId))
                 .execute();
     }

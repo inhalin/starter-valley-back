@@ -110,7 +110,7 @@ public class LunchbusService {
         Long driverId = lunchbusCustomRepository.findById(busId).getDriver().getId();
 
         if (!userId.equals(driverId)) {
-            throw new UserNotValidException("버스 기사만 삭제할 수 있습니다.");
+            throw new UserNotValidException("버스 기사만 접근 가능합니다.");
         }
     }
 
@@ -177,5 +177,12 @@ public class LunchbusService {
         lunchbusCustomRepository.updateCountByBusId(lunchbus.getCount() - 1, lunchbus.getId());
 
         return BasicResponse.of(busId, "버스에서 하차하였습니다.");
+    }
+
+    public BasicResponse closeLunchbus(Long busId) {
+
+        lunchbusCustomRepository.closeById(busId);
+
+        return BasicResponse.of(busId, "버스 운행이 종료되었습니다.");
     }
 }
