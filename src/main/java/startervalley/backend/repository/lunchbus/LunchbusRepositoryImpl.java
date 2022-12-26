@@ -1,11 +1,10 @@
-package startervalley.backend.repository;
+package startervalley.backend.repository.lunchbus;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import startervalley.backend.dto.lunchbus.LunchbusSimpleDto;
-import startervalley.backend.entity.Lunchbus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -13,20 +12,13 @@ import java.util.List;
 
 import static startervalley.backend.constant.LimitMessage.ACTIVE_LUNCHBUS;
 import static startervalley.backend.entity.QLunchbus.lunchbus;
+import static startervalley.backend.entity.QPassenger.passenger;
 
 @Repository
 @RequiredArgsConstructor
-public class LunchbusCustomRepository {
+public class LunchbusRepositoryImpl implements LunchbusRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
-
-    public Lunchbus findById(Long busId) {
-
-        return queryFactory
-                .selectFrom(lunchbus)
-                .where(lunchbus.id.eq(busId))
-                .fetchFirst();
-    }
 
     public void deleteOneById(Long busId) {
 
@@ -100,5 +92,19 @@ public class LunchbusCustomRepository {
                 .set(lunchbus.active, false)
                 .where(lunchbus.id.eq(busId))
                 .execute();
+    }
+
+    public boolean isLimitExceeded(Long busId) {
+        Integer occupancy = queryFactory.select(lunchbus.occupancy)
+                .from(lunchbus)
+                .where(lunchbus.id.eq(busId))
+                .fetchFirst();
+
+        Long count = queryFactory.select(passenger.count())
+                .from(passenger)
+                .where(passenger.lunchbus.id.eq(busId))
+                .fetchFirst();
+
+        return count >= occupancy;
     }
 }
