@@ -38,7 +38,7 @@ public class LunchbusService {
     public BasicResponse saveLunchbus(Long userId, LunchbusInsertRequest request) {
         User driver = userService.findUserOrThrow(userId);
 
-        if (!lunchbusRepository.isAvailableToInsert(userId)) {
+        if (lunchbusRepository.isCreateLimitExceeded(userId)) {
             throw new CustomLimitExceededException(ACTIVE_LUNCHBUS.getMessage(), ACTIVE_LUNCHBUS.getLimit());
         }
 
@@ -97,7 +97,7 @@ public class LunchbusService {
     @Transactional
     public BasicResponse deleteLunchbus(Long busId) {
 
-        lunchbusRepository.deleteOneById(busId);
+        lunchbusRepository.deleteById(busId);
 
         return BasicResponse.of(busId, "버스가 정상적으로 삭제되었습니다.");
     }
@@ -122,7 +122,7 @@ public class LunchbusService {
         }
 
         // 인원 초과된 경우 탑승 불가
-        if (lunchbusRepository.isLimitExceeded(busId)) {
+        if (lunchbusRepository.isJoinLimitExceeded(busId)) {
             throw new LunchbusInvalidJobException(LUNCHBUS_EXCEEDED.getMessage(), LUNCHBUS_EXCEEDED.getCode());
         }
 

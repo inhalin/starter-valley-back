@@ -5,6 +5,7 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import startervalley.backend.dto.lunchbus.LunchbusSimpleDto;
+import startervalley.backend.entity.Lunchbus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -12,21 +13,12 @@ import java.util.List;
 
 import static startervalley.backend.constant.LimitMessage.ACTIVE_LUNCHBUS;
 import static startervalley.backend.entity.QLunchbus.lunchbus;
-import static startervalley.backend.entity.QPassenger.passenger;
 
 @Repository
 @RequiredArgsConstructor
 public class LunchbusRepositoryImpl implements LunchbusRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
-
-    public void deleteOneById(Long busId) {
-
-        queryFactory
-                .delete(lunchbus)
-                .where(lunchbus.id.eq(busId))
-                .execute();
-    }
 
     public List<LunchbusSimpleDto> findAllActiveByGenerationId(Long generationId) {
 
@@ -67,7 +59,8 @@ public class LunchbusRepositoryImpl implements LunchbusRepositoryCustom {
                 .fetch();
     }
 
-    public boolean isAvailableToInsert(Long userId) {
+    public boolean isCreateLimitExceeded(Long userId) {
+
         Long count = queryFactory
                 .select(lunchbus.count())
                 .from(lunchbus)
@@ -80,6 +73,7 @@ public class LunchbusRepositoryImpl implements LunchbusRepositoryCustom {
     }
 
     public void updateCountByBusId(int count, Long busId) {
+
         queryFactory.update(lunchbus)
                 .set(lunchbus.count, count)
                 .where(lunchbus.id.eq(busId))
@@ -87,6 +81,7 @@ public class LunchbusRepositoryImpl implements LunchbusRepositoryCustom {
     }
 
     public void closeById(Long busId) {
+
         queryFactory.update(lunchbus)
                 .set(lunchbus.closedDate, LocalDateTime.now())
                 .set(lunchbus.active, false)
@@ -94,17 +89,13 @@ public class LunchbusRepositoryImpl implements LunchbusRepositoryCustom {
                 .execute();
     }
 
-    public boolean isLimitExceeded(Long busId) {
-        Integer occupancy = queryFactory.select(lunchbus.occupancy)
+    public boolean isJoinLimitExceeded(Long busId) {
+
+        Lunchbus bus = queryFactory.select(lunchbus)
                 .from(lunchbus)
                 .where(lunchbus.id.eq(busId))
                 .fetchFirst();
 
-        Long count = queryFactory.select(passenger.count())
-                .from(passenger)
-                .where(passenger.lunchbus.id.eq(busId))
-                .fetchFirst();
-
-        return count >= occupancy;
+        return bus.getCount() >= bus.getOccupancy();
     }
 }

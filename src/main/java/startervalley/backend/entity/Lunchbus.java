@@ -8,7 +8,10 @@ import lombok.NoArgsConstructor;
 import javax.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
+import static javax.persistence.CascadeType.*;
 import static javax.persistence.FetchType.*;
 import static javax.persistence.GenerationType.*;
 
@@ -42,4 +45,7 @@ public class Lunchbus extends BaseTimeEntity {
     private boolean active;
 
     private LocalDateTime closedDate;
+
+    @OneToMany(mappedBy = "lunchbus", cascade = ALL, orphanRemoval = true)
+    private List<Passenger> passengers = new ArrayList<>();
 }

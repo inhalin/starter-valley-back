@@ -45,24 +45,32 @@ public class LunchbusController {
     }
 
     @DeleteMapping("/{busId}")
-    public ResponseEntity<BasicResponse> delete(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long busId) {
+    public ResponseEntity<BasicResponse> delete(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long busId) {
         lunchbusService.validateDriver(userDetails.getId(), busId);
 
         return ResponseEntity.ok(lunchbusService.deleteLunchbus(busId));
     }
 
     @PostMapping("/{busId}/join")
-    public ResponseEntity<BasicResponse> join(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long busId) {
+    public ResponseEntity<BasicResponse> join(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long busId) {
         return ResponseEntity.ok(lunchbusService.joinLunchbus(userDetails.getId(), busId));
     }
 
     @PostMapping("/{busId}/leave")
-    public ResponseEntity<BasicResponse> leave(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long busId) {
+    public ResponseEntity<BasicResponse> leave(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long busId) {
         return ResponseEntity.ok(lunchbusService.leaveLunchbus(userDetails.getId(), busId));
     }
 
     @PostMapping("/{busId}/close")
-    public ResponseEntity<BasicResponse> close(@AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long busId) {
+    public ResponseEntity<BasicResponse> close(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @PathVariable Long busId) {
         lunchbusService.validateDriver(userDetails.getId(), busId);
 
         return ResponseEntity.ok(lunchbusService.closeLunchbus(busId));
