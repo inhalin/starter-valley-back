@@ -69,7 +69,7 @@ public class LunchbusRepositoryImpl implements LunchbusRepositoryCustom {
 
         if (count == null) return false;
 
-        return count <= ACTIVE_LUNCHBUS.getLimit();
+        return count >= ACTIVE_LUNCHBUS.getLimit();
     }
 
     public void updateCountByBusId(int count, Long busId) {
