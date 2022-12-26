@@ -6,17 +6,15 @@ import java.util.List;
 
 public interface LunchbusRepositoryCustom {
 
-    void deleteOneById(Long busId);
-
     List<LunchbusSimpleDto> findAllActiveByGenerationId(Long generationId);
 
     List<LunchbusSimpleDto> findAllNotActiveInLimitedDaysByGenerationId(int days, Long generationId);
 
-    boolean isAvailableToInsert(Long userId);
+    boolean isCreateLimitExceeded(Long userId);
 
     void updateCountByBusId(int count, Long busId);
 
     void closeById(Long busId);
 
-    boolean isLimitExceeded(Long busId);
+    boolean isJoinLimitExceeded(Long busId);
 }
