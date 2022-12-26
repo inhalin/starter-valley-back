@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
+import java.time.LocalDateTime;
+
 import static javax.persistence.FetchType.*;
 import static javax.persistence.GenerationType.*;
 
@@ -31,11 +33,13 @@ public class Lunchbus extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    private Integer occupancy;
-    private Integer count;
+    private int occupancy;
+    private int count;
     private String storeName;
     private String storeUrl;
 
     @Column(columnDefinition = "tinyint(1)")
-    private Boolean active;
+    private boolean active;
+
+    private LocalDateTime closedDate;
 }

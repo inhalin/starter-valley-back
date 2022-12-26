@@ -1,4 +1,4 @@
-package startervalley.backend.repository;
+package startervalley.backend.repository.lunchbus;
 
 import com.querydsl.core.Tuple;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -14,11 +14,11 @@ import static startervalley.backend.entity.QPassenger.passenger;
 
 @Repository
 @RequiredArgsConstructor
-public class PassengerCustomRepository {
+public class PassengerRepositoryImpl implements PassengerRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
 
-    public Boolean existsOnTheBus(Long busId, Long userId) {
+    public boolean existsOnTheBus(Long busId, Long userId) {
         Passenger p = queryFactory
                 .selectFrom(passenger)
                 .where(passenger.lunchbus.id.eq(busId), passenger.user.id.eq(userId))
@@ -33,7 +33,7 @@ public class PassengerCustomRepository {
                 .execute();
     }
 
-    public List<LunchbusUserDto> findAllPassengersByBusId(Long busId) {
+    public List<LunchbusUserDto> findAllByBusId(Long busId) {
 
         List<Tuple> tuple = queryFactory.select(passenger.user.id, passenger.user.name, passenger.user.imageUrl)
                 .from(passenger)

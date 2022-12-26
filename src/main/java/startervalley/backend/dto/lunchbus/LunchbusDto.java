@@ -10,8 +10,8 @@ import java.util.List;
 public class LunchbusDto {
     private Long busId;
     private String title;
-    private Integer limit;
-    private Integer count;
+    private int limit;
+    private int count;
     private Boolean isDriver;
     private Boolean isPassenger;
     private LunchbusUserDto driver;

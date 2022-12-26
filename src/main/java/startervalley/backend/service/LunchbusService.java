@@ -3,7 +3,6 @@ package startervalley.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import startervalley.backend.constant.LimitMessage;
 import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.dto.lunchbus.LunchbusDto;
 import startervalley.backend.dto.lunchbus.LunchbusInsertRequest;
@@ -13,16 +12,16 @@ import startervalley.backend.entity.Lunchbus;
 import startervalley.backend.entity.Passenger;
 import startervalley.backend.entity.User;
 import startervalley.backend.exception.CustomLimitExceededException;
+import startervalley.backend.exception.LunchbusInvalidJobException;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.UserNotValidException;
-import startervalley.backend.repository.LunchbusCustomRepository;
-import startervalley.backend.repository.LunchbusRepository;
-import startervalley.backend.repository.PassengerCustomRepository;
-import startervalley.backend.repository.PassengerRepository;
+import startervalley.backend.repository.lunchbus.LunchbusRepository;
+import startervalley.backend.repository.lunchbus.PassengerRepository;
 import startervalley.backend.service.auth.AuthService;
 
 import java.util.List;
 
+import static startervalley.backend.constant.CodedErrorMessage.*;
 import static startervalley.backend.constant.LimitMessage.ACTIVE_LUNCHBUS;
 
 @Service
@@ -31,17 +30,15 @@ import static startervalley.backend.constant.LimitMessage.ACTIVE_LUNCHBUS;
 public class LunchbusService {
 
     private final LunchbusRepository lunchbusRepository;
-    private final LunchbusCustomRepository lunchbusCustomRepository;
+    private final PassengerRepository passengerRepository;
     private final UserService userService;
     private final AuthService authService;
-    private final PassengerRepository passengerRepository;
-    private final PassengerCustomRepository passengerCustomRepository;
 
     @Transactional
     public BasicResponse saveLunchbus(Long userId, LunchbusInsertRequest request) {
         User driver = userService.findUserOrThrow(userId);
 
-        if (!lunchbusCustomRepository.isAvailableToInsert(userId)) {
+        if (!lunchbusRepository.isAvailableToInsert(userId)) {
             throw new CustomLimitExceededException(ACTIVE_LUNCHBUS.getMessage(), ACTIVE_LUNCHBUS.getLimit());
         }
 
@@ -61,23 +58,21 @@ public class LunchbusService {
         return BasicResponse.of(bus.getId(), "버스가 정상적으로 생성되었습니다.");
     }
 
-    public List<LunchbusSimpleDto> findAllActiveLunchbuses() {
-        User loginUser = authService.getLoginUser();
+    public List<LunchbusSimpleDto> findAllActiveLunchbuses(Long userId) {
+        User loginUser = userService.findUserOrThrow(userId);
 
-        return lunchbusCustomRepository.findAllActiveByGenerationId(loginUser.getGeneration().getId());
+        return lunchbusRepository.findAllActiveByGenerationId(loginUser.getGeneration().getId());
     }
 
-    public List<LunchbusSimpleDto> findPastLunchbusesInLimitedDays(int days) {
-        User loginUser = authService.getLoginUser();
-
-        return lunchbusCustomRepository.findAllNotActiveInLimitedDaysByGenerationId(days, loginUser.getGeneration().getId());
+    public List<LunchbusSimpleDto> findPastLunchbusesInLimitedDays(int days, Long generationId) {
+        return lunchbusRepository.findAllNotActiveInLimitedDaysByGenerationId(days, generationId);
     }
 
     public LunchbusDto findLunchbus(Long busId) {
         Lunchbus bus = lunchbusRepository.findById(busId).orElseThrow(() -> new ResourceNotFoundException("Lunchbus", "id", busId.toString()));
         User driver = bus.getDriver();
         User loginUser = authService.getLoginUser();
-        List<LunchbusUserDto> passengers = passengerCustomRepository.findAllPassengersByBusId(busId);
+        List<LunchbusUserDto> passengers = passengerRepository.findAllByBusId(busId);
         boolean isPassenger = passengers.stream().anyMatch(passenger -> passenger.getUserId().equals(loginUser.getId()));
 
         return LunchbusDto.builder()
@@ -101,44 +96,44 @@ public class LunchbusService {
 
     @Transactional
     public BasicResponse deleteLunchbus(Long busId) {
-        lunchbusCustomRepository.deleteOneById(busId);
+
+        lunchbusRepository.deleteOneById(busId);
 
         return BasicResponse.of(busId, "버스가 정상적으로 삭제되었습니다.");
     }
 
     public void validateDriver(Long userId, Long busId) {
-        Long driverId = lunchbusCustomRepository.findById(busId).getDriver().getId();
+        Long driverId = findByIdOrElseThrow(busId).getDriver().getId();
 
         if (!userId.equals(driverId)) {
-            throw new UserNotValidException("버스 기사만 삭제할 수 있습니다.");
+            throw new UserNotValidException("버스 기사만 접근 가능합니다.");
         }
     }
 
     @Transactional
-    public BasicResponse joinLunchbus(Long busId) {
+    public BasicResponse joinLunchbus(Long userId, Long busId) {
 
-        Lunchbus lunchbus = lunchbusCustomRepository.findById(busId);
+        Lunchbus lunchbus = findByIdOrElseThrow(busId);
+        User loginUser = userService.findUserOrThrow(userId);
 
         // 운행중인 버스만 탑승 가능
-        if (!lunchbus.getActive()) {
-            throw new IllegalArgumentException("운행 종료된 버스입니다.");
+        if (!lunchbus.isActive()) {
+            throw new LunchbusInvalidJobException(LUNCHBUS_INACTIVE.getMessage(), LUNCHBUS_INACTIVE.getCode());
         }
 
         // 인원 초과된 경우 탑승 불가
-        if (lunchbus.getCount() >= lunchbus.getOccupancy()) {
-            throw new CustomLimitExceededException(LimitMessage.JOIN_LUNCHBUS.getMessage(), lunchbus.getOccupancy());
+        if (lunchbusRepository.isLimitExceeded(busId)) {
+            throw new LunchbusInvalidJobException(LUNCHBUS_EXCEEDED.getMessage(), LUNCHBUS_EXCEEDED.getCode());
         }
-
-        User loginUser = authService.getLoginUser();
 
         // 본인 버스 탑승 불가
         if (lunchbus.getDriver().getId().equals(loginUser.getId())) {
-            throw new IllegalArgumentException("본인이 운행하는 버스입니다.");
+            throw new LunchbusInvalidJobException(LUNCHBUS_OWNER.getMessage(), LUNCHBUS_OWNER.getCode());
         }
 
         // 중복 탑승 불가
-        if (passengerCustomRepository.existsOnTheBus(lunchbus.getId(), loginUser.getId())) {
-            throw new IllegalArgumentException("이미 탑승한 버스입니다.");
+        if (passengerRepository.existsOnTheBus(lunchbus.getId(), loginUser.getId())) {
+            throw new LunchbusInvalidJobException(LUNCHBUS_ALREADY_JOINED.getMessage(), LUNCHBUS_ALREADY_JOINED.getCode());
         }
 
         Passenger passenger = Passenger.builder()
@@ -146,36 +141,47 @@ public class LunchbusService {
                 .user(loginUser)
                 .build();
         passengerRepository.save(passenger);
-        lunchbusCustomRepository.updateCountByBusId(lunchbus.getCount() + 1, lunchbus.getId());
+        lunchbusRepository.updateCountByBusId(lunchbus.getCount() + 1, lunchbus.getId());
 
         return BasicResponse.of(busId, "버스에 탑승하였습니다.");
     }
 
     @Transactional
-    public BasicResponse leaveLunchbus(Long busId) {
+    public BasicResponse leaveLunchbus(Long userId, Long busId) {
 
-        Lunchbus lunchbus = lunchbusCustomRepository.findById(busId);
+        Lunchbus lunchbus = findByIdOrElseThrow(busId);
+        User loginUser = userService.findUserOrThrow(userId);
 
         // 운행 종료된 경우 하차 불가
-        if (!lunchbus.getActive()) {
-            throw new IllegalArgumentException("운행 종료된 버스입니다.");
+        if (!lunchbus.isActive()) {
+            throw new LunchbusInvalidJobException(LUNCHBUS_INACTIVE.getMessage(), LUNCHBUS_INACTIVE.getCode());
         }
-
-        User loginUser = authService.getLoginUser();
 
         // 본인 버스 하차 불가
         if (lunchbus.getDriver().getId().equals(loginUser.getId())) {
-            throw new IllegalArgumentException("본인이 운행하는 버스입니다.");
+            throw new LunchbusInvalidJobException(LUNCHBUS_OWNER.getMessage(), LUNCHBUS_OWNER.getCode());
         }
 
         // 본인 미탑승 버스 하차 불가
-        if (!passengerCustomRepository.existsOnTheBus(lunchbus.getId(), loginUser.getId())) {
-            throw new IllegalArgumentException("탑승하지 않은 버스입니다.");
+        if (!passengerRepository.existsOnTheBus(lunchbus.getId(), loginUser.getId())) {
+            throw new LunchbusInvalidJobException(LUNCHBUS_NOT_PASSENGER.getMessage(), LUNCHBUS_NOT_PASSENGER.getCode());
         }
 
-        passengerCustomRepository.deleteByBusIdAndUserId(lunchbus.getId(), loginUser.getId());
-        lunchbusCustomRepository.updateCountByBusId(lunchbus.getCount() - 1, lunchbus.getId());
+        passengerRepository.deleteByBusIdAndUserId(lunchbus.getId(), loginUser.getId());
+        lunchbusRepository.updateCountByBusId(lunchbus.getCount() - 1, lunchbus.getId());
 
         return BasicResponse.of(busId, "버스에서 하차하였습니다.");
+    }
+
+    public BasicResponse closeLunchbus(Long busId) {
+
+        lunchbusRepository.closeById(busId);
+
+        return BasicResponse.of(busId, "버스 운행이 종료되었습니다.");
+    }
+
+    private Lunchbus findByIdOrElseThrow(Long id) {
+        return lunchbusRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Lunchbus", "id", id.toString()));
     }
 }

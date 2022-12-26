@@ -1,31 +1,24 @@
-package startervalley.backend.repository;
+package startervalley.backend.repository.lunchbus;
 
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import startervalley.backend.dto.lunchbus.LunchbusSimpleDto;
-import startervalley.backend.entity.Lunchbus;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static startervalley.backend.constant.LimitMessage.ACTIVE_LUNCHBUS;
 import static startervalley.backend.entity.QLunchbus.lunchbus;
+import static startervalley.backend.entity.QPassenger.passenger;
 
 @Repository
 @RequiredArgsConstructor
-public class LunchbusCustomRepository {
+public class LunchbusRepositoryImpl implements LunchbusRepositoryCustom {
 
     private final JPAQueryFactory queryFactory;
-
-    public Lunchbus findById(Long busId) {
-
-        return queryFactory
-                .selectFrom(lunchbus)
-                .where(lunchbus.id.eq(busId))
-                .fetchFirst();
-    }
 
     public void deleteOneById(Long busId) {
 
@@ -48,7 +41,9 @@ public class LunchbusCustomRepository {
                         lunchbus.driver.imageUrl.as("driverImageUrl")
                 ))
                 .from(lunchbus)
-                .where(lunchbus.active.eq(true), lunchbus.driver.generation.id.eq(generationId))
+                .where(lunchbus.active.eq(true),
+                        lunchbus.driver.generation.id.eq(generationId))
+                .orderBy(lunchbus.createdDate.desc())
                 .fetch();
     }
 
@@ -68,6 +63,7 @@ public class LunchbusCustomRepository {
                 .where(lunchbus.active.eq(false),
                         lunchbus.createdDate.after(LocalDate.now().atStartOfDay().minusDays(days)),
                         lunchbus.driver.generation.id.eq(generationId))
+                .orderBy(lunchbus.createdDate.desc())
                 .fetch();
     }
 
@@ -88,5 +84,27 @@ public class LunchbusCustomRepository {
                 .set(lunchbus.count, count)
                 .where(lunchbus.id.eq(busId))
                 .execute();
+    }
+
+    public void closeById(Long busId) {
+        queryFactory.update(lunchbus)
+                .set(lunchbus.closedDate, LocalDateTime.now())
+                .set(lunchbus.active, false)
+                .where(lunchbus.id.eq(busId))
+                .execute();
+    }
+
+    public boolean isLimitExceeded(Long busId) {
+        Integer occupancy = queryFactory.select(lunchbus.occupancy)
+                .from(lunchbus)
+                .where(lunchbus.id.eq(busId))
+                .fetchFirst();
+
+        Long count = queryFactory.select(passenger.count())
+                .from(passenger)
+                .where(passenger.lunchbus.id.eq(busId))
+                .fetchFirst();
+
+        return count >= occupancy;
     }
 }

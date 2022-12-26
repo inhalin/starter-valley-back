@@ -63,4 +63,11 @@ public class ExceptionControllerAdvice {
         );
         return new ResponseEntity<>(new ErrorResult(message, request.getDescription(false)), HttpStatus.BAD_REQUEST);
     }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(LunchbusInvalidJobException.class)
+    public ResponseEntity<CodedErrorResult> handleLunchbusNotAllowedException(LunchbusInvalidJobException e, WebRequest request) {
+        CodedErrorResult errorResult = new CodedErrorResult(e.getMessage(), e.getCode(), request.getDescription(false));
+        return new ResponseEntity<>(errorResult, HttpStatus.BAD_REQUEST);
+    }
 }
