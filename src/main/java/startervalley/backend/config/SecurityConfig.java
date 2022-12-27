@@ -18,7 +18,6 @@ import startervalley.backend.security.jwt.*;
 @EnableGlobalMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig {
 
-    private final JwtLogoutHandler jwtLogoutHandler;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
@@ -32,19 +31,15 @@ public class SecurityConfig {
     protected SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http.cors().and()
-                .csrf().ignoringAntMatchers("/auth/login").disable()
+                .csrf().disable()
                 .httpBasic().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeRequests()
-                .antMatchers("/auth/**").permitAll()
-                .antMatchers("/api/**").authenticated()
+                .antMatchers("/auth/login/**").permitAll()
+                .antMatchers("/api/**", "/auth/**").authenticated()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll();
-
-        http.logout()
-                .logoutUrl("/auth/logout")
-                .addLogoutHandler(jwtLogoutHandler);
 
         http.exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)  // 401

@@ -1,11 +1,11 @@
 package startervalley.backend.dto.auth;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class AuthResponse {
     private String accessToken;

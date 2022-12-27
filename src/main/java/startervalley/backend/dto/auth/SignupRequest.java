@@ -1,11 +1,15 @@
 package startervalley.backend.dto.auth;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 public class SignupRequest {
 
     @NotNull(message = "이름을 작성해주세요")

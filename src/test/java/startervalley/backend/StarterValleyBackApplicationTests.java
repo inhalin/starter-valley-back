@@ -1,13 +1,13 @@
-package startervalley.backend;
+//package startervalley.backend;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+//import org.junit.jupiter.api.Test;
+//import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
-class StarterValleyBackApplicationTests {
+//@SpringBootTest
+//class StarterValleyBackApplicationTests {
 
-    @Test
-    void contextLoads() {
-    }
-
-}
+//    @Test
+//    void contextLoads() {
+//    }
+//
+//}

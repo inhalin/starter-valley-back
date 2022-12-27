@@ -5,11 +5,11 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     show-sql: true
 
   datasource:
-    url: ${db.local.url}
+    url: ${db.dev.url}
     driver-class-name: org.mariadb.jdbc.Driver
-    username: ${db.local.username}
-    password: ${db.local.password}
+    username: ${db.dev.username}
+    password: ${db.dev.password}
