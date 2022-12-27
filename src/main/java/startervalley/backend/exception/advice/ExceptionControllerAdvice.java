@@ -74,6 +74,7 @@ public class ExceptionControllerAdvice {
     @ExceptionHandler(ResourceNotFoundException.class)
     public ErrorResult handleResourceNotFoundException(ResourceNotFoundException e) {
         return new ErrorResult(e.getMessage());
+    }
 
     @ExceptionHandler(LunchbusInvalidJobException.class)
     public ResponseEntity<CodedErrorResult> handleLunchbusNotAllowedException(LunchbusInvalidJobException e, WebRequest request) {
