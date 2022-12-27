@@ -7,9 +7,19 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+    properties:
+      hibernate:
+        format-sql: true
 
   datasource:
-    url: ${db.dev.url}
     driver-class-name: org.mariadb.jdbc.Driver
+    url: ${db.dev.url}
     username: ${db.dev.username}
     password: ${db.dev.password}
+
+app:
+  oauth2:
+    client:
+      github:
+        client-id: ${github.dev.client-id}
+        client-secret: ${github.dev.client-secret}
