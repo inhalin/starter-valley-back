@@ -1,14 +1,14 @@
 package startervalley.backend.service;
 
 import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.CannedAccessControlList;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.services.s3.model.*;
+import com.amazonaws.services.s3.model.DeleteObjectsRequest.KeyVersion;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import startervalley.backend.entity.Store;
 import startervalley.backend.entity.StoreImage;
@@ -17,19 +17,19 @@ import startervalley.backend.repository.StoreImageRepository;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Slf4j
 @RequiredArgsConstructor
 @Primary
+@Transactional
 @Service
 public class StoreImageS3Service implements StoreImageService {
 
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
+    private final static String S3_PREFIX = "images/";
     private final StoreImageRepository storeImageRepository;
     private final AmazonS3Client amazonS3Client;
 
@@ -48,7 +48,7 @@ public class StoreImageS3Service implements StoreImageService {
             //UUID
             String uuid = UUID.randomUUID().toString();
 
-            String saveName = uuid + "_" + fileName;
+            String saveName = S3_PREFIX + uuid + "_" + fileName;
 
             ObjectMetadata objMeta = new ObjectMetadata();
             objMeta.setContentLength(uploadFile.getInputStream().available());
@@ -68,6 +68,17 @@ public class StoreImageS3Service implements StoreImageService {
             storeImageRepository.save(storeImage);
         }
     }
+
+    @Override
+    public void deleteFiles(List<Long> deleteImageIdList) {
+        List<StoreImage> storeImageList = storeImageRepository.findAllByIdIn(deleteImageIdList);
+        for (StoreImage storeImage : storeImageList) {
+            String filePath = "images/" + storeImage.getUuid() + "_" + storeImage.getImgName();
+            amazonS3Client.deleteObject(bucket, filePath);
+            storeImageRepository.delete(storeImage);
+        }
+    }
+
 
     private String putS3(File uploadFile, String fileName) {
         amazonS3Client.putObject(new PutObjectRequest(bucket, fileName, uploadFile).withCannedAcl(CannedAccessControlList.PublicRead));

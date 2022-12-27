@@ -42,6 +42,12 @@ public class ExceptionControllerAdvice {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(NotOwnerException.class)
+    public ErrorResult handleNotOwnerException(NotOwnerException e) {
+        return new ErrorResult("해당 게시글/댓글 작성자가 아닙니다.");
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(StoreImageUploadFailedException.class)
     public ErrorResult handleStoreImageUploadFailedException(StoreImageUploadFailedException e) {
         return new ErrorResult(e.getMessage());
@@ -65,6 +71,10 @@ public class ExceptionControllerAdvice {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ErrorResult handleResourceNotFoundException(ResourceNotFoundException e) {
+        return new ErrorResult(e.getMessage());
+
     @ExceptionHandler(LunchbusInvalidJobException.class)
     public ResponseEntity<CodedErrorResult> handleLunchbusNotAllowedException(LunchbusInvalidJobException e, WebRequest request) {
         CodedErrorResult errorResult = new CodedErrorResult(e.getMessage(), e.getCode(), request.getDescription(false));

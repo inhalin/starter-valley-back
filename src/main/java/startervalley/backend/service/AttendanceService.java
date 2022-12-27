@@ -89,14 +89,13 @@ public class AttendanceService {
     public void updateConsecutiveDays(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
         List<Attendance> attendanceList = attendanceRepository.findAllByUserOrderByDate(user.getId());
-        int consecutiveDays = 1;
+        int consecutiveDays = 0;
         for (Attendance attendance : attendanceList) {
             if (attendance.getStatus() == AttendanceStatus.ABSENT) {
                 break;
             }
             consecutiveDays += 1;
         }
-        System.out.println(consecutiveDays);
         user.setConsecutiveDays(consecutiveDays);
     }
 

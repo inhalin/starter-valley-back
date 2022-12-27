@@ -3,6 +3,7 @@ package startervalley.backend.entity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import startervalley.backend.dto.request.CommentRequestDto;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ public class Comment extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     private Store store;
 
-    @OneToMany(mappedBy = "comment")
+    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CommentTag> commentTagList = new ArrayList<>();
 
     @Builder
@@ -35,5 +36,9 @@ public class Comment extends BaseTimeEntity {
         this.description = description;
         this.user = user;
         this.store = store;
+    }
+
+    public void update(CommentRequestDto commentRequestDto) {
+        this.description = commentRequestDto.getContent();
     }
 }

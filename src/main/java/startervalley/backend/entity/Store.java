@@ -4,6 +4,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import startervalley.backend.dto.request.StoreRequestDto;
+import startervalley.backend.dto.request.StoreUpdateDto;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -30,26 +31,30 @@ public class Store extends BaseTimeEntity {
     private Category category;
 
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> commentList = new ArrayList<>();
+
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoreImage> storeImageList = new ArrayList<>();
 
-    @OneToMany(mappedBy = "store")
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StoreTag> storeTagList = new ArrayList<>();
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    private User user;
+
     @Builder
-    public Store(Long id, String name, String address, String description, String url, Category category) {
+    public Store(Long id, String name, String address, String description, String url, Category category, User user) {
         this.id = id;
         this.name = name;
         this.address = address;
         this.description = description;
         this.url = url;
         this.category = category;
+        this.user = user;
     }
 
-    public void update(StoreRequestDto storeRequestDto) {
-        this.name = storeRequestDto.getName();
-        this.address = storeRequestDto.getAddress();
-        this.description = storeRequestDto.getDescription();
-        this.url = url;
+    public void update(StoreUpdateDto storeUpdateDto, Category category) {
+        this.description = storeUpdateDto.getDescription();
         this.category = category;
     }
 }

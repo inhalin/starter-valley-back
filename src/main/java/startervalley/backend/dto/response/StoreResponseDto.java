@@ -4,7 +4,6 @@ import lombok.*;
 
 @Getter
 @Setter
-@ToString
 public class StoreResponseDto {
 
     private Long id;
@@ -23,6 +22,8 @@ public class StoreResponseDto {
 
     private boolean myLikeStatus;
 
+    private boolean own;
+
     public StoreResponseDto(Long id, String name, String address, String description, String category) {
         this.id = id;
         this.name = name;
@@ -32,7 +33,7 @@ public class StoreResponseDto {
     }
 
     @Builder
-    public StoreResponseDto(Long id, String name, String address, String description, String url, String category, long likeCount, boolean myLikeStatus) {
+    public StoreResponseDto(Long id, String name, String address, String description, String url, String category, long likeCount, boolean myLikeStatus, boolean own) {
         this.id = id;
         this.name = name;
         this.address = address;
@@ -41,5 +42,6 @@ public class StoreResponseDto {
         this.category = category;
         this.likeCount = likeCount;
         this.myLikeStatus = myLikeStatus;
+        this.own = own;
     }
 }
