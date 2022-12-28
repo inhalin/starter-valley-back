@@ -9,7 +9,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import startervalley.backend.dto.attendance.AttendanceCodeDto;
 import startervalley.backend.dto.request.AttendanceCheckDto;
 import startervalley.backend.dto.request.AttendanceExcuseDto;
 import startervalley.backend.dto.request.AttendanceYearMonthDto;
@@ -46,7 +45,7 @@ public class AttendanceService {
 
     private final GoogleSpreadSheet googleSpreadSheet;
     private static final int LIMITED_RANGE = 100;
-    private static final LocalTime ABSENT_TIME = LocalTime.of(9, 0);
+    private static final LocalTime LATE_TIME = LocalTime.of(9, 1);
 
 
     @Value("${google-form-key}")
@@ -111,7 +110,7 @@ public class AttendanceService {
         Generation generation = user.getGeneration();
         LocalDate today = LocalDate.now();
 
-        checkIfWeekendOrHoliday(today);
+        throwIfWeekendOrHoliday(today);
         checkRange(generation.getLatitude(), generation.getLongitude(), attendanceCheckDto.getLatitude(), attendanceCheckDto.getLongtitude());
 
         AttendanceId attendanceId = new AttendanceId(user.getId(), today);
@@ -126,7 +125,7 @@ public class AttendanceService {
         return new BaseResponseDto(status);
     }
 
-    private void checkIfWeekendOrHoliday(LocalDate today) {
+    private void throwIfWeekendOrHoliday(LocalDate today) {
         DayOfWeek dayOfWeek = today.getDayOfWeek();
         if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
             throw new AttendanceWeekendException("WEEKEND CAN NOT ATTEND");
@@ -157,7 +156,7 @@ public class AttendanceService {
         User user = getUserOrElseThrow(userId);
 
         LocalDate today = LocalDate.now();
-        checkIfWeekendOrHoliday(today);
+        throwIfWeekendOrHoliday(today);
         AttendanceId attendanceId = new AttendanceId(user.getId(), today);
         Optional<Attendance> optional = attendanceRepository.findById(attendanceId);
         Attendance attendance;
@@ -236,7 +235,7 @@ public class AttendanceService {
 
     private AttendanceStatus checkIfOverPresentTime() {
         LocalTime now = LocalTime.now();
-        return now.isAfter(ABSENT_TIME) ? LATE : PRESENT;
+        return now.isAfter(LATE_TIME) ? LATE : PRESENT;
     }
 
     private void checkRange(double x1, double y1, double x2, double y2) {
