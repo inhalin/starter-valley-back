@@ -6,8 +6,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.entity.AuthProvider;
-import startervalley.backend.entity.Devpart;
-import startervalley.backend.entity.Generation;
 import startervalley.backend.entity.User;
 
 import java.util.List;
