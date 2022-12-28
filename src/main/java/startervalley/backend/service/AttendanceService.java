@@ -9,6 +9,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import startervalley.backend.dto.attendance.AttendanceCodeDto;
 import startervalley.backend.dto.request.AttendanceCheckDto;
 import startervalley.backend.dto.request.AttendanceExcuseDto;
 import startervalley.backend.dto.request.AttendanceYearMonthDto;
@@ -18,13 +19,16 @@ import startervalley.backend.dto.response.TodayAttendanceDto;
 import startervalley.backend.entity.*;
 import startervalley.backend.exception.AttendanceAlreadyPresentException;
 import startervalley.backend.exception.AttendanceOutOfRangeException;
+import startervalley.backend.exception.AttendanceWeekendException;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.AttendanceRepository;
+import startervalley.backend.repository.HolidayRepository;
 import startervalley.backend.repository.UserRepository;
 import startervalley.backend.util.GoogleSpreadSheet;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -41,17 +45,19 @@ import static startervalley.backend.entity.AttendanceStatus.PRESENT;
 public class AttendanceService {
 
     private final GoogleSpreadSheet googleSpreadSheet;
-    private final static int LIMITED_RANGE = 100;
-    private final static LocalTime ABSENT_TIME = LocalTime.of(9, 0);
+    private static final int LIMITED_RANGE = 100;
+    private static final LocalTime ABSENT_TIME = LocalTime.of(9, 0);
+
 
     @Value("${google-form-key}")
     private String GOOGLE_FORM_KEY;
     private final UserRepository userRepository;
     private final AttendanceRepository attendanceRepository;
+    private final HolidayRepository holidayRepository;
     private final WebClient webClient;
 
     public List<AttendanceDto> findUserAttendances(Long userId, AttendanceYearMonthDto attendanceYearMonthDto) {
-        User user = getUser(userId);
+        User user = getUserOrElseThrow(userId);
         LocalDate currentDate = getDate(attendanceYearMonthDto.getYear(), attendanceYearMonthDto.getMonth());
         List<Attendance> attendances;
         attendances = (currentDate == null) ? attendanceRepository.findAllByUser(user) :
@@ -66,7 +72,7 @@ public class AttendanceService {
 
     @Transactional
     public void saveAttendancesFromGoogleSpreadSheet(Long userId) {
-        User user = getUser(userId);
+        User user = getUserOrElseThrow(userId);
         String name = user.getName();
         try {
             List<AttendanceDto> attendanceDtos = googleSpreadSheet.makeAttendanceList(name);
@@ -101,12 +107,13 @@ public class AttendanceService {
 
     @Transactional
     public BaseResponseDto checkAttendance(Long userId, AttendanceCheckDto attendanceCheckDto) {
-        User user = getUser(userId);
+        User user = getUserOrElseThrow(userId);
         Generation generation = user.getGeneration();
+        LocalDate today = LocalDate.now();
 
+        checkIfWeekendOrHoliday(today);
         checkRange(generation.getLatitude(), generation.getLongitude(), attendanceCheckDto.getLatitude(), attendanceCheckDto.getLongtitude());
 
-        LocalDate today = LocalDate.now();
         AttendanceId attendanceId = new AttendanceId(user.getId(), today);
         Attendance attendance = attendanceRepository.findById(attendanceId).orElseThrow();
 
@@ -119,9 +126,20 @@ public class AttendanceService {
         return new BaseResponseDto(status);
     }
 
+    private void checkIfWeekendOrHoliday(LocalDate today) {
+        DayOfWeek dayOfWeek = today.getDayOfWeek();
+        if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
+            throw new AttendanceWeekendException("WEEKEND CAN NOT ATTEND");
+        }
+
+        if (holidayRepository.existsByDate(today)) {
+            throw new AttendanceWeekendException("HOLIDAY CAN NOT ATTEND");
+        }
+    }
+
     @Transactional
     public void excuseAttendance(Long userId, AttendanceExcuseDto attendanceExcuseDto) {
-        User user = getUser(userId);
+        User user = getUserOrElseThrow(userId);
         LocalDate today = LocalDate.now();
         AttendanceId attendanceId = new AttendanceId(user.getId(), today);
         Attendance attendance = attendanceRepository.findById(attendanceId).orElseThrow();
@@ -135,10 +153,11 @@ public class AttendanceService {
     }
 
     @Transactional
-    public TodayAttendanceDto checkIfCheckedToday(Long userId) {
-        User user = getUser(userId);
+    public TodayAttendanceDto checkIfAttendToday(Long userId) {
+        User user = getUserOrElseThrow(userId);
 
         LocalDate today = LocalDate.now();
+        checkIfWeekendOrHoliday(today);
         AttendanceId attendanceId = new AttendanceId(user.getId(), today);
         Optional<Attendance> optional = attendanceRepository.findById(attendanceId);
         Attendance attendance;
@@ -159,7 +178,7 @@ public class AttendanceService {
     }
 
     public void sendToGoogleForm(Long userId) {
-        User user = getUser(userId);
+        User user = getUserOrElseThrow(userId);
         LocalDate today = LocalDate.now();
         AttendanceId attendanceId = new AttendanceId(user.getId(), today);
         Attendance attendance = attendanceRepository.findById(attendanceId).orElseThrow();
@@ -172,7 +191,7 @@ public class AttendanceService {
             case PRESENT -> "정상 출석 (~09:00)";
             case LATE -> {
                 params.add("entry.1488509836", attendance.getReason());
-                yield  "지각 (09:01~09:30)";
+                yield "지각 (09:01~09:30)";
             }
             case ABSENT -> {
                 params.add("entry.1488509836", attendance.getReason());
@@ -189,7 +208,7 @@ public class AttendanceService {
                 .block();
     }
 
-    private User getUser(Long userId) {
+    private User getUserOrElseThrow(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", String.valueOf(userId)));
     }
