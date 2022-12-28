@@ -6,39 +6,33 @@ import lombok.NoArgsConstructor;
 import startervalley.backend.dto.request.CommentRequestDto;
 
 import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
 
 @Getter
 @NoArgsConstructor
 @Entity
-public class Comment extends BaseTimeEntity {
+public class BoardComment extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String description;
+    private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "userId")
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    private Store store;
-
-    @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CommentTag> commentTagList = new ArrayList<>();
+    private Board board;
 
     @Builder
-    public Comment(Long id, String description, User user, Store store) {
+    public BoardComment(Long id, String content, User user, Board board) {
         this.id = id;
-        this.description = description;
+        this.content = content;
         this.user = user;
-        this.store = store;
+        this.board = board;
     }
 
     public void update(CommentRequestDto commentRequestDto) {
-        this.description = commentRequestDto.getContent();
+        this.content = commentRequestDto.getContent();
     }
 }
