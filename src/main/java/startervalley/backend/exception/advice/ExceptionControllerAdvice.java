@@ -34,6 +34,12 @@ public class ExceptionControllerAdvice {
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(AttendanceWeekendException.class)
+    public ErrorResult handleAttendanceWeekendException(AttendanceWeekendException e) {
+        return new ErrorResult(e.getMessage());
+    }
+
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({MethodArgumentNotValidException.class, BindException.class})
     public ErrorResult handleValidatorException(BindException e, WebRequest request) {
         BindingResult bindingResult = e.getBindingResult();
