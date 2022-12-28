@@ -37,7 +37,7 @@ public class AttendanceController {
     @GetMapping("/today")
     public ResponseEntity<TodayAttendanceDto> checkIfCheckedToday(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getId();
-        TodayAttendanceDto dto = attendanceService.checkIfCheckedToday(userId);
+        TodayAttendanceDto dto = attendanceService.checkIfAttendToday(userId);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
