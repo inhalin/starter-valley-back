@@ -53,6 +53,11 @@ public class AttendanceScheduler {
     @Transactional
     @Scheduled(cron = "0 0 15 ? * MON-FRI")
     public void setAttendanceStatusToAbsent() {
+
+        if (checkIfWeekendOrHoliday(LocalDate.now())) {
+            return;
+        }
+
         List<Attendance> allByStatusIsNull = attendanceRepository.findAllByStatusIsNull();
         for (Attendance attendance : allByStatusIsNull) {
             attendance.setStatus(ABSENT);
