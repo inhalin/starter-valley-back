@@ -17,6 +17,7 @@ import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.service.BoardService;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -66,11 +67,11 @@ public class BoardController {
     }
 
     @GetMapping("/{id}/comments")
-    public ResponseEntity<PageResultDTO<BoardComment, CommentResponseDto>> getBoardCommentList(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                                       @PathVariable Long id,
-                                                                                       @Valid @ModelAttribute PageRequestDto pageRequestDto) {
+    public ResponseEntity<List<CommentResponseDto>> getBoardCommentList(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                        @PathVariable Long id,
+                                                                        @Valid @ModelAttribute PageRequestDto pageRequestDto) {
         Long userId = userDetails.getId();
-        PageResultDTO<BoardComment, CommentResponseDto> result = boardService.findBoardCommentList(userId, id, pageRequestDto);
+        List<CommentResponseDto> result = boardService.findBoardCommentList(userId, id, pageRequestDto);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 

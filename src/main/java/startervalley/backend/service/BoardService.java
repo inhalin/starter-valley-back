@@ -3,6 +3,7 @@ package startervalley.backend.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.dto.board.BoardRequestDto;
@@ -51,7 +52,8 @@ public class BoardService {
 
     @Transactional(readOnly = true)
     public PageResultDTO<Board, BoardResponseDto> findBoardList(Long userID, PageRequestDto pageRequestDto) {
-        Pageable pageable = pageRequestDto.getPageable();
+        Sort descByCreatedDate = Sort.by(Sort.Direction.DESC, "createdDate");
+        Pageable pageable = pageRequestDto.getPageable(descByCreatedDate);
         Page<Board> boardPage = boardRepository.findAll(pageable);
         List<BoardResponseDto> dtoList = boardPage.getContent().stream()
                 .map(b -> {
@@ -105,15 +107,12 @@ public class BoardService {
         boardRepository.deleteById(boardId);
     }
 
-    public PageResultDTO<BoardComment, CommentResponseDto> findBoardCommentList(Long userId, Long boardId, PageRequestDto pageRequestDto) {
+    public List<CommentResponseDto> findBoardCommentList(Long userId, Long boardId, PageRequestDto pageRequestDto) {
         User user = getUserElseThrow(userId);
         Board board = getBoardOrElseThrow(boardId);
 
-        Pageable pageable = pageRequestDto.getPageable();
-        Page<BoardComment> commentPage = boardCommentRepository.findAllByBoard(board, pageable);
-
-        List<BoardComment> boardCommentList = commentPage.getContent();
-        List<CommentResponseDto> result = boardCommentList.stream()
+        List<BoardComment> boardCommentList = boardCommentRepository.findAllByBoard(board);
+        return boardCommentList.stream()
                 .map(comment -> {
                     User commentUser = comment.getUser();
                     boolean own = Objects.equals(commentUser.getId(), user.getId());
@@ -126,7 +125,6 @@ public class BoardService {
                             .modifiedDate(comment.getModifiedDate())
                             .build();
                 }).toList();
-        return new PageResultDTO<>(commentPage, result);
     }
 
     @Transactional
