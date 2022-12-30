@@ -11,7 +11,7 @@ import startervalley.backend.entity.*;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.TokenNotValidException;
 import startervalley.backend.repository.DevpartRepository;
-import startervalley.backend.repository.GenerationRepository;
+import startervalley.backend.repository.generation.GenerationRepository;
 import startervalley.backend.repository.UserRepository;
 import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.security.jwt.JwtTokenProvider;

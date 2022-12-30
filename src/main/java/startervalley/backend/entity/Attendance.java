@@ -31,13 +31,17 @@ public class Attendance extends BaseTimeEntity {
 
     private LocalTime attendanceTime;
 
+    @Column(columnDefinition = "TEXT")
+    private String adminMemo;
+
     @Builder
-    public Attendance(AttendanceId id, User user, String reason, AttendanceStatus status, LocalTime attendanceTime) {
+    public Attendance(AttendanceId id, User user, String reason, AttendanceStatus status, LocalTime attendanceTime, String adminMemo) {
         this.id = id;
         this.user = user;
         this.reason = reason;
         this.status = status;
         this.attendanceTime = attendanceTime;
+        this.adminMemo = adminMemo;
     }
 
     public void setStatus(AttendanceStatus status) {

@@ -9,6 +9,9 @@ import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 
+import java.util.List;
+
+import static javax.persistence.CascadeType.*;
 import static javax.persistence.EnumType.*;
 import static javax.persistence.FetchType.*;
 import static javax.persistence.GenerationType.*;
@@ -66,6 +69,9 @@ public class User extends BaseTimeEntity {
 
     @ColumnDefault(value = "0")
     private Integer consecutiveDays;
+
+    @OneToMany(mappedBy = "user", cascade = ALL, orphanRemoval = true)
+    private List<Attendance> attendances;
 
     public void setGeneration(Generation generation) {
         this.generation = generation;
