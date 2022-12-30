@@ -3,7 +3,6 @@ package startervalley.backend.entity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import startervalley.backend.dto.request.CommentRequestDto;
 
 import javax.persistence.*;
 
@@ -32,7 +31,11 @@ public class BoardComment extends BaseTimeEntity {
         this.board = board;
     }
 
-    public void update(CommentRequestDto commentRequestDto) {
-        this.content = commentRequestDto.getContent();
+    public void setNullBoard() {
+        this.board = null;
+    }
+
+    public void update(String content) {
+        this.content = content;
     }
 }

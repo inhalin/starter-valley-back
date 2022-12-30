@@ -1,4 +1,4 @@
-package startervalley.backend.dto.response;
+package startervalley.backend.dto.board;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
@@ -14,11 +14,17 @@ public class BoardResponseDto {
 
     private Long id;
 
+    private String profileUrl;
+
     private String name;
+
+    private String title;
 
     private String content;
 
     private boolean own;
+
+    private int commentCount;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Seoul")
     private LocalDateTime createdDate;

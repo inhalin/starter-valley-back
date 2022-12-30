@@ -1,9 +1,7 @@
 package startervalley.backend.entity;
 
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import startervalley.backend.dto.request.BoardRequestDto;
 
 import javax.persistence.*;
 
@@ -16,19 +14,23 @@ public class Board extends BaseTimeEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(length = 100)
+    private String title;
+
+    @Column(length = 500)
     private String content;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
 
-    @Builder
-    public Board(Long id, String content, User user) {
-        this.id = id;
+    public Board(String title, String content, User user) {
+        this.title = title;
         this.content = content;
         this.user = user;
     }
 
-    public void update(BoardRequestDto boardRequestDto) {
-        this.content = boardRequestDto.getContent();
+    public void update(String title, String content) {
+        this.title = title;
+        this.content = content;
     }
 }
