@@ -5,19 +5,19 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import startervalley.backend.dto.request.BoardRequestDto;
+import startervalley.backend.dto.board.BoardRequestDto;
 import startervalley.backend.dto.request.CommentRequestDto;
 import startervalley.backend.dto.request.PageRequestDto;
-import startervalley.backend.dto.response.BoardResponseDto;
+import startervalley.backend.dto.board.BoardResponseDto;
 import startervalley.backend.dto.response.CommentResponseDto;
 import startervalley.backend.dto.response.PageResultDTO;
 import startervalley.backend.entity.Board;
 import startervalley.backend.entity.BoardComment;
-import startervalley.backend.entity.Comment;
 import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.service.BoardService;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -67,11 +67,11 @@ public class BoardController {
     }
 
     @GetMapping("/{id}/comments")
-    public ResponseEntity<PageResultDTO<BoardComment, CommentResponseDto>> getBoardCommentList(@AuthenticationPrincipal CustomUserDetails userDetails,
-                                                                                       @PathVariable Long id,
-                                                                                       @Valid @ModelAttribute PageRequestDto pageRequestDto) {
+    public ResponseEntity<List<CommentResponseDto>> getBoardCommentList(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                                        @PathVariable Long id,
+                                                                        @Valid @ModelAttribute PageRequestDto pageRequestDto) {
         Long userId = userDetails.getId();
-        PageResultDTO<BoardComment, CommentResponseDto> result = boardService.findBoardCommentList(userId, id, pageRequestDto);
+        List<CommentResponseDto> result = boardService.findBoardCommentList(userId, id, pageRequestDto);
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
