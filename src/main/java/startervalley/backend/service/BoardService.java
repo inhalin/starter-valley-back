@@ -92,7 +92,7 @@ public class BoardService {
             throw new NotOwnerException();
         }
 
-        board.update(boardRequestDto.getTitle(), board.getContent());
+        board.update(boardRequestDto.getTitle(), boardRequestDto.getContent());
     }
 
     public void deleteBoard(Long userId, Long boardId) {
