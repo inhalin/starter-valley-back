@@ -6,10 +6,9 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum AuthProvider {
-    GITHUB("GITHUB", "github", Role.USER),
-    GOOGLE("GOOGLE", "google", Role.ADMIN);
+    GITHUB("GITHUB", "github", Role.USER.getRole());
 
     private final String provider;
     private final String name;
-    private final Role role;
+    private final String role;
 }

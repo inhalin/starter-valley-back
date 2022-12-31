@@ -5,14 +5,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import startervalley.backend.entity.AdminUser;
+import startervalley.backend.entity.Role;
 import startervalley.backend.entity.User;
 import startervalley.backend.exception.TokenNotValidException;
 import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.adminuser.AdminUserRepository;
+import startervalley.backend.security.auth.AdminUserDetails;
 import startervalley.backend.security.auth.CustomUserDetails;
 
 import javax.servlet.http.HttpServletRequest;
@@ -26,6 +29,7 @@ public class JwtTokenProvider {
 
     private final String SECRET_KEY;
     private final UserRepository userRepository;
+    private final AdminUserRepository adminUserRepository;
 
     @Value("${app.auth.token.expiry.access-token}")
     private Long ACCESS_TOKEN_EXPIRE_LENGTH;
@@ -36,9 +40,10 @@ public class JwtTokenProvider {
     private final String ISSUER = "startervalley";
     private final String AUTHORITIES_KEY = "role";
 
-    public JwtTokenProvider(@Value("${app.auth.token.secret-key}") String secretKey, UserRepository userRepository) {
+    public JwtTokenProvider(@Value("${app.auth.token.secret-key}") String secretKey, UserRepository userRepository, AdminUserRepository adminUserRepository) {
         this.SECRET_KEY = Base64.getEncoder().encodeToString(secretKey.getBytes());
         this.userRepository = userRepository;
+        this.adminUserRepository = adminUserRepository;
     }
 
     public String createAccessToken(User user, Map<String, String> userData) {
@@ -50,11 +55,29 @@ public class JwtTokenProvider {
         Date now = new Date();
         Date validity = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_LENGTH);
         Map<String, Object> claims = new HashMap<>(userData);
+        claims.put(AUTHORITIES_KEY, Role.USER.getRole());
 
         return Jwts.builder()
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 .setClaims(claims)
                 .setSubject(Optional.ofNullable(user.getUsername()).orElse(userData.get("username")))
+                .setIssuer(ISSUER)
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .compact();
+    }
+
+    public String createAccessToken(String username) {
+
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_LENGTH);
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(AUTHORITIES_KEY, Role.ADMIN.getRole());
+
+        return Jwts.builder()
+                .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
+                .setClaims(claims)
+                .setSubject(username)
                 .setIssuer(ISSUER)
                 .setIssuedAt(now)
                 .setExpiration(validity)
@@ -88,19 +111,22 @@ public class JwtTokenProvider {
 
         Claims claims = parseClaims(accessToken);
 
-        Collection<? extends GrantedAuthority> authorities =
-                Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
-                        .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
+        List<SimpleGrantedAuthority> authorities = Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
+                .map(SimpleGrantedAuthority::new).collect(Collectors.toList());
 
-        Optional<User> userOptional = userRepository.findByUsername(claims.getSubject());
-        User user;
+        if (authorities.get(0).getAuthority().equals(Role.ADMIN.getRole())) {
+            AdminUser adminUser = adminUserRepository.findByUsername(claims.getSubject());
+            AdminUserDetails principal = new AdminUserDetails(adminUser);
+
+            return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+        }
+
+        User user = userRepository.findByUsername(claims.getSubject()).orElse(new User());
+
         Map<String, String> attributes = new HashMap<>();
 
-        if (userOptional.isEmpty()) {
-            user = new User();
+        if (user.getName() == null) {
             attributes = getAttributes(claims);
-        } else {
-            user = userOptional.get();
         }
 
         CustomUserDetails principal = new CustomUserDetails(user, attributes);
@@ -110,8 +136,14 @@ public class JwtTokenProvider {
 
     public Boolean validateToken(String token) {
         try {
-            Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token);
-            return userRepository.existsRefreshTokenByUsername(getUsername(token)) != null || parseClaims(token).get("email") != null;
+            Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+
+            if (claims.get(AUTHORITIES_KEY).equals(Role.ADMIN.getRole())) {
+                return adminUserRepository.existsByUsername(getUsername(token));
+            }
+
+            return userRepository.existsRefreshTokenByUsername(getUsername(token)) != null
+                    || parseClaims(token).get("email") != null;
         } catch (ExpiredJwtException e) {
             throw new TokenNotValidException("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException e) {

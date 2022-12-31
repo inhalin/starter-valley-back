@@ -59,32 +59,44 @@ public class ExceptionControllerAdvice {
         return new ErrorResult(e.getMessage());
     }
 
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
     @ExceptionHandler(TokenNotValidException.class)
     public ResponseEntity<ErrorResult> handleTokenValidationException(TokenNotValidException e, WebRequest request) {
         ErrorResult errorResult = new ErrorResult(e.getMessage(), request.getDescription(false));
         return new ResponseEntity<>(errorResult, HttpStatus.UNAUTHORIZED);
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(CustomLimitExceededException.class)
     public ResponseEntity<ErrorResult> handleLimitExceededException(CustomLimitExceededException e, WebRequest request) {
         Map<String, Object> message = Map.ofEntries(
                 Map.entry("errorMessage", e.getMessage()),
                 Map.entry("limit", e.getLimit())
         );
-        return new ResponseEntity<>(new ErrorResult(message, request.getDescription(false)), HttpStatus.BAD_REQUEST);
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResult.of(message, request.getDescription(false)));
     }
 
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ErrorResult handleResourceNotFoundException(ResourceNotFoundException e) {
-        return new ErrorResult(e.getMessage());
+    public ResponseEntity<ErrorResult> handleResourceNotFoundException(ResourceNotFoundException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ErrorResult.of(e.getMessage(), request.getDescription(false)));
+    }
+
+    @ExceptionHandler(ResourceDuplicateException.class)
+    public ResponseEntity<ErrorResult> handleResourceDuplicateException(ResourceDuplicateException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResult.of(e.getMessage(), request.getDescription(false)));
+    }
+
+    @ExceptionHandler(UserNotValidException.class)
+    public ResponseEntity<ErrorResult> handleUserNotValidException(UserNotValidException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorResult.of(e.getMessage(), request.getDescription(false)));
     }
 
     @ExceptionHandler(LunchbusInvalidJobException.class)
     public ResponseEntity<CodedErrorResult> handleLunchbusNotAllowedException(LunchbusInvalidJobException e, WebRequest request) {
-        CodedErrorResult errorResult = new CodedErrorResult(e.getMessage(), e.getCode(), request.getDescription(false));
-        return new ResponseEntity<>(errorResult, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(CodedErrorResult.of(e.getMessage(), e.getCode(), request.getDescription(false)));
     }
 }

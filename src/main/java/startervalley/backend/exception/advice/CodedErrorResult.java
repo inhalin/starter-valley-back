@@ -24,4 +24,8 @@ public class CodedErrorResult {
         this.message = message;
         this.details = details;
     }
+
+    public static CodedErrorResult of(String message, String code, String details) {
+        return new CodedErrorResult(message, code, details);
+    }
 }
