@@ -15,7 +15,7 @@ public class NoticeListDto {
     private String title;
     private String postedBy;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd")
     private LocalDateTime createdDate;
 
     private boolean hasImage;
