@@ -82,6 +82,18 @@ public class ExceptionControllerAdvice {
         return new ErrorResult(e.getMessage());
     }
 
+    @ExceptionHandler(ResourceDuplicateException.class)
+    public ResponseEntity<ErrorResult> handleResourceDuplicateException(ResourceDuplicateException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResult.of(e.getMessage(), request.getDescription(false)));
+    }
+
+    @ExceptionHandler(UserNotValidException.class)
+    public ResponseEntity<ErrorResult> handleUserNotValidException(UserNotValidException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ErrorResult.of(e.getMessage(), request.getDescription(false)));
+    }
+
     @ExceptionHandler(LunchbusInvalidJobException.class)
     public ResponseEntity<CodedErrorResult> handleLunchbusNotAllowedException(LunchbusInvalidJobException e, WebRequest request) {
         CodedErrorResult errorResult = new CodedErrorResult(e.getMessage(), e.getCode(), request.getDescription(false));

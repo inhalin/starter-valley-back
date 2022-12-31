@@ -26,4 +26,8 @@ public class ErrorResult {
         this.message = message;
         this.details = details;
     }
+
+    public static ErrorResult of(Object message, String details) {
+        return new ErrorResult(message, details);
+    }
 }

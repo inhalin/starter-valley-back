@@ -1,7 +1,10 @@
 package startervalley.backend.entity;
 
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
+import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
 
@@ -10,6 +13,8 @@ import static javax.persistence.GenerationType.*;
 @Entity
 @Getter
 @DynamicInsert
+@DynamicUpdate
+@NoArgsConstructor
 public class AdminUser extends BaseTimeEntity {
 
     @Id
@@ -29,11 +34,24 @@ public class AdminUser extends BaseTimeEntity {
     private String phone;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(255) default 'ADMIN'", nullable = false)
+    @Column(columnDefinition = "varchar(255) default 'ROLE_ADMIN'", nullable = false)
     private Role role = Role.ADMIN;
 
     @Embedded
     private UserProfile profile = new UserProfile();
 
     private String refreshToken;
+
+    @Builder
+    public AdminUser(Long id, String username, String password, String name, String email, String phone, Role role, UserProfile profile, String refreshToken) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.name = name;
+        this.email = email;
+        this.phone = phone;
+        this.role = role;
+        this.profile = profile;
+        this.refreshToken = refreshToken;
+    }
 }
