@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import startervalley.backend.admin.dto.auth.AuthPasswordRequest;
 import startervalley.backend.admin.dto.auth.AuthRegisterRequest;
 import startervalley.backend.admin.dto.auth.AuthLoginRequest;
 import startervalley.backend.admin.dto.auth.AuthLoginResponse;
@@ -26,15 +27,13 @@ public class AdminAuthService {
     @Transactional(readOnly = true)
     public AuthLoginResponse login(AuthLoginRequest request) {
 
-        if (!adminUserRepository.existsByUsername(request.getUsername())) {
-            throw new ResourceNotFoundException("AdminUser", "username", request.getUsername());
+        if (!isExistingUsername(request.getUsername())) {
+            throw new ResourceNotFoundException("Admin User", "username", request.getUsername());
         }
 
         AdminUser adminUser = adminUserRepository.findByUsername(request.getUsername());
 
-        if (!passwordEncoder.matches(request.getPassword(), adminUser.getPassword())) {
-            throw new UserNotValidException("비밀번호가 일치하지 않습니다.");
-        }
+        validatePassword(request.getPassword(), adminUser.getPassword());
 
         String accessToken = tokenProvider.createAccessToken(adminUser.getUsername());
 
@@ -44,7 +43,7 @@ public class AdminAuthService {
     @Transactional
     public BasicResponse register(AuthRegisterRequest request) {
 
-        if (adminUserRepository.existsByUsername(request.getUsername())) {
+        if (isExistingUsername(request.getUsername())) {
             throw new ResourceDuplicateException("이미 사용중인 아이디입니다.");
         }
 
@@ -58,5 +57,31 @@ public class AdminAuthService {
         adminUserRepository.save(adminUser);
 
         return BasicResponse.of(adminUser.getId(), "새로운 관리자를 정상적으로 등록하였습니다.");
+    }
+
+    @Transactional
+    public BasicResponse changePassword(Long userId, AuthPasswordRequest request) {
+        AdminUser adminUser = adminUserRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Admin User", "id", userId.toString()));
+
+        validatePassword(request.getPassword(), adminUser.getPassword());
+
+        if (!request.getNewPassword().equals(request.get_newPassword())) {
+            throw new IllegalArgumentException("입력하신 새로운 비밀번호가 서로 일치하지 않습니다.");
+        }
+
+        adminUserRepository.changePassword(adminUser.getId(), passwordEncoder.encode(request.getNewPassword()));
+
+        return BasicResponse.of(adminUser.getId(), "비밀번호가 정상적으로 변경되었습니다.");
+    }
+
+    private boolean isExistingUsername(String username) {
+        return adminUserRepository.existsByUsername(username);
+    }
+
+    private void validatePassword(String inputPassword, String originalPassword) {
+        if (!passwordEncoder.matches(inputPassword, originalPassword)) {
+            throw new UserNotValidException("비밀번호가 일치하지 않습니다.");
+        }
     }
 }
