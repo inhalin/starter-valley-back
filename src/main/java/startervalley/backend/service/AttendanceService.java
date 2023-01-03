@@ -9,6 +9,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import startervalley.backend.admin.dto.dashboard.AttendanceStatusUserDto;
 import startervalley.backend.dto.request.AttendanceCheckDto;
 import startervalley.backend.dto.request.AttendanceExcuseDto;
 import startervalley.backend.dto.request.AttendanceYearMonthDto;
@@ -20,7 +21,7 @@ import startervalley.backend.exception.AttendanceAlreadyPresentException;
 import startervalley.backend.exception.AttendanceOutOfRangeException;
 import startervalley.backend.exception.AttendanceWeekendException;
 import startervalley.backend.exception.ResourceNotFoundException;
-import startervalley.backend.repository.AttendanceRepository;
+import startervalley.backend.repository.attendance.AttendanceRepository;
 import startervalley.backend.repository.HolidayRepository;
 import startervalley.backend.repository.UserRepository;
 import startervalley.backend.util.GoogleSpreadSheet;
@@ -267,5 +268,9 @@ public class AttendanceService {
 
         distance = (int) (2 * radius * Math.asin(squareRoot) * 1000);
         return distance;
+    }
+
+    public List<AttendanceStatusUserDto> getStatusForTodayByGenerationId(Long generationId) {
+        return attendanceRepository.findStatusByDateAndGenerationId(LocalDate.now(), generationId);
     }
 }

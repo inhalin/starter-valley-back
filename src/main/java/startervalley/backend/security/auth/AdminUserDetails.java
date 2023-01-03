@@ -1,54 +1,40 @@
 package startervalley.backend.security.auth;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import startervalley.backend.entity.Role;
-import startervalley.backend.entity.User;
+import startervalley.backend.entity.AdminUser;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Map;
 
 @Getter
-public class CustomUserDetails implements UserDetails {
+@RequiredArgsConstructor
+public class AdminUserDetails implements UserDetails {
 
-    private final User user;
-    private Map<String, String> attributes;
-
-    public CustomUserDetails(User user) {
-        this.user = user;
-    }
-
-    public CustomUserDetails(User user, Map<String, String> attributes) {
-        this.user = user;
-        this.attributes = attributes;
-    }
+    private final AdminUser adminUser;
 
     public Long getId() {
-        return user.getId();
-    }
-
-    public String getEmail() {
-        return user.getEmail();
+        return adminUser.getId();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> collection = new ArrayList<>();
-        collection.add(() -> Role.USER.getRole());
+        collection.add(() -> adminUser.getRole().getRole());
 
         return collection;
     }
 
     @Override
     public String getPassword() {
-        return null;
+        return adminUser.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return user.getUsername();
+        return adminUser.getUsername();
     }
 
     @Override

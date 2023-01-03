@@ -7,14 +7,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.entity.Attendance;
 import startervalley.backend.entity.AttendanceId;
-import startervalley.backend.entity.AttendanceStatus;
 import startervalley.backend.entity.User;
-import startervalley.backend.exception.AttendanceWeekendException;
-import startervalley.backend.repository.AttendanceRepository;
+import startervalley.backend.repository.attendance.AttendanceRepository;
 import startervalley.backend.repository.HolidayRepository;
 import startervalley.backend.repository.UserRepository;
 import startervalley.backend.service.AttendanceService;
-import startervalley.backend.service.HolidayService;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
