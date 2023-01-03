@@ -11,7 +11,7 @@ import startervalley.backend.entity.*;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.TokenNotValidException;
 import startervalley.backend.repository.DevpartRepository;
-import startervalley.backend.repository.GenerationRepository;
+import startervalley.backend.repository.generation.GenerationRepository;
 import startervalley.backend.repository.UserRepository;
 import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.security.jwt.JwtTokenProvider;
@@ -52,10 +52,7 @@ public class AuthService {
                 .build();
         userRepository.save(user);
 
-        Map<String, String> attributes = new HashMap<>();
-        attributes.put("role", user.getRole().name());
-
-        return createJwtToken(user, attributes);
+        return createJwtToken(user);
     }
 
     public void validateGenerationCode(String code, Long generationId) {
@@ -67,8 +64,8 @@ public class AuthService {
         }
     }
 
-    private JwtTokenDto createJwtToken(User user, Map<String, String> attributes) {
-        String accessToken = tokenProvider.createAccessToken(user, attributes);
+    private JwtTokenDto createJwtToken(User user) {
+        String accessToken = tokenProvider.createAccessToken(user, new HashMap<>());
         String refreshToken = tokenProvider.createRefreshToken(tokenProvider.getAuthentication(accessToken));
 
         return JwtTokenDto.builder()

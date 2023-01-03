@@ -29,8 +29,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Validation Access Token
         if (StringUtils.hasText(token) && tokenProvider.validateToken(token)) {
             Authentication authentication = tokenProvider.getAuthentication(token);
+            log.debug("{} 유저 인증 정보를 가져왔습니다.", authentication.getName());
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.debug("{}의 인증정보 저장", authentication.getName());
         } else {
             log.info("유효한 JWT 토큰이 없습니다.");
         }

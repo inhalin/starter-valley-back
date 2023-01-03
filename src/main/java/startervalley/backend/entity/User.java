@@ -1,6 +1,5 @@
 package startervalley.backend.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,6 +8,9 @@ import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 
+import java.util.List;
+
+import static javax.persistence.CascadeType.*;
 import static javax.persistence.EnumType.*;
 import static javax.persistence.FetchType.*;
 import static javax.persistence.GenerationType.*;
@@ -17,8 +19,6 @@ import static javax.persistence.GenerationType.*;
 @Entity
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class User extends BaseTimeEntity {
 
     @Id
@@ -34,7 +34,7 @@ public class User extends BaseTimeEntity {
     private String name;
 
     @Enumerated(STRING)
-    @Column(columnDefinition = "varchar(255) default 'ANONYMOUS'", nullable = false)
+    @Column(columnDefinition = "varchar(255) default 'ROLE_USER'", nullable = false)
     private Role role;
 
     @ManyToOne(fetch = LAZY)
@@ -67,6 +67,9 @@ public class User extends BaseTimeEntity {
     @ColumnDefault(value = "0")
     private Integer consecutiveDays;
 
+    @OneToMany(mappedBy = "user", cascade = ALL, orphanRemoval = true)
+    private List<Attendance> attendances;
+
     public void setGeneration(Generation generation) {
         this.generation = generation;
     }
@@ -78,5 +81,26 @@ public class User extends BaseTimeEntity {
 
     public void setConsecutiveDays(Integer consecutiveDays) {
         this.consecutiveDays = consecutiveDays;
+    }
+
+    @Builder
+    public User(Long id, String username, String email, String name, Role role, Generation generation, Team team, Boolean isLeader, Devpart devpart, AuthProvider provider, String providerId, String refreshToken, String githubUrl, UserProfile profile, String imageUrl, Integer consecutiveDays, List<Attendance> attendances) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.name = name;
+        this.role = role;
+        this.generation = generation;
+        this.team = team;
+        this.isLeader = isLeader;
+        this.devpart = devpart;
+        this.provider = provider;
+        this.providerId = providerId;
+        this.refreshToken = refreshToken;
+        this.githubUrl = githubUrl;
+        this.profile = profile;
+        this.imageUrl = imageUrl;
+        this.consecutiveDays = consecutiveDays;
+        this.attendances = attendances;
     }
 }
