@@ -1,21 +1,32 @@
 package startervalley.backend.admin.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.admin.dto.notice.NoticeDto;
 import startervalley.backend.admin.dto.notice.NoticeListDto;
 import startervalley.backend.admin.dto.notice.NoticeRequest;
+import startervalley.backend.admin.dto.notice.NoticeResponse;
 import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.entity.AdminUser;
 import startervalley.backend.entity.Notice;
+import startervalley.backend.exception.CustomValidationException;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.adminuser.AdminUserRepository;
 import startervalley.backend.repository.notice.NoticeRepository;
 
+import javax.xml.bind.ValidationException;
+import java.util.Arrays;
 import java.util.List;
 
+import static startervalley.backend.util.PaginationConstants.*;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -24,8 +35,57 @@ public class NoticeService {
     private final AdminUserRepository adminUserRepository;
     private final NoticeRepository noticeRepository;
 
-    public List<NoticeListDto> getAll() {
-        return noticeRepository.findAllOrderById(Sort.Direction.DESC.name());
+    public NoticeResponse getAll(int page, int size, String sort, String dir) {
+        try {
+            validatePaginationOption(page, size, sort, dir);
+        } catch (ValidationException e) {
+            throw new CustomValidationException(e.getMessage());
+        }
+
+        Sort sorting = dir.equalsIgnoreCase(Sort.Direction.ASC.name()) ? Sort.by(sort).ascending()
+                : Sort.by(sort).descending();
+
+        Pageable pageable = PageRequest.of(page - 1, size, sorting);
+
+        Page<Notice> noticePage = noticeRepository.findAll(pageable);
+
+        List<NoticeListDto> dtos = noticePage.getContent()
+                .stream()
+                .map(notice -> NoticeListDto.builder()
+                        .id(notice.getId()).
+                        title(notice.getTitle())
+                        .postedBy(notice.getAdminUser().getName())
+                        .createdDate(notice.getCreatedDate())
+                        .hasImage(notice.getImages().size() > 0)
+                        .build())
+                .toList();
+
+        return NoticeResponse.builder()
+                .notice(dtos)
+                .page(noticePage.getNumber() + 1)
+                .size(noticePage.getSize())
+                .totalElement(noticePage.getTotalElements())
+                .totalPages(noticePage.getTotalPages())
+                .last(noticePage.isLast())
+                .build();
+    }
+
+    private void validatePaginationOption(int page, int size, String sort, String dir) throws ValidationException {
+        if (page < MINIMUM_PAGE_NUMBER) {
+            throw new ValidationException("페이지 번호는 1 이상어야 합니다.");
+        }
+
+        if (Arrays.stream(ALLOWED_PAGE_SIZE).noneMatch(s -> s == size)) {
+            throw new ValidationException("페이지당 보여줄 개수는 5, 10, 30, 50, 100 중에서 지정해야 합니다.");
+        }
+
+        if (!(sort.equalsIgnoreCase("id") || sort.equalsIgnoreCase("title"))) {
+            throw new ValidationException("정렬 기준은 id, title 중에서 지정해야 합니다.");
+        }
+
+        if (!(dir.equalsIgnoreCase(Sort.Direction.ASC.name()) || dir.equalsIgnoreCase(Sort.Direction.DESC.name()))) {
+            throw new ValidationException("정렬 순서는 asc, desc 중에서 지정해야 합니다.");
+        }
     }
 
     public NoticeDto getOne(Long id) {
@@ -46,6 +106,7 @@ public class NoticeService {
         return BasicResponse.of(id, "공지사항이 정상적으로 삭제되었습니다.");
     }
 
+    @Transactional
     public BasicResponse createOne(Long adminUserId, NoticeRequest request) {
         AdminUser adminUser = adminUserRepository.findById(adminUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("AdminUser", "id", adminUserId.toString()));
