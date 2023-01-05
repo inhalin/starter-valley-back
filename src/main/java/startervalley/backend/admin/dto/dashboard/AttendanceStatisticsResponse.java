@@ -16,11 +16,12 @@ public class AttendanceStatisticsResponse {
     private UserStatus present;
     private UserStatus late;
     private UserStatus absent;
+    private UserStatus unchecked;
 
     @Getter
     @AllArgsConstructor(staticName = "of")
     public static class UserStatus {
-        private long count;
         private List<UserSimpleDto> users;
+        private long count;
     }
 }
