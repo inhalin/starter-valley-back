@@ -19,5 +19,4 @@ public class NoticeListDto {
     private LocalDateTime createdDate;
 
     private boolean hasImage;
-
 }

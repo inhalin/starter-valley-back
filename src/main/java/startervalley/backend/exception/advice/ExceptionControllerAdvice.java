@@ -99,4 +99,10 @@ public class ExceptionControllerAdvice {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(CodedErrorResult.of(e.getMessage(), e.getCode(), request.getDescription(false)));
     }
+
+    @ExceptionHandler(CustomValidationException.class)
+    public ResponseEntity<ErrorResult> handleCustomValidationException(CustomValidationException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResult.of(e.getMessage(), request.getDescription(false)));
+    }
 }
