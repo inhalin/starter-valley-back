@@ -26,41 +26,37 @@ public class StatisticsService {
         List<AttendanceStatisticsResponse> response = new ArrayList<>();
 
         List<Generation> generations = generationRepository.findAll();
+
         for (Generation generation : generations) {
-            List<AttendanceStatusUserDto> userStatusForToday = attendanceService.getStatusForTodayByGenerationId(generation.getId());
-            List<UserSimpleDto> presentUsers = new ArrayList<>();
-            List<UserSimpleDto> lateUsers = new ArrayList<>();
-            List<UserSimpleDto> absentUsers = new ArrayList<>();
+            List<AttendanceStatusUserDto> userStatus = attendanceService.getStatusForTodayByGenerationId(generation.getId());
 
-            long presentCount = userStatusForToday.stream().filter(userStatusDto -> {
-                if (userStatusDto.getStatus().equals(AttendanceStatus.PRESENT.name())) {
-                    presentUsers.add(UserSimpleDto.of(userStatusDto.getUser_id(), userStatusDto.getName()));
-                }
-                return userStatusDto.getStatus().equals(AttendanceStatus.PRESENT.name());
-            }).count();
+            List<UserSimpleDto> present = userStatus.stream()
+                    .filter(status -> status.getStatus() != null && status.getStatus().equals(AttendanceStatus.PRESENT.name()))
+                    .map(us -> UserSimpleDto.of(us.getUser_id(), us.getName()))
+                    .toList();
 
-            long lateCount = userStatusForToday.stream().filter(userStatusDto -> {
-                if (userStatusDto.getStatus().equals(AttendanceStatus.LATE.name())) {
-                    lateUsers.add(UserSimpleDto.of(userStatusDto.getUser_id(), userStatusDto.getName()));
-                }
+            List<UserSimpleDto> late = userStatus.stream()
+                    .filter(status -> status.getStatus() != null && status.getStatus().equals(AttendanceStatus.LATE.name()))
+                    .map(us -> UserSimpleDto.of(us.getUser_id(), us.getName()))
+                    .toList();
 
-                return userStatusDto.getStatus().equals(AttendanceStatus.LATE.name());
-            }).count();
+            List<UserSimpleDto> absent = userStatus.stream()
+                    .filter(status -> status.getStatus() != null && status.getStatus().equals(AttendanceStatus.ABSENT.name()))
+                    .map(us -> UserSimpleDto.of(us.getUser_id(), us.getName()))
+                    .toList();
 
-            long absentCount = userStatusForToday.stream().filter(userStatusDto -> {
-                if (userStatusDto.getStatus().equals(AttendanceStatus.ABSENT.name())) {
-                    absentUsers.add(UserSimpleDto.of(userStatusDto.getUser_id(), userStatusDto.getName()));
-                }
-
-                return userStatusDto.getStatus().equals(AttendanceStatus.ABSENT.name());
-            }).count();
+            List<UserSimpleDto> unchecked = userStatus.stream()
+                    .filter(status -> status.getStatus() == null)
+                    .map(user -> UserSimpleDto.of(user.getUser_id(), user.getName()))
+                    .toList();
 
             AttendanceStatisticsResponse statistics = AttendanceStatisticsResponse.builder()
                     .generationId(generation.getId())
-                    .total(userStatusForToday.size())
-                    .present(AttendanceStatisticsResponse.UserStatus.of(presentCount, presentUsers))
-                    .late(AttendanceStatisticsResponse.UserStatus.of(lateCount, lateUsers))
-                    .absent(AttendanceStatisticsResponse.UserStatus.of(absentCount, absentUsers))
+                    .total(userStatus.size())
+                    .present(AttendanceStatisticsResponse.UserStatus.of(present, present.size()))
+                    .late(AttendanceStatisticsResponse.UserStatus.of(late, late.size()))
+                    .absent(AttendanceStatisticsResponse.UserStatus.of(absent, absent.size()))
+                    .unchecked(AttendanceStatisticsResponse.UserStatus.of(unchecked, unchecked.size()))
                     .build();
 
             response.add(statistics);
