@@ -62,6 +62,12 @@ public class AttendanceScheduler {
         }
     }
 
+    @Scheduled(cron = "1 0 0 ? * MON-FRI")
+    public void renewAttendanceCode() {
+        log.info("renew attendance code");
+        Attendance.generateAttendanceRandomCode();
+    }
+
     @Transactional
     @Scheduled(cron = "0 5 15 ? * MON-FRI")
     public void updateConsecutiveDays() {

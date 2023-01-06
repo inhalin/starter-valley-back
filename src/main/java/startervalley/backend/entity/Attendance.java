@@ -3,6 +3,7 @@ package startervalley.backend.entity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import net.bytebuddy.utility.RandomString;
 
 import javax.persistence.*;
 
@@ -34,6 +35,9 @@ public class Attendance extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String adminMemo;
 
+    @Transient
+    private static String attendanceCode;
+
     @Builder
     public Attendance(AttendanceId id, User user, String reason, AttendanceStatus status, LocalTime attendanceTime, String adminMemo) {
         this.id = id;
@@ -54,5 +58,13 @@ public class Attendance extends BaseTimeEntity {
 
     public void setAttendanceTime(LocalTime attendanceTime) {
         this.attendanceTime = attendanceTime;
+    }
+
+    public static String getAttendanceCode() {
+        return attendanceCode;
+    }
+
+    public static void generateAttendanceRandomCode() {
+        attendanceCode = RandomString.make();
     }
 }
