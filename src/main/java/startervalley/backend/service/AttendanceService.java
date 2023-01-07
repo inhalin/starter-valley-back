@@ -10,6 +10,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 import startervalley.backend.admin.dto.dashboard.AttendanceStatusUserDto;
+import startervalley.backend.dto.attendance.AttendanceCodeDto;
 import startervalley.backend.dto.request.AttendanceCheckDto;
 import startervalley.backend.dto.request.AttendanceExcuseDto;
 import startervalley.backend.dto.request.AttendanceYearMonthDto;
@@ -70,11 +71,9 @@ public class AttendanceService {
         attendances = (currentDate == null) ? attendanceRepository.findAllByUser(user) :
                 attendanceRepository.findAllByUserForMonth(user.getId(), currentDate.getYear(), currentDate.getMonthValue());
 
-        List<AttendanceDto> result = attendances.stream().map(attendance ->
+        return attendances.stream().map(attendance ->
                         new AttendanceDto(attendance.getId().getAttendedDate(), attendance.getStatus()))
                 .collect(Collectors.toList());
-
-        return result;
     }
 
     @Transactional
@@ -113,18 +112,18 @@ public class AttendanceService {
     }
 
     @Transactional
-    public BaseResponseDto checkAttendance(Long userId, AttendanceCheckDto attendanceCheckDto) {
+    public BaseResponseDto doAttendance(Long userId, AttendanceCheckDto attendanceCheckDto) {
         User user = getUserOrElseThrow(userId);
         Generation generation = user.getGeneration();
         LocalDate today = LocalDate.now();
 
-        throwIfWeekendOrHoliday(today);
-        checkRange(generation.getLatitude(), generation.getLongitude(), attendanceCheckDto.getLatitude(), attendanceCheckDto.getLongtitude());
+        checkIfWeekendOrHolidayOrElseThrow(today);
+        checkRangeOrElseThrow(generation.getLatitude(), generation.getLongitude(), attendanceCheckDto.getLatitude(), attendanceCheckDto.getLongtitude());
 
         AttendanceId attendanceId = new AttendanceId(user.getId(), today);
         Attendance attendance = attendanceRepository.findById(attendanceId).orElseThrow();
 
-        checkIfAlreadyAttend(attendance.getStatus());
+        checkIfAlreadyAttendOrElseThrow(attendance.getStatus());
 
         AttendanceStatus status = checkIfOverPresentTime();
         attendance.setStatus(status);
@@ -133,7 +132,30 @@ public class AttendanceService {
         return new BaseResponseDto(status);
     }
 
-    private void throwIfWeekendOrHoliday(LocalDate today) {
+    @Transactional
+    public BaseResponseDto doAttendanceByCode(Long userId, AttendanceCodeDto attendanceCodeDto) {
+        User user = getUserOrElseThrow(userId);
+        String inputCode = attendanceCodeDto.getCode();
+        if (!inputCode.equals(Attendance.getAttendanceCode())) {
+            return new BaseResponseDto("ATTENDANCE CODE INCORRECT");
+        }
+        LocalDate today = LocalDate.now();
+
+        checkIfWeekendOrHolidayOrElseThrow(today); // 휴일인지 체크
+
+        AttendanceId attendanceId = new AttendanceId(user.getId(), today);
+        Attendance attendance = attendanceRepository.findById(attendanceId).orElseThrow();
+
+        checkIfAlreadyAttendOrElseThrow(attendance.getStatus());
+
+        AttendanceStatus status = checkIfOverPresentTime();
+        attendance.setStatus(status);
+        attendance.setAttendanceTime(LocalTime.now());
+        user.setConsecutiveDays(user.getConsecutiveDays() + 1);
+        return new BaseResponseDto(status);
+    }
+
+    private void checkIfWeekendOrHolidayOrElseThrow(LocalDate today) {
         DayOfWeek dayOfWeek = today.getDayOfWeek();
         if (dayOfWeek == DayOfWeek.SATURDAY || dayOfWeek == DayOfWeek.SUNDAY) {
             throw new AttendanceWeekendException("WEEKEND CAN NOT ATTEND");
@@ -164,7 +186,7 @@ public class AttendanceService {
         User user = getUserOrElseThrow(userId);
 
         LocalDate today = LocalDate.now();
-        throwIfWeekendOrHoliday(today);
+        checkIfWeekendOrHolidayOrElseThrow(today);
         AttendanceId attendanceId = new AttendanceId(user.getId(), today);
         Optional<Attendance> optional = attendanceRepository.findById(attendanceId);
         Attendance attendance;
@@ -177,7 +199,7 @@ public class AttendanceService {
 
         TodayAttendanceDto todayAttendanceDto = new TodayAttendanceDto();
         try {
-            todayAttendanceDto.setChecked(checkIfAlreadyAttend(attendance.getStatus()));
+            todayAttendanceDto.setChecked(checkIfAlreadyAttendOrElseThrow(attendance.getStatus()));
         } catch (AttendanceAlreadyPresentException ignored) {
         }
         todayAttendanceDto.setNeedReason(checkNeedReason(attendance));
@@ -227,7 +249,7 @@ public class AttendanceService {
         return LocalDate.of(month, year, 1);
     }
 
-    private boolean checkIfAlreadyAttend(AttendanceStatus status) {
+    private boolean checkIfAlreadyAttendOrElseThrow(AttendanceStatus status) {
         if (status != null) {
             throw new AttendanceAlreadyPresentException("이미 출석되었습니다.");
         }
@@ -246,7 +268,7 @@ public class AttendanceService {
         return now.isAfter(LATE_TIME) ? LATE : PRESENT;
     }
 
-    private void checkRange(double x1, double y1, double x2, double y2) {
+    private void checkRangeOrElseThrow(double x1, double y1, double x2, double y2) {
         int distance = distanceInMeterByHaversine(x1, y1, x2, y2);
         if (distance > LIMITED_RANGE)
             throw new AttendanceOutOfRangeException("범위는 " + LIMITED_RANGE + "m 안으로 가능합니다.");
