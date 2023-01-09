@@ -15,10 +15,10 @@ import startervalley.backend.security.auth.AdminUserDetails;
 
 import javax.validation.Valid;
 
-@RestController
+@RestController(value = "AuthControllerBO")
 @RequiredArgsConstructor
 @RequestMapping("/admin/auth")
-public class AdminAuthController {
+public class AuthController {
 
     private final AdminAuthService authService;
 

@@ -24,3 +24,10 @@ google-form:
     name: entry.246568632
     reason: entry.1336473987
     status: entry.199576355
+
+logging:
+  level:
+    com:
+      amazonaws:
+        util:
+          EC2MetadataUtils: ERROR

@@ -14,10 +14,10 @@ import startervalley.backend.dto.common.BasicResponse;
 import java.time.LocalDate;
 import java.util.List;
 
-@RestController
+@RestController(value = "UserControllerBO")
 @RequiredArgsConstructor
 @RequestMapping("/admin/users")
-public class AdminUserController {
+public class UserController {
 
     private final AdminUserService userService;
 
