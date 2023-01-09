@@ -66,8 +66,12 @@ public class AdminAuthService {
 
         validatePassword(request.getPassword(), adminUser.getPassword());
 
+        if (request.getPassword().equals(request.getNewPassword())) {
+            throw new PasswordNotValidException("기존 비밀번호와 동일한 비밀번호로 변경할 수 없습니다.");
+        }
+
         if (!request.getNewPassword().equals(request.get_newPassword())) {
-            throw new IllegalArgumentException("입력하신 새로운 비밀번호가 서로 일치하지 않습니다.");
+            throw new PasswordNotValidException("입력하신 새로운 비밀번호가 서로 일치하지 않습니다.");
         }
 
         adminUserRepository.changePassword(adminUser.getId(), passwordEncoder.encode(request.getNewPassword()));
@@ -81,7 +85,7 @@ public class AdminAuthService {
 
     private void validatePassword(String inputPassword, String originalPassword) {
         if (!passwordEncoder.matches(inputPassword, originalPassword)) {
-            throw new UserNotValidException("비밀번호가 일치하지 않습니다.");
+            throw new PasswordNotValidException("기존 비밀번호가 일치하지 않습니다.");
         }
     }
 }

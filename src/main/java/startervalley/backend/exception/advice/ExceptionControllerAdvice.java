@@ -105,4 +105,10 @@ public class ExceptionControllerAdvice {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResult.of(e.getMessage(), request.getDescription(false)));
     }
+
+    @ExceptionHandler(PasswordNotValidException.class)
+    public ResponseEntity<ErrorResult> handlePasswordNotValidException(PasswordNotValidException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResult.of(e.getMessage(), request.getDescription(false)));
+    }
 }
