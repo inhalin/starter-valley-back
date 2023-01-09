@@ -269,13 +269,15 @@ public class StoreService {
     public void updateRecommendStoreList() {
         recommendStoreList.clear();
         List<Store> randomList = storeRepository.findAllRandom();
-        List<StoreResponseDto> result = randomList.stream().map(store -> StoreResponseDto.builder()
-                .id(store.getId())
-                .name(store.getName())
-                .address(store.getAddress())
-                .description(store.getDescription())
-                .category(store.getCategory().getName())
-                .build()).toList();
+        List<StoreResponseDto> result = randomList.stream()
+                .map(store -> StoreResponseDto
+                        .builder()
+                        .id(store.getId())
+                        .name(store.getName())
+                        .address(store.getAddress())
+                        .description(store.getDescription())
+                        .category(store.getCategory().getName())
+                        .build()).toList();
         recommendStoreList.addAll(result);
     }
 

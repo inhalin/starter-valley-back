@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import startervalley.backend.dto.attendance.AttendanceCodeDto;
 import startervalley.backend.dto.request.AttendanceCheckDto;
 import startervalley.backend.dto.request.AttendanceExcuseDto;
 import startervalley.backend.dto.request.AttendanceYearMonthDto;
@@ -45,7 +46,7 @@ public class AttendanceController {
     public ResponseEntity<BaseResponseDto> checkAttendance(@AuthenticationPrincipal CustomUserDetails userDetails,
                                                            @RequestBody AttendanceCheckDto attendanceCheckDto) {
         Long userId = userDetails.getId();
-        BaseResponseDto dto = attendanceService.checkAttendance(userId, attendanceCheckDto);
+        BaseResponseDto dto = attendanceService.doAttendance(userId, attendanceCheckDto);
         return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
@@ -60,5 +61,13 @@ public class AttendanceController {
     public void postGoogleForm(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getId();
         attendanceService.sendToGoogleForm(userId);
+    }
+
+    @PostMapping("/code")
+    public ResponseEntity<BaseResponseDto> attendanceByCode(@AuthenticationPrincipal CustomUserDetails userDetails,
+                                                            @Valid @RequestBody AttendanceCodeDto attendanceCode) {
+        Long userId = userDetails.getId();
+        BaseResponseDto baseResponseDto = attendanceService.doAttendanceByCode(userId, attendanceCode);
+        return new ResponseEntity<>(baseResponseDto, HttpStatus.OK);
     }
 }
