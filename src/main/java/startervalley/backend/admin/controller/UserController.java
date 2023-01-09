@@ -8,7 +8,7 @@ import startervalley.backend.admin.dto.user.AdminUserDto;
 import startervalley.backend.admin.dto.user.UserAttendanceDto;
 import startervalley.backend.admin.dto.user.UserAttendanceResponse;
 import startervalley.backend.admin.dto.user.UserResponse;
-import startervalley.backend.admin.service.AdminUserService;
+import startervalley.backend.admin.service.UserService;
 import startervalley.backend.dto.common.BasicResponse;
 
 import java.time.LocalDate;
@@ -19,7 +19,7 @@ import java.util.List;
 @RequestMapping("/admin/users")
 public class UserController {
 
-    private final AdminUserService userService;
+    private final UserService userService;
 
     @GetMapping
     public ResponseEntity<List<UserResponse>> listUsers() {

@@ -4,21 +4,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import startervalley.backend.admin.dto.auth.AuthPasswordRequest;
-import startervalley.backend.admin.dto.auth.AuthRegisterRequest;
 import startervalley.backend.admin.dto.auth.AuthLoginRequest;
 import startervalley.backend.admin.dto.auth.AuthLoginResponse;
+import startervalley.backend.admin.dto.auth.AuthPasswordRequest;
+import startervalley.backend.admin.dto.auth.AuthRegisterRequest;
 import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.entity.AdminUser;
+import startervalley.backend.exception.PasswordNotValidException;
 import startervalley.backend.exception.ResourceDuplicateException;
 import startervalley.backend.exception.ResourceNotFoundException;
-import startervalley.backend.exception.UserNotValidException;
 import startervalley.backend.repository.adminuser.AdminUserRepository;
 import startervalley.backend.security.jwt.JwtTokenProvider;
 
-@Service
+@Service(value = "AuthServiceBO")
 @RequiredArgsConstructor
-public class AdminAuthService {
+public class AuthService {
 
     private final AdminUserRepository adminUserRepository;
     private final BCryptPasswordEncoder passwordEncoder;
@@ -66,8 +66,12 @@ public class AdminAuthService {
 
         validatePassword(request.getPassword(), adminUser.getPassword());
 
+        if (request.getPassword().equals(request.getNewPassword())) {
+            throw new PasswordNotValidException("기존 비밀번호와 동일한 비밀번호로 변경할 수 없습니다.");
+        }
+
         if (!request.getNewPassword().equals(request.get_newPassword())) {
-            throw new IllegalArgumentException("입력하신 새로운 비밀번호가 서로 일치하지 않습니다.");
+            throw new PasswordNotValidException("입력하신 새로운 비밀번호가 서로 일치하지 않습니다.");
         }
 
         adminUserRepository.changePassword(adminUser.getId(), passwordEncoder.encode(request.getNewPassword()));
@@ -81,7 +85,7 @@ public class AdminAuthService {
 
     private void validatePassword(String inputPassword, String originalPassword) {
         if (!passwordEncoder.matches(inputPassword, originalPassword)) {
-            throw new UserNotValidException("비밀번호가 일치하지 않습니다.");
+            throw new PasswordNotValidException("기존 비밀번호가 일치하지 않습니다.");
         }
     }
 }
