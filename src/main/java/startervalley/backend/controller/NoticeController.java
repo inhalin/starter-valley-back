@@ -8,7 +8,7 @@ import startervalley.backend.admin.dto.notice.NoticeResponse;
 import startervalley.backend.admin.service.NoticeService;
 import startervalley.backend.util.PaginationConstants;
 
-@RestController(value = "NoticeControllerFO")
+@RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/notices")
 public class NoticeController {

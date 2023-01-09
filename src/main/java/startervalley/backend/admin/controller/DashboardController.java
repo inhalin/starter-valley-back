@@ -11,7 +11,7 @@ import startervalley.backend.entity.Attendance;
 
 import java.util.List;
 
-@RestController
+@RestController(value = "DashboardControllerBO")
 @RequiredArgsConstructor
 @RequestMapping("/admin/dashboards")
 public class DashboardController {
