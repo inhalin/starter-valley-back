@@ -8,9 +8,8 @@ import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
 
-import static javax.persistence.EnumType.*;
-import static javax.persistence.FetchType.*;
-import static javax.persistence.GenerationType.*;
+import static javax.persistence.EnumType.STRING;
+import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Getter
@@ -29,8 +28,8 @@ public class Inquiry extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @Column(columnDefinition="tinyint(1)")
-    @ColumnDefault(value = "1")
+    @Column(columnDefinition = "tinyint(1)")
+    @ColumnDefault(value = "0")
     private boolean anonymous;
 
     @Enumerated(value = STRING)
