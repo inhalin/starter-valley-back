@@ -32,7 +32,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         sessionList.remove(session);
     }
 
-    public void sendHello(String s) throws IOException {
+    public void sendAlert(String s) throws IOException {
         TextMessage textMessage = new TextMessage(s);
         for (WebSocketSession webSocketSession : sessionList) {
             webSocketSession.sendMessage(textMessage);

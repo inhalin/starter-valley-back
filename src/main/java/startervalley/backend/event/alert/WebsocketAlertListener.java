@@ -25,6 +25,6 @@ public class WebsocketAlertListener {
     public void onAlert(AlertDto dto) throws IOException {
         Gson gson = new Gson();
         String s = gson.toJson(dto);
-        webSocketHandler.sendHello(s);
+        webSocketHandler.sendAlert(s);
     }
 }
