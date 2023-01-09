@@ -48,6 +48,8 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
 
+    implementation 'com.slack.api:bolt-jakarta-servlet:[1.27,)'
+
     implementation 'com.querydsl:querydsl-jpa:5.0.0'
     annotationProcessor(
             'javax.persistence:javax.persistence-api',
