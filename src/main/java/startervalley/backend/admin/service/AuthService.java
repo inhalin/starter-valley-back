@@ -4,21 +4,21 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import startervalley.backend.admin.dto.auth.AuthPasswordRequest;
-import startervalley.backend.admin.dto.auth.AuthRegisterRequest;
 import startervalley.backend.admin.dto.auth.AuthLoginRequest;
 import startervalley.backend.admin.dto.auth.AuthLoginResponse;
+import startervalley.backend.admin.dto.auth.AuthPasswordRequest;
+import startervalley.backend.admin.dto.auth.AuthRegisterRequest;
 import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.entity.AdminUser;
+import startervalley.backend.exception.PasswordNotValidException;
 import startervalley.backend.exception.ResourceDuplicateException;
 import startervalley.backend.exception.ResourceNotFoundException;
-import startervalley.backend.exception.UserNotValidException;
 import startervalley.backend.repository.adminuser.AdminUserRepository;
 import startervalley.backend.security.jwt.JwtTokenProvider;
 
-@Service
+@Service(value = "AuthServiceBO")
 @RequiredArgsConstructor
-public class AdminAuthService {
+public class AuthService {
 
     private final AdminUserRepository adminUserRepository;
     private final BCryptPasswordEncoder passwordEncoder;
