@@ -12,6 +12,7 @@ import startervalley.backend.entity.Inquiry;
 import startervalley.backend.entity.InquiryTarget;
 import startervalley.backend.entity.Role;
 import startervalley.backend.entity.User;
+import startervalley.backend.event.InquiryEventPublisher;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.inquiry.InquiryRepository;
 
@@ -24,6 +25,7 @@ public class InquiryService {
 
     private final InquiryRepository inquiryRepository;
     private final UserService userService;
+    private final InquiryEventPublisher eventPublisher;
 
     @Transactional
     public BasicResponse createOne(Long userId, InquiryRequest request) {
@@ -42,7 +44,21 @@ public class InquiryService {
 
         inquiryRepository.save(inquiry);
 
+        if (inquiry.getTarget().equals(InquiryTarget.DEVELOPERS)) {
+            eventPublisher.publishEvent(constructSlackMessage(inquiry));
+        }
+
         return BasicResponse.of(inquiry.getId(), "문의가 정상적으로 등록되었습니다.");
+    }
+
+    private String constructSlackMessage(Inquiry inquiry) {
+
+        String name = userService.findUserOrThrow(inquiry.getUserId()).getName();
+
+        return "🔔 개발자 문의글이 등록되었습니다.\n\n"
+                + "이름: " + name + "\n"
+                + "제목: " + inquiry.getTitle() + "\n"
+                + "내용: " + inquiry.getContent();
     }
 
     public InquiryResponse getOne(Long inquiryId, Long userId, Role role) {
