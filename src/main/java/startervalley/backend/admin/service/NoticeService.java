@@ -15,6 +15,9 @@ import startervalley.backend.admin.dto.notice.NoticeResponse;
 import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.entity.AdminUser;
 import startervalley.backend.entity.Notice;
+import startervalley.backend.event.alert.WebsocketAlertEventPublisher;
+import startervalley.backend.event.alert.dto.AlertDto;
+import startervalley.backend.event.alert.dto.AlertType;
 import startervalley.backend.exception.CustomValidationException;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.adminuser.AdminUserRepository;
@@ -34,6 +37,7 @@ public class NoticeService {
 
     private final AdminUserRepository adminUserRepository;
     private final NoticeRepository noticeRepository;
+    private final WebsocketAlertEventPublisher alertEventPublisher;
 
     public NoticeResponse getAll(int page, int size, String sort, String dir) {
         try {
@@ -118,7 +122,8 @@ public class NoticeService {
                 .build();
 
         noticeRepository.save(notice);
-
+        AlertDto alertDto = new AlertDto(AlertType.NOTICE, notice.getId(), notice.getTitle());
+        alertEventPublisher.publishEvent(alertDto);
         return BasicResponse.of(notice.getId(), "공지사항이 정상적으로 등록되었습니다.");
     }
 }
