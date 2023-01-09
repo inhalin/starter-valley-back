@@ -14,7 +14,7 @@ import startervalley.backend.util.PaginationConstants;
 
 import javax.validation.Valid;
 
-@RestController
+@RestController(value = "NoticeControllerBO")
 @RequiredArgsConstructor
 @RequestMapping("/admin/notices")
 public class NoticeController {
