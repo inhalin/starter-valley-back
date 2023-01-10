@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import startervalley.backend.admin.dto.user.AdminUserDto;
 import startervalley.backend.admin.dto.user.UserAttendanceDto;
 import startervalley.backend.admin.dto.user.UserAttendanceResponse;
 import startervalley.backend.admin.dto.user.UserResponse;
@@ -38,10 +37,5 @@ public class UserController {
         userService.updateAttendanceInfo(userId, attendanceDto);
 
         return ResponseEntity.ok(BasicResponse.of(userId, "출석 상태가 정상적으로 변경되었습니다."));
-    }
-
-    @GetMapping("/managers")
-    public ResponseEntity<List<AdminUserDto>> listAdminUsers() {
-        return ResponseEntity.ok(userService.findAdminUsers());
     }
 }
