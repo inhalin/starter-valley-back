@@ -11,6 +11,7 @@ import startervalley.backend.entity.Generation;
 import startervalley.backend.entity.User;
 import startervalley.backend.exception.CustomValidationException;
 import startervalley.backend.exception.ResourceNotFoundException;
+import startervalley.backend.exception.UserNotValidException;
 import startervalley.backend.repository.UserRepository;
 import startervalley.backend.repository.adminuser.AdminUserRepository;
 import startervalley.backend.repository.attendance.AttendanceRepository;
@@ -106,7 +107,7 @@ public class UserService {
         return BasicResponse.of(userId, "중도 하차생이 정상적으로 등록되었습니다.");
     }
 
-    public List<UserDropoutResponse> findDropouts() {
+    public List<UserDropoutResponse> findAllDropouts() {
 
         List<Generation> generations = generationRepository.findAll();
         List<UserDropoutResponse> responseList = new ArrayList<>();
@@ -122,5 +123,29 @@ public class UserService {
         }
 
         return responseList;
+    }
+
+    public UserDropoutDto findOneDropout(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString()));
+
+        if (user.isActive()) {
+            throw new UserNotValidException("중도 하차한 수강생이 아닙니다.");
+        }
+
+        return UserDropoutDto.mapToDto(user);
+    }
+
+    public BasicResponse updateDropoutInfo(Long userId, UserDropoutRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString()));
+
+        if (request.getDropoutDate().equals(user.getDropoutDate()) && request.getReason().equals(user.getDropoutReason())) {
+            return BasicResponse.of(user.getId(), "변경된 내용이 없습니다.");
+        }
+
+        user.updateDropout(request.getDropoutDate(), request.getReason());
+
+        return BasicResponse.of(user.getId(),  "중도 하차 상세 내용이 정상적으로 변경되었습니다.");
     }
 }

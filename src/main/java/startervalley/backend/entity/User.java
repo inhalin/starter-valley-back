@@ -128,4 +128,9 @@ public class User extends BaseTimeEntity {
         this.dropoutDate = dropoutDate;
         this.dropoutApprovedDate = LocalDateTime.now();
     }
+
+    public void updateDropout(LocalDate dropoutDate, String reason) {
+        this.dropoutDate = dropoutDate;
+        this.dropoutReason = reason;
+    }
 }

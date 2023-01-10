@@ -46,6 +46,17 @@ public class UserController {
 
     @GetMapping("/dropouts")
     public ResponseEntity<List<UserDropoutResponse>> listDropouts() {
-        return ResponseEntity.ok(userService.findDropouts());
+        return ResponseEntity.ok(userService.findAllDropouts());
+    }
+
+    @GetMapping("/dropouts/{userId}")
+    public ResponseEntity<UserDropoutDto> getDropout(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.findOneDropout(userId));
+    }
+
+    @PutMapping("/dropouts/{userId}")
+    public ResponseEntity<BasicResponse> updateDropoutInfo(@PathVariable Long userId,
+                                                           @Valid @RequestBody UserDropoutRequest request) {
+        return ResponseEntity.ok(userService.updateDropoutInfo(userId, request));
     }
 }
