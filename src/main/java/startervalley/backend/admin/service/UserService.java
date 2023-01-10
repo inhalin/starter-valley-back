@@ -12,9 +12,9 @@ import startervalley.backend.entity.User;
 import startervalley.backend.exception.CustomValidationException;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.adminuser.AdminUserRepository;
 import startervalley.backend.repository.attendance.AttendanceRepository;
 import startervalley.backend.repository.generation.GenerationRepository;
-import startervalley.backend.repository.adminuser.AdminUserRepository;
 import startervalley.backend.service.AttendanceService;
 
 import java.time.LocalDate;
@@ -38,30 +38,17 @@ public class UserService {
         List<UserResponse> responseList = new ArrayList<>();
 
         for (Generation generation : generations) {
-            List<UserDto> users = findUsersByGeneration(generation);
+            List<UserDto> users = generation.getUsers()
+                    .stream()
+                    .filter(User::isActive)
+                    .map(user -> UserDto.mapToDto(user, attendanceService.findUserAttendances(user.getId(), new AttendanceYearMonthDto())))
+                    .toList();
 
-            responseList.add(UserResponse.builder()
-                    .generationId(generation.getId())
-                    .users(users)
-                    .build());
+            responseList.add(UserResponse.mapToResponse(generation, users));
         }
 
         return responseList;
     }
-
-    private List<UserDto> findUsersByGeneration(Generation generation) {
-        return generation.getUsers()
-                .stream()
-                .map(user -> UserDto.builder()
-                        .id(user.getId())
-                        .name(user.getName())
-                        .email(user.getEmail())
-                        .devpart(user.getDevpart().getName())
-                        .attendance(attendanceService.findUserAttendances(user.getId(), new AttendanceYearMonthDto()))
-                        .build())
-                .toList();
-    }
-
 
     public UserAttendanceResponse findAttendanceByUser(Long userId, LocalDate attendedDate) {
 
@@ -105,7 +92,7 @@ public class UserService {
     }
 
     @Transactional
-    public BasicResponse approveDropout(Long userId, UserQuitRequest request) {
+    public BasicResponse approveDropout(Long userId, UserDropoutRequest request) {
 
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString()));
@@ -117,5 +104,23 @@ public class UserService {
         user.dropout(request.getDropoutDate(), request.getReason());
 
         return BasicResponse.of(userId, "중도 하차생이 정상적으로 등록되었습니다.");
+    }
+
+    public List<UserDropoutResponse> findDropouts() {
+
+        List<Generation> generations = generationRepository.findAll();
+        List<UserDropoutResponse> responseList = new ArrayList<>();
+
+        for (Generation generation : generations) {
+            List<UserDropoutDto> users = generation.getUsers()
+                    .stream()
+                    .filter(user -> !user.isActive())
+                    .map(UserDropoutDto::mapToDto)
+                    .toList();
+
+            responseList.add(UserDropoutResponse.mapToResponse(generation, users));
+        }
+
+        return responseList;
     }
 }

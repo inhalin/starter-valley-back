@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import startervalley.backend.admin.dto.user.UserAttendanceDto;
-import startervalley.backend.admin.dto.user.UserAttendanceResponse;
-import startervalley.backend.admin.dto.user.UserDropoutRequest;
-import startervalley.backend.admin.dto.user.UserResponse;
+import startervalley.backend.admin.dto.user.*;
 import startervalley.backend.admin.service.UserService;
 import startervalley.backend.dto.common.BasicResponse;
 
@@ -44,5 +41,10 @@ public class UserController {
     public ResponseEntity<BasicResponse> quit(@PathVariable Long userId,
                                               @RequestBody UserDropoutRequest request) {
         return ResponseEntity.ok(userService.approveDropout(userId, request));
+    }
+
+    @GetMapping("/dropouts")
+    public ResponseEntity<List<UserDropoutResponse>> listDropouts() {
+        return ResponseEntity.ok(userService.findDropouts());
     }
 }
