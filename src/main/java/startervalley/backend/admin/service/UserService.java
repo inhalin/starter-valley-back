@@ -19,10 +19,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@Service
+@Service(value = "UserServiceBO")
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class AdminUserService {
+public class UserService {
 
     private final GenerationRepository generationRepository;
     private final AttendanceService attendanceService;

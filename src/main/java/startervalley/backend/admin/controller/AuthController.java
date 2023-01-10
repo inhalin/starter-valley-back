@@ -9,7 +9,7 @@ import startervalley.backend.admin.dto.auth.AuthPasswordRequest;
 import startervalley.backend.admin.dto.auth.AuthRegisterRequest;
 import startervalley.backend.admin.dto.auth.AuthLoginRequest;
 import startervalley.backend.admin.dto.auth.AuthLoginResponse;
-import startervalley.backend.admin.service.AdminAuthService;
+import startervalley.backend.admin.service.AuthService;
 import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.security.auth.AdminUserDetails;
 
@@ -20,7 +20,7 @@ import javax.validation.Valid;
 @RequestMapping("/admin/auth")
 public class AuthController {
 
-    private final AdminAuthService authService;
+    private final AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthLoginResponse> login(@Valid @RequestBody AuthLoginRequest request) {
