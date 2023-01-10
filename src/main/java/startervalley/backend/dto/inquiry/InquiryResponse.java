@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class InquiryResponse {
+    private Long id;
     private String title;
     private String content;
     private String name;
@@ -23,6 +24,7 @@ public class InquiryResponse {
 
     public static InquiryResponse mapToResponse(Inquiry inquiry, String name) {
         return InquiryResponse.builder()
+                .id(inquiry.getId())
                 .title(inquiry.getTitle())
                 .content(inquiry.getContent())
                 .name(name)
