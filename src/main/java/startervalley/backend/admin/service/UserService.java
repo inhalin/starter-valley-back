@@ -4,10 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.admin.dto.user.*;
+import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.dto.request.AttendanceYearMonthDto;
 import startervalley.backend.entity.Attendance;
 import startervalley.backend.entity.Generation;
 import startervalley.backend.entity.User;
+import startervalley.backend.exception.CustomValidationException;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.UserRepository;
 import startervalley.backend.repository.attendance.AttendanceRepository;
@@ -100,5 +102,20 @@ public class UserService {
                         .email(admin.getEmail())
                         .build())
                 .toList();
+    }
+
+    @Transactional
+    public BasicResponse approveDropout(Long userId, UserQuitRequest request) {
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString()));
+
+        if (!user.isActive()) {
+            throw new CustomValidationException("이미 중도 하차한 수강생입니다.");
+        }
+
+        user.dropout(request.getDropoutDate(), request.getReason());
+
+        return BasicResponse.of(userId, "중도 하차생이 정상적으로 등록되었습니다.");
     }
 }
