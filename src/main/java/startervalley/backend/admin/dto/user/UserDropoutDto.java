@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class UserDropoutDto {
     private Long id;
     private String name;
+    private String reason;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy.MM.dd", timezone = "Asia/Seoul")
     private LocalDate dropoutDate;
@@ -26,6 +27,7 @@ public class UserDropoutDto {
         return UserDropoutDto.builder()
                 .id(user.getId())
                 .name(user.getName())
+                .reason(user.getDropoutReason())
                 .dropoutDate(user.getDropoutDate())
                 .approvedDate(user.getDropoutApprovedDate())
                 .build();

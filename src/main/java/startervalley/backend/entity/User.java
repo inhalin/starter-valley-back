@@ -78,7 +78,7 @@ public class User extends BaseTimeEntity {
     private boolean active;
 
     @Column(columnDefinition = "text")
-    private String reason;
+    private String dropoutReason;
 
     private LocalDate dropoutDate;
     private LocalDateTime dropoutApprovedDate;
@@ -98,7 +98,7 @@ public class User extends BaseTimeEntity {
     }
 
     @Builder
-    public User(Long id, String username, String email, String name, Role role, Generation generation, Team team, Boolean isLeader, Devpart devpart, AuthProvider provider, String providerId, String refreshToken, String githubUrl, UserProfile profile, String imageUrl, Integer consecutiveDays, List<Attendance> attendances, boolean active, String reason, LocalDate dropoutDate, LocalDateTime dropoutApprovedDate) {
+    public User(Long id, String username, String email, String name, Role role, Generation generation, Team team, Boolean isLeader, Devpart devpart, AuthProvider provider, String providerId, String refreshToken, String githubUrl, UserProfile profile, String imageUrl, Integer consecutiveDays, List<Attendance> attendances, boolean active, String dropoutReason, LocalDate dropoutDate, LocalDateTime dropoutApprovedDate) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -117,14 +117,14 @@ public class User extends BaseTimeEntity {
         this.consecutiveDays = consecutiveDays;
         this.attendances = attendances;
         this.active = active;
-        this.reason = reason;
+        this.dropoutReason = dropoutReason;
         this.dropoutDate = dropoutDate;
         this.dropoutApprovedDate = dropoutApprovedDate;
     }
 
     public void dropout(LocalDate dropoutDate, String reason) {
         this.active = false;
-        this.reason = reason;
+        this.dropoutReason = reason;
         this.dropoutDate = dropoutDate;
         this.dropoutApprovedDate = LocalDateTime.now();
     }
