@@ -4,12 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import startervalley.backend.admin.dto.user.UserAttendanceDto;
-import startervalley.backend.admin.dto.user.UserAttendanceResponse;
-import startervalley.backend.admin.dto.user.UserResponse;
+import startervalley.backend.admin.dto.user.*;
 import startervalley.backend.admin.service.UserService;
 import startervalley.backend.dto.common.BasicResponse;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -37,5 +36,27 @@ public class UserController {
         userService.updateAttendanceInfo(userId, attendanceDto);
 
         return ResponseEntity.ok(BasicResponse.of(userId, "출석 상태가 정상적으로 변경되었습니다."));
+    }
+
+    @PutMapping("/{userId}/dropout")
+    public ResponseEntity<BasicResponse> quit(@PathVariable Long userId,
+                                              @Valid @RequestBody UserDropoutRequest request) {
+        return ResponseEntity.ok(userService.approveDropout(userId, request));
+    }
+
+    @GetMapping("/dropouts")
+    public ResponseEntity<List<UserDropoutResponse>> listDropouts() {
+        return ResponseEntity.ok(userService.findAllDropouts());
+    }
+
+    @GetMapping("/dropouts/{userId}")
+    public ResponseEntity<UserDropoutDto> getDropout(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.findOneDropout(userId));
+    }
+
+    @PutMapping("/dropouts/{userId}")
+    public ResponseEntity<BasicResponse> updateDropoutInfo(@PathVariable Long userId,
+                                                           @Valid @RequestBody UserDropoutRequest request) {
+        return ResponseEntity.ok(userService.updateDropoutInfo(userId, request));
     }
 }
