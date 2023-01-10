@@ -8,6 +8,7 @@ import startervalley.backend.admin.dto.user.*;
 import startervalley.backend.admin.service.UserService;
 import startervalley.backend.dto.common.BasicResponse;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -39,7 +40,7 @@ public class UserController {
 
     @PutMapping("/{userId}/dropout")
     public ResponseEntity<BasicResponse> quit(@PathVariable Long userId,
-                                              @RequestBody UserDropoutRequest request) {
+                                              @Valid @RequestBody UserDropoutRequest request) {
         return ResponseEntity.ok(userService.approveDropout(userId, request));
     }
 
