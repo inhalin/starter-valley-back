@@ -37,7 +37,7 @@ public class User extends BaseTimeEntity {
     private String name;
 
     @Enumerated(STRING)
-    @Column(columnDefinition = "varchar(255) default 'ROLE_USER'", nullable = false)
+    @Column(columnDefinition = "varchar(255) default 'USER'", nullable = false)
     private Role role;
 
     @ManyToOne(fetch = LAZY)
