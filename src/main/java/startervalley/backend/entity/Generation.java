@@ -1,6 +1,5 @@
 package startervalley.backend.entity;
 
-import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -10,12 +9,10 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static javax.persistence.GenerationType.*;
+import static javax.persistence.GenerationType.IDENTITY;
 
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
 @Entity
 public class Generation extends BaseTimeEntity {
 
@@ -34,6 +31,24 @@ public class Generation extends BaseTimeEntity {
     private LocalDate courseStartDate;
     private LocalDate courseEndDate;
 
+    private String recruitUrl;
+    private String submitUrl;
+
     @OneToMany(mappedBy = "generation")
-    private List<User> users;
+    private List<User> users = new ArrayList<>();
+
+    @Builder
+    public Generation(Long id, String code, String description, String location, Double latitude, Double longitude, LocalDate courseStartDate, LocalDate courseEndDate, String recruitUrl, String submitUrl, List<User> users) {
+        this.id = id;
+        this.code = code;
+        this.description = description;
+        this.location = location;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.courseStartDate = courseStartDate;
+        this.courseEndDate = courseEndDate;
+        this.recruitUrl = recruitUrl;
+        this.submitUrl = submitUrl;
+        this.users = users;
+    }
 }
