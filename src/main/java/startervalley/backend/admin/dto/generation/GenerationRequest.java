@@ -11,7 +11,7 @@ public class GenerationRequest {
 
     @NotNull(message = "기수를 입력해주세요.")
     @Min(value = 1, message = "1기부터 입력 가능합니다.")
-    private Long id;
+    private Long generation;
 
     @NotNull(message = "교육 시작일을 입력해주세요.")
     private LocalDate courseStartDate;
@@ -25,4 +25,5 @@ public class GenerationRequest {
     private String location;
     private String recruitUrl;
     private String submitUrl;
+    private String submitResultUrl;
 }

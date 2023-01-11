@@ -27,12 +27,12 @@ public class GenerationService {
     @Transactional
     public BasicResponse createOne(GenerationRequest request) {
 
-        if (generationRepository.existsById(request.getId())) {
+        if (generationRepository.existsById(request.getGeneration())) {
             throw new ResourceNotValidException("기수 내역이 이미 존재합니다.");
         }
 
         Generation generation = Generation.builder()
-                .id(request.getId())
+                .id(request.getGeneration())
                 .code(CodeGenerator.generateRandom())
                 .courseStartDate(request.getCourseStartDate())
                 .courseEndDate(request.getCourseEndDate())
@@ -76,7 +76,8 @@ public class GenerationService {
                 request.getLatitude() != null ? request.getLatitude() : generation.getLatitude(),
                 request.getLongitude() != null ? request.getLongitude() : generation.getLongitude(),
                 request.getRecruitUrl() != null ? request.getRecruitUrl() : generation.getRecruitUrl(),
-                request.getSubmitUrl() != null ? request.getSubmitUrl() : generation.getSubmitUrl());
+                request.getSubmitUrl() != null ? request.getSubmitUrl() : generation.getSubmitUrl(),
+                request.getSubmitResultUrl() != null ? request.getSubmitResultUrl() : generation.getSubmitResultUrl());
 
         return BasicResponse.of(generation.getId(), "기수 상세 내용이 수정되었습니다.");
     }

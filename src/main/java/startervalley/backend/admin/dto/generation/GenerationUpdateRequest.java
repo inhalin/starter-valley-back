@@ -20,4 +20,5 @@ public class GenerationUpdateRequest {
     private String location;
     private String recruitUrl;
     private String submitUrl;
+    private String submitResultUrl;
 }
