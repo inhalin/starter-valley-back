@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class UserDropoutDto {
+    private Long generation;
     private Long id;
     private String name;
     private String reason;
@@ -25,6 +26,7 @@ public class UserDropoutDto {
 
     public static UserDropoutDto mapToDto(User user) {
         return UserDropoutDto.builder()
+                .generation(user.getGeneration().getId())
                 .id(user.getId())
                 .name(user.getName())
                 .reason(user.getDropoutReason())

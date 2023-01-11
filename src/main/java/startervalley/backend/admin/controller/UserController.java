@@ -38,8 +38,8 @@ public class UserController {
         return ResponseEntity.ok(BasicResponse.of(userId, "출석 상태가 정상적으로 변경되었습니다."));
     }
 
-    @PutMapping("/{userId}/dropout")
-    public ResponseEntity<BasicResponse> quit(@PathVariable Long userId,
+    @PostMapping("/dropouts/{userId}")
+    public ResponseEntity<BasicResponse> dropout(@PathVariable Long userId,
                                               @Valid @RequestBody UserDropoutRequest request) {
         return ResponseEntity.ok(userService.approveDropout(userId, request));
     }
