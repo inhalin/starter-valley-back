@@ -3,8 +3,7 @@ package startervalley.backend.entity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import startervalley.backend.dto.request.StoreRequestDto;
-import startervalley.backend.dto.request.StoreUpdateDto;
+import startervalley.backend.dto.store.StoreUpdateDto;
 
 import javax.persistence.*;
 import java.util.ArrayList;

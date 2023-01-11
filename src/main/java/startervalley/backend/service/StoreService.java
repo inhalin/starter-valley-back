@@ -6,13 +6,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.multipart.MultipartFile;
 import startervalley.backend.dto.request.CommentRequestDto;
 import startervalley.backend.dto.request.PageRequestDto;
-import startervalley.backend.dto.request.StoreRequestDto;
-import startervalley.backend.dto.request.StoreUpdateDto;
+import startervalley.backend.dto.store.StoreRequestDto;
+import startervalley.backend.dto.store.StoreUpdateDto;
 import startervalley.backend.dto.response.*;
+import startervalley.backend.dto.store.StoreDetailDto;
+import startervalley.backend.dto.store.StoreImageDto;
+import startervalley.backend.dto.store.StoreResponseDto;
 import startervalley.backend.entity.*;
 import startervalley.backend.exception.NotOwnerException;
 import startervalley.backend.exception.ResourceNotFoundException;
@@ -83,19 +87,22 @@ public class StoreService {
         }
 
         List<Store> storeList = storePage.getContent();
-        List<StoreResponseDto> result = storeList.stream().map(store -> {
-            long likeCount = userLikeStoreRepository.countByStore(store);
-            boolean myLikeStatus = userLikeStoreRepository.existsByUserAndStore(user, store);
-            return StoreResponseDto.builder()
-                    .id(store.getId())
-                    .name(store.getName())
-                    .description(store.getDescription())
-                    .address(store.getAddress())
-                    .likeCount(likeCount)
-                    .myLikeStatus(myLikeStatus)
-                    .category(store.getCategory().getName())
-                    .build();
-        }).toList();
+        List<StoreResponseDto> result = storeList.stream()
+                .map(store -> {
+                    long likeCount = userLikeStoreRepository.countByStore(store);
+                    boolean myLikeStatus = userLikeStoreRepository.existsByUserAndStore(user, store);
+                    String imageUrl = getFirstImageUrlFromStoreImageList(store.getStoreImageList());
+                    return StoreResponseDto.builder()
+                            .id(store.getId())
+                            .name(store.getName())
+                            .description(store.getDescription())
+                            .address(store.getAddress())
+                            .likeCount(likeCount)
+                            .myLikeStatus(myLikeStatus)
+                            .category(store.getCategory().getName())
+                            .imageUrl(imageUrl)
+                            .build();
+                }).toList();
 
         return new PageResultDTO<>(storePage, result);
     }
@@ -201,24 +208,28 @@ public class StoreService {
         Page<Comment> commentPage = commentRepository.findAllByStore(store, pageable);
 
 
-        List<CommentResponseDto> result = commentPage.getContent().stream().map(comment -> {
-            User commentUser = comment.getUser();
-            boolean isOwn = Objects.equals(commentUser.getId(), user.getId());
-            List<TagDto> tagDtoList = comment.getCommentTagList().stream().map(commentTag -> {
-                Tag tag = commentTag.getTag();
-                return TagDto.builder().id(tag.getId()).content(tag.getContent()).build();
-            }).toList();
-
-            return CommentResponseDto.builder()
-                    .id(comment.getId())
-                    .description(comment.getDescription())
-                    .author(commentUser.getName())
-                    .isOwn(isOwn)
-                    .tagList(tagDtoList)
-                    .createdDate(comment.getCreatedDate())
-                    .modifiedDate(comment.getModifiedDate())
-                    .build();
-        }).toList();
+        List<CommentResponseDto> result = commentPage.getContent().stream()
+                .map(comment -> {
+                    User commentUser = comment.getUser();
+                    boolean isOwn = Objects.equals(commentUser.getId(), user.getId());
+                    List<TagDto> tagDtoList = comment.getCommentTagList().stream()
+                            .map(commentTag -> {
+                                Tag tag = commentTag.getTag();
+                                return TagDto.builder()
+                                        .id(tag.getId())
+                                        .content(tag.getContent())
+                                        .build();
+                            }).toList();
+                    return CommentResponseDto.builder()
+                            .id(comment.getId())
+                            .description(comment.getDescription())
+                            .author(commentUser.getName())
+                            .isOwn(isOwn)
+                            .tagList(tagDtoList)
+                            .createdDate(comment.getCreatedDate())
+                            .modifiedDate(comment.getModifiedDate())
+                            .build();
+                }).toList();
         return new PageResultDTO<>(commentPage, result);
     }
 
@@ -299,5 +310,14 @@ public class StoreService {
     private User getUserElseThrow(Long userId) {
         return userRepository.findById(userId).orElseThrow(() ->
                 new ResourceNotFoundException("User", "id", String.valueOf(userId)));
+    }
+
+    private String getFirstImageUrlFromStoreImageList(List<StoreImage> storeImageList) {
+        if (CollectionUtils.isEmpty(storeImageList)) {
+            return null;
+        }
+
+        StoreImage storeImage = storeImageList.get(0);
+        return StoreImageDto.getImageURL(storeImage.getUuid(), storeImage.getImgName());
     }
 }

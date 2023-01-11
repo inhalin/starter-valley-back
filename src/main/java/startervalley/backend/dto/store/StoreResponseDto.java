@@ -1,4 +1,4 @@
-package startervalley.backend.dto.response;
+package startervalley.backend.dto.store;
 
 import lombok.*;
 
@@ -18,6 +18,8 @@ public class StoreResponseDto {
 
     private String category;
 
+    private String imageUrl;
+
     private long likeCount;
 
     private boolean myLikeStatus;
@@ -33,13 +35,14 @@ public class StoreResponseDto {
     }
 
     @Builder
-    public StoreResponseDto(Long id, String name, String address, String description, String url, String category, long likeCount, boolean myLikeStatus, boolean own) {
+    public StoreResponseDto(Long id, String name, String address, String description, String url, String category, String imageUrl, long likeCount, boolean myLikeStatus, boolean own) {
         this.id = id;
         this.name = name;
         this.address = address;
         this.description = description;
         this.url = url;
         this.category = category;
+        this.imageUrl = imageUrl;
         this.likeCount = likeCount;
         this.myLikeStatus = myLikeStatus;
         this.own = own;
