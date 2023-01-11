@@ -136,6 +136,7 @@ public class UserService {
         return UserDropoutDto.mapToDto(user);
     }
 
+    @Transactional
     public BasicResponse updateDropoutInfo(Long userId, UserDropoutRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString()));
