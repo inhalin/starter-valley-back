@@ -81,4 +81,10 @@ public class GenerationService {
 
         return BasicResponse.of(generation.getId(), "기수 상세 내용이 수정되었습니다.");
     }
+
+    @Transactional
+    public BasicResponse deleteOne(Long id) {
+        generationRepository.deleteById(id);
+        return BasicResponse.of(id, "기수가 정상적으로 삭제되었습니다.");
+    }
 }

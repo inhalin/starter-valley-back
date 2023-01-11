@@ -39,4 +39,9 @@ public class GenerationController {
                                                 @Valid @RequestBody GenerationUpdateRequest request) {
         return ResponseEntity.ok(generationService.updateOne(id, request));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<BasicResponse> delete(@PathVariable Long id) {
+        return ResponseEntity.ok(generationService.deleteOne(id));
+    }
 }
