@@ -1,7 +1,8 @@
-package startervalley.backend.dto.response;
+package startervalley.backend.dto.store;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import startervalley.backend.dto.response.TagDto;
 
 import java.util.List;
 
