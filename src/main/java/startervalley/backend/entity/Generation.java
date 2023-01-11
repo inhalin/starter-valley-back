@@ -3,22 +3,24 @@ package startervalley.backend.entity;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.DynamicUpdate;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static javax.persistence.GenerationType.IDENTITY;
-
 @Getter
 @NoArgsConstructor
 @Entity
+@DynamicUpdate
 public class Generation extends BaseTimeEntity {
 
     @Id
-    @GeneratedValue(strategy = IDENTITY)
-    @Column(name = "generation_id")
+    @Column(name = "generation_id", unique = true, nullable = false)
     private Long id;
 
     @Column(updatable = false)
@@ -50,5 +52,16 @@ public class Generation extends BaseTimeEntity {
         this.recruitUrl = recruitUrl;
         this.submitUrl = submitUrl;
         this.users = users;
+    }
+
+    public void update(LocalDate courseStartDate, LocalDate courseEndDate, String description, String location, double latitude, double longitude, String recruitUrl, String submitUrl) {
+        this.courseStartDate = courseStartDate;
+        this.courseEndDate = courseEndDate;
+        this.description = description;
+        this.location = location;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.recruitUrl = recruitUrl;
+        this.submitUrl = submitUrl;
     }
 }

@@ -5,8 +5,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.admin.dto.generation.GenerationRequest;
 import startervalley.backend.admin.dto.generation.GenerationResponse;
+import startervalley.backend.admin.dto.generation.GenerationUpdateRequest;
 import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.entity.Generation;
+import startervalley.backend.exception.ResourceNotFoundException;
+import startervalley.backend.exception.ResourceNotValidException;
 import startervalley.backend.repository.UserRepository;
 import startervalley.backend.repository.generation.GenerationRepository;
 import startervalley.backend.util.CodeGenerator;
@@ -23,6 +26,10 @@ public class GenerationService {
 
     @Transactional
     public BasicResponse createOne(GenerationRequest request) {
+
+        if (generationRepository.existsById(request.getId())) {
+            throw new ResourceNotValidException("기수 내역이 이미 존재합니다.");
+        }
 
         Generation generation = Generation.builder()
                 .id(request.getId())
@@ -46,5 +53,31 @@ public class GenerationService {
         return generationRepository.findAll().stream()
                 .map(generation -> GenerationResponse.mapToResponse(generation, userRepository.findAllByGenerationId(generation.getId())))
                 .toList();
+    }
+
+    public GenerationResponse getOne(Long id) {
+
+        Generation generation = generationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Generation", "id", id.toString()));
+
+        return GenerationResponse.mapToResponse(generation, userRepository.findAllByGenerationId(generation.getId()));
+    }
+
+    @Transactional
+    public BasicResponse updateOne(Long id, GenerationUpdateRequest request) {
+
+        Generation generation = generationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Generation", "id", id.toString()));
+
+        generation.update(request.getCourseStartDate(),
+                request.getCourseEndDate(),
+                request.getDescription() != null ? request.getDescription() : generation.getDescription(),
+                request.getLocation() != null ? request.getLocation() : generation.getLocation(),
+                request.getLatitude() != null ? request.getLatitude() : generation.getLatitude(),
+                request.getLongitude() != null ? request.getLongitude() : generation.getLongitude(),
+                request.getRecruitUrl() != null ? request.getRecruitUrl() : generation.getRecruitUrl(),
+                request.getSubmitUrl() != null ? request.getSubmitUrl() : generation.getSubmitUrl());
+
+        return BasicResponse.of(generation.getId(), "기수 상세 내용이 수정되었습니다.");
     }
 }
