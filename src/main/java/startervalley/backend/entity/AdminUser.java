@@ -34,7 +34,7 @@ public class AdminUser extends BaseTimeEntity {
     private String phone;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "varchar(255) default 'ROLE_ADMIN'", nullable = false)
+    @Column(columnDefinition = "varchar(255) default 'ADMIN'", nullable = false)
     private Role role = Role.ADMIN;
 
     @Embedded

@@ -10,12 +10,12 @@ import java.util.List;
 @Getter
 @AllArgsConstructor
 @Builder
-public class UserResponse {
+public class UserDropoutResponse {
     private Long generationId;
-    private List<UserDto> users;
+    private List<UserDropoutDto> users;
 
-    public static UserResponse mapToResponse(Generation generation, List<UserDto> users) {
-        return UserResponse.builder()
+    public static UserDropoutResponse mapToResponse(Generation generation, List<UserDropoutDto> users) {
+        return UserDropoutResponse.builder()
                 .generationId(generation.getId())
                 .users(users)
                 .build();
