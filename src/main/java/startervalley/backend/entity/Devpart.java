@@ -37,4 +37,8 @@ public class Devpart {
     public static Devpart mapToEntity(String name, String koname, Long generationId) {
         return new Devpart(name, koname, generationId);
     }
+
+    public void updateKoname(String koname) {
+        this.koname = koname;
+    }
 }

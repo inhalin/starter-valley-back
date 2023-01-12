@@ -21,14 +21,13 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class GenerationService {
 
     private final GenerationRepository generationRepository;
     private final UserRepository userRepository;
     private final DevpartRepository devpartRepository;
 
-    @Transactional
     public BasicResponse createOne(GenerationRequest request) {
 
         if (generationRepository.existsById(request.getGeneration())) {
@@ -57,12 +56,14 @@ public class GenerationService {
         return BasicResponse.of(generation.getId(), "새로운 기수가 생성되었습니다.");
     }
 
+    @Transactional(readOnly = true)
     public List<GenerationResponse> listAll() {
         return generationRepository.findAll().stream()
                 .map(generation -> GenerationResponse.mapToResponse(generation, userRepository.findAllByGenerationId(generation.getId()), devpartRepository.findAllByGenerationId(generation.getId())))
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public GenerationResponse getOne(Long id) {
 
         Generation generation = generationRepository.findById(id)
@@ -71,7 +72,6 @@ public class GenerationService {
         return GenerationResponse.mapToResponse(generation, userRepository.findAllByGenerationId(generation.getId()), devpartRepository.findAllByGenerationId(generation.getId()));
     }
 
-    @Transactional
     public BasicResponse updateOne(Long id, GenerationUpdateRequest request) {
 
         Generation generation = generationRepository.findById(id)
@@ -90,9 +90,27 @@ public class GenerationService {
         return BasicResponse.of(generation.getId(), "기수 상세 내용이 수정되었습니다.");
     }
 
-    @Transactional
     public BasicResponse deleteOne(Long id) {
         generationRepository.deleteById(id);
         return BasicResponse.of(id, "기수가 정상적으로 삭제되었습니다.");
+    }
+
+    public BasicResponse updateDevpart(Long generationId, DevpartDto devpartDto) {
+
+        Devpart devpart = devpartRepository.findByNameAndGenerationId(devpartDto.getName(), generationId);
+        String oldKoname = devpart.getKoname();
+        devpart.updateKoname(devpartDto.getKoname());
+
+        String updated = "[" + oldKoname + " -> " + devpart.getKoname() + "]";
+
+        return BasicResponse.of(generationId, "해당 기수의 파트 한글명이 수정되었습니다. " + updated);
+    }
+
+    public BasicResponse deleteDevpart(Long generationId, DevpartDto devpartDto) {
+
+        String deleted = "[" + devpartDto.getName() + ", " + devpartDto.getKoname() + "]";
+        devpartRepository.deleteByNameAndGenerationId(devpartDto.getName(), generationId);
+
+        return BasicResponse.of(generationId, "해당 기수의 개발 파트를 삭제하였습니다. " + deleted);
     }
 }
