@@ -3,9 +3,7 @@ package startervalley.backend.admin.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import startervalley.backend.admin.dto.generation.GenerationRequest;
-import startervalley.backend.admin.dto.generation.GenerationResponse;
-import startervalley.backend.admin.dto.generation.GenerationUpdateRequest;
+import startervalley.backend.admin.dto.generation.*;
 import startervalley.backend.admin.service.GenerationService;
 import startervalley.backend.dto.common.BasicResponse;
 
@@ -43,5 +41,17 @@ public class GenerationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<BasicResponse> delete(@PathVariable Long id) {
         return ResponseEntity.ok(generationService.deleteOne(id));
+    }
+
+    @PutMapping("/{generationId}/devparts")
+    public ResponseEntity<BasicResponse> updateDevpart(@PathVariable Long generationId,
+                                                       @RequestBody DevpartDto devpart) {
+        return ResponseEntity.ok(generationService.updateDevpart(generationId, devpart));
+    }
+
+    @DeleteMapping("/{generationId}/devparts")
+    public ResponseEntity<BasicResponse> deleteDevpart(@PathVariable Long generationId,
+                                                       @RequestBody DevpartDto devpart) {
+        return ResponseEntity.ok(generationService.deleteDevpart(generationId, devpart));
     }
 }

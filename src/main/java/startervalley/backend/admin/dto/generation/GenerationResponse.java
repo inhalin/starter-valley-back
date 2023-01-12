@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import startervalley.backend.entity.Devpart;
 import startervalley.backend.entity.Generation;
 import startervalley.backend.entity.User;
 
@@ -26,12 +27,14 @@ public class GenerationResponse {
     private String recruitUrl;
     private String submissionUrl;
     private String location;
-    private double latitude;
-    private double longitude;
+    private Double latitude;
+    private Double longitude;
     private int total;
     private int dropouts;
 
-    public static GenerationResponse mapToResponse(Generation generation, List<User> users) {
+    private List<DevpartDto> devparts;
+
+    public static GenerationResponse mapToResponse(Generation generation, List<User> users, List<Devpart> devparts) {
         return GenerationResponse.builder()
                 .generationId(generation.getId())
                 .startDate(generation.getCourseStartDate())
@@ -44,6 +47,7 @@ public class GenerationResponse {
                 .submissionUrl(generation.getSubmitUrl())
                 .total(users.size())
                 .dropouts((int) users.stream().filter(u -> !u.isActive()).count())
+                .devparts(devparts.stream().map(DevpartDto::mapToDto).toList())
                 .build();
     }
 }
