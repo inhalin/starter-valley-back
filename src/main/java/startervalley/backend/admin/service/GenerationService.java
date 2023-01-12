@@ -12,8 +12,8 @@ import startervalley.backend.entity.Devpart;
 import startervalley.backend.entity.Generation;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.ResourceNotValidException;
-import startervalley.backend.repository.DevpartRepository;
 import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.devpart.DevpartRepository;
 import startervalley.backend.repository.generation.GenerationRepository;
 import startervalley.backend.util.CodeGenerator;
 
@@ -59,7 +59,7 @@ public class GenerationService {
 
     public List<GenerationResponse> listAll() {
         return generationRepository.findAll().stream()
-                .map(generation -> GenerationResponse.mapToResponse(generation, userRepository.findAllByGenerationId(generation.getId())))
+                .map(generation -> GenerationResponse.mapToResponse(generation, userRepository.findAllByGenerationId(generation.getId()), devpartRepository.findAllByGenerationId(generation.getId())))
                 .toList();
     }
 
@@ -68,7 +68,7 @@ public class GenerationService {
         Generation generation = generationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Generation", "id", id.toString()));
 
-        return GenerationResponse.mapToResponse(generation, userRepository.findAllByGenerationId(generation.getId()));
+        return GenerationResponse.mapToResponse(generation, userRepository.findAllByGenerationId(generation.getId()), devpartRepository.findAllByGenerationId(generation.getId()));
     }
 
     @Transactional
