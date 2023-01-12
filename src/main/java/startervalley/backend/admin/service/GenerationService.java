@@ -1,6 +1,7 @@
 package startervalley.backend.admin.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.admin.dto.generation.DevpartDto;
@@ -19,6 +20,7 @@ import startervalley.backend.util.CodeGenerator;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -49,9 +51,13 @@ public class GenerationService {
 
         generationRepository.save(generation);
 
+        log.info("기수 생성 완료: {}기", generation.getId());
+
         request.getDevparts().stream()
                 .map(DevpartDto::validate)
                 .forEach(devpart -> devpartRepository.save(Devpart.mapToEntity(devpart.getName(), devpart.getKoname(), generation.getId())));
+
+        log.info("파트 생성 완료: {}", request.getDevparts().stream().map(devpartDto -> "{" + devpartDto.getName() + ", " + devpartDto.getKoname() + "}").toList());
 
         return BasicResponse.of(generation.getId(), "새로운 기수가 생성되었습니다.");
     }
@@ -92,6 +98,9 @@ public class GenerationService {
 
     public BasicResponse deleteOne(Long id) {
         generationRepository.deleteById(id);
+
+        log.info("기수 삭제 완료: {}기", id);
+
         return BasicResponse.of(id, "기수가 정상적으로 삭제되었습니다.");
     }
 
@@ -103,6 +112,8 @@ public class GenerationService {
 
         String updated = "[" + oldKoname + " -> " + devpart.getKoname() + "]";
 
+        log.info("{}기 파트 한글명 수정 {}", generationId, updated);
+
         return BasicResponse.of(generationId, "해당 기수의 파트 한글명이 수정되었습니다. " + updated);
     }
 
@@ -110,6 +121,8 @@ public class GenerationService {
 
         String deleted = "[" + devpartDto.getName() + ", " + devpartDto.getKoname() + "]";
         devpartRepository.deleteByNameAndGenerationId(devpartDto.getName(), generationId);
+
+        log.info("{}기 파트 삭제 {}", generationId, deleted);
 
         return BasicResponse.of(generationId, "해당 기수의 개발 파트를 삭제하였습니다. " + deleted);
     }
