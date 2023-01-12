@@ -5,6 +5,7 @@ import lombok.Getter;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 public class GenerationRequest {
@@ -26,4 +27,7 @@ public class GenerationRequest {
     private String recruitUrl;
     private String submitUrl;
     private String submitResultUrl;
+
+    @NotNull(message = "개발 파트를 입력해주세요.")
+    private List<DevpartDto> devparts;
 }

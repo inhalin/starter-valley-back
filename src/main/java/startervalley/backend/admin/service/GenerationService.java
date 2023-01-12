@@ -3,13 +3,16 @@ package startervalley.backend.admin.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import startervalley.backend.admin.dto.generation.DevpartDto;
 import startervalley.backend.admin.dto.generation.GenerationRequest;
 import startervalley.backend.admin.dto.generation.GenerationResponse;
 import startervalley.backend.admin.dto.generation.GenerationUpdateRequest;
 import startervalley.backend.dto.common.BasicResponse;
+import startervalley.backend.entity.Devpart;
 import startervalley.backend.entity.Generation;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.ResourceNotValidException;
+import startervalley.backend.repository.DevpartRepository;
 import startervalley.backend.repository.UserRepository;
 import startervalley.backend.repository.generation.GenerationRepository;
 import startervalley.backend.util.CodeGenerator;
@@ -23,6 +26,7 @@ public class GenerationService {
 
     private final GenerationRepository generationRepository;
     private final UserRepository userRepository;
+    private final DevpartRepository devpartRepository;
 
     @Transactional
     public BasicResponse createOne(GenerationRequest request) {
@@ -45,6 +49,10 @@ public class GenerationService {
                 .build();
 
         generationRepository.save(generation);
+
+        request.getDevparts().stream()
+                .map(DevpartDto::validate)
+                .forEach(devpart -> devpartRepository.save(Devpart.mapToEntity(devpart.getName(), devpart.getKoname(), generation.getId())));
 
         return BasicResponse.of(generation.getId(), "새로운 기수가 생성되었습니다.");
     }
