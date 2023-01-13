@@ -15,10 +15,10 @@ public class GenerationRequest {
     private Long generation;
 
     @NotNull(message = "교육 시작일을 입력해주세요.")
-    private LocalDate courseStartDate;
+    private LocalDate startDate;
 
     @NotNull(message = "교육 종료일을 입력해주세요.")
-    private LocalDate courseEndDate;
+    private LocalDate endDate;
 
     private String description;
     private Double latitude;

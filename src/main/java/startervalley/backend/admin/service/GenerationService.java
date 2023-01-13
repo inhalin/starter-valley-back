@@ -39,8 +39,8 @@ public class GenerationService {
         Generation generation = Generation.builder()
                 .id(request.getGeneration())
                 .code(CodeGenerator.generateRandom())
-                .courseStartDate(request.getCourseStartDate())
-                .courseEndDate(request.getCourseEndDate())
+                .courseStartDate(request.getStartDate())
+                .courseEndDate(request.getEndDate())
                 .description(request.getDescription())
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
@@ -48,6 +48,7 @@ public class GenerationService {
                 .address2(request.getAddress2())
                 .recruitUrl(request.getRecruitUrl())
                 .submitUrl(request.getSubmitUrl())
+                .submitResultUrl(request.getSubmitResultUrl())
                 .build();
 
         generationRepository.save(generation);
