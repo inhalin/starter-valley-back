@@ -13,7 +13,7 @@ import startervalley.backend.entity.Devpart;
 import startervalley.backend.entity.Generation;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.ResourceNotValidException;
-import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.repository.devpart.DevpartRepository;
 import startervalley.backend.repository.generation.GenerationRepository;
 import startervalley.backend.util.CodeGenerator;

@@ -11,7 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.entity.User;
 import startervalley.backend.repository.attendance.AttendanceRepository;
-import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.user.UserRepository;
 
 import java.util.List;
 

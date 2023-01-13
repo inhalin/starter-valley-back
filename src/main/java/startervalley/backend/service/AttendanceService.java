@@ -24,7 +24,7 @@ import startervalley.backend.exception.AttendanceWeekendException;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.attendance.AttendanceRepository;
 import startervalley.backend.repository.HolidayRepository;
-import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.util.GoogleSpreadSheet;
 
 import java.io.IOException;

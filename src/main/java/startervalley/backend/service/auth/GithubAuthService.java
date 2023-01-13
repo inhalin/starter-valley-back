@@ -7,7 +7,7 @@ import startervalley.backend.dto.auth.AuthResponse;
 import startervalley.backend.dto.auth.GithubUserResponse;
 import startervalley.backend.entity.Role;
 import startervalley.backend.entity.User;
-import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.security.auth.client.ClientGithub;
 import startervalley.backend.security.jwt.JwtTokenProvider;
 

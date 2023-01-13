@@ -13,7 +13,7 @@ import startervalley.backend.entity.AdminUser;
 import startervalley.backend.entity.Role;
 import startervalley.backend.entity.User;
 import startervalley.backend.exception.TokenNotValidException;
-import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.repository.adminuser.AdminUserRepository;
 import startervalley.backend.security.auth.AdminUserDetails;
 import startervalley.backend.security.auth.CustomUserDetails;

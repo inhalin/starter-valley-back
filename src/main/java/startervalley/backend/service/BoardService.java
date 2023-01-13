@@ -17,7 +17,7 @@ import startervalley.backend.exception.NotOwnerException;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.BoardCommentRepository;
 import startervalley.backend.repository.BoardRepository;
-import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.user.UserRepository;
 
 import java.util.List;
 import java.util.Objects;
