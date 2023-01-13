@@ -105,6 +105,18 @@ public class GenerationService {
         log.info("기수 삭제 완료: {}기", id);
     }
 
+    public BasicResponse createDevpart(Long generationId, DevpartDto devpartDto) {
+
+        Devpart devpart = Devpart.mapToEntity(devpartDto.getName(), devpartDto.getKoname(), generationId);
+        devpartRepository.save(devpart);
+
+        String created = "[" + devpart.getName() + ", " + devpart.getKoname() + "]";
+
+        log.info("{}기 파트 생성 {}", generationId, created);
+
+        return BasicResponse.of(generationId, "해당 기수에 새로운 파트가 생성되었습니다. " + created);
+    }
+
     public BasicResponse updateDevpart(Long generationId, DevpartDto devpartDto) {
 
         Devpart devpart = devpartRepository.findByNameAndGenerationId(devpartDto.getName(), generationId);
