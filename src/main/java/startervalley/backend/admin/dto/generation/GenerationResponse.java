@@ -25,12 +25,13 @@ public class GenerationResponse {
 
     private String description;
     private String recruitUrl;
-    private String submissionUrl;
+    private String submitUrl;
+    private String submitResultUrl;
     private String location;
     private Double latitude;
     private Double longitude;
     private int total;
-    private int dropouts;
+    private long dropouts;
 
     private List<DevpartDto> devparts;
 
@@ -44,9 +45,10 @@ public class GenerationResponse {
                 .latitude(generation.getLatitude())
                 .longitude(generation.getLongitude())
                 .recruitUrl(generation.getRecruitUrl())
-                .submissionUrl(generation.getSubmitUrl())
+                .submitUrl(generation.getSubmitUrl())
+                .submitResultUrl(generation.getSubmitResultUrl())
                 .total(users.size())
-                .dropouts((int) users.stream().filter(u -> !u.isActive()).count())
+                .dropouts(users.stream().filter(u -> !u.isActive()).count())
                 .devparts(devparts.stream().map(DevpartDto::mapToDto).toList())
                 .build();
     }
