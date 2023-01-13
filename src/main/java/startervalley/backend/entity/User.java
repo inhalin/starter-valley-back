@@ -133,4 +133,9 @@ public class User extends BaseTimeEntity {
         this.dropoutDate = dropoutDate;
         this.dropoutReason = reason;
     }
+
+    public void setTeamInfo(Team team, boolean isLeader) {
+        this.team = team;
+        this.isLeader = isLeader;
+    }
 }

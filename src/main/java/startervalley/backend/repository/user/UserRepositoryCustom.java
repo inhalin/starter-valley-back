@@ -7,4 +7,6 @@ import java.util.List;
 public interface UserRepositoryCustom {
 
     List<User> listAvailableForTeamByGenerationId(Long generationId);
+
+    List<User> findAllByTeamId(Long teamId);
 }

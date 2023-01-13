@@ -4,10 +4,10 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static javax.persistence.GenerationType.IDENTITY;
 
@@ -28,11 +28,15 @@ public class Team {
     private String notionUrl;
     private String releaseUrl;
 
+    @OneToMany(mappedBy = "team")
+    private List<User> users = new ArrayList<>();
+
     @Builder
-    public Team(String name, String description, String notionUrl, String releaseUrl) {
+    public Team(String name, String description, String notionUrl, String releaseUrl, List<User> users) {
         this.name = name;
         this.description = description;
         this.notionUrl = notionUrl;
         this.releaseUrl = releaseUrl;
+        this.users = users;
     }
 }

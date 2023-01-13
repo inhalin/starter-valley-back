@@ -4,12 +4,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.admin.dto.team.TeamRequest;
+import startervalley.backend.admin.dto.team.TeamResponse;
+import startervalley.backend.admin.dto.team.TeamUserDto;
 import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.entity.Team;
-import startervalley.backend.entity.TeamUser;
-import startervalley.backend.entity.TeamUserId;
+import startervalley.backend.entity.User;
+import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.team.TeamRepository;
-import startervalley.backend.repository.team.TeamUserRepository;
+import startervalley.backend.repository.user.UserRepository;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,7 +21,7 @@ import startervalley.backend.repository.team.TeamUserRepository;
 public class TeamService {
 
     private final TeamRepository teamRepository;
-    private final TeamUserRepository teamUserRepository;
+    private final UserRepository userRepository;
 
     public BasicResponse createOne(TeamRequest request) {
 
@@ -29,11 +33,26 @@ public class TeamService {
                 .build();
         teamRepository.save(team);
 
-        teamUserRepository.save(TeamUser.of(TeamUserId.of(team.getId(), request.getLeader()), true));
+        User user = userRepository.findById(request.getLeader())
+                .orElseThrow(() -> new ResourceNotFoundException("User", "id", request.getLeader().toString()));
+        user.setTeamInfo(team, true);
 
-        request.getTeammates()
-                .forEach(teammate -> teamUserRepository.save(TeamUser.of(TeamUserId.of(team.getId(), teammate), false)));
+        request.getTeammates().stream()
+                .map(userId -> userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId.toString())))
+                .forEach(teammate -> teammate.setTeamInfo(team, false));
 
         return BasicResponse.of(team.getId(), "팀이 생성되었습니다.");
+    }
+
+    public TeamResponse getOne(Long id) {
+
+        Team team = teamRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Team", "id", id.toString()));
+
+        List<TeamUserDto> teamUserDtos = userRepository.findAllByTeamId(id).stream()
+                .map(TeamUserDto::mapToDto)
+                .toList();
+
+        return TeamResponse.mapToResponse(team, teamUserDtos);
     }
 }
