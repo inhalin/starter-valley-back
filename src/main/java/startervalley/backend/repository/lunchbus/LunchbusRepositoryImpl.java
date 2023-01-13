@@ -30,7 +30,8 @@ public class LunchbusRepositoryImpl implements LunchbusRepositoryCustom {
                         lunchbus.occupancy.as("limit"),
                         lunchbus.count,
                         lunchbus.driver.name.as("driverName"),
-                        lunchbus.driver.imageUrl.as("driverImageUrl")
+                        lunchbus.driver.imageUrl.as("driverImageUrl"),
+                        lunchbus.closedDate.as("closeAt")
                 ))
                 .from(lunchbus)
                 .where(lunchbus.active.eq(true),
