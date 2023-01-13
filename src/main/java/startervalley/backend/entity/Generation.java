@@ -27,7 +27,8 @@ public class Generation extends BaseTimeEntity {
     private String code;
 
     private String description;
-    private String location;
+    private String address1;
+    private String address2;
     private Double latitude;
     private Double longitude;
     private LocalDate courseStartDate;
@@ -41,11 +42,12 @@ public class Generation extends BaseTimeEntity {
     private List<User> users = new ArrayList<>();
 
     @Builder
-    public Generation(Long id, String code, String description, String location, Double latitude, Double longitude, LocalDate courseStartDate, LocalDate courseEndDate, String recruitUrl, String submitUrl, String submitResultUrl, List<User> users) {
+    public Generation(Long id, String code, String description, String address1, String address2, Double latitude, Double longitude, LocalDate courseStartDate, LocalDate courseEndDate, String recruitUrl, String submitUrl, String submitResultUrl, List<User> users) {
         this.id = id;
         this.code = code;
         this.description = description;
-        this.location = location;
+        this.address1 = address1;
+        this.address2 = address2;
         this.latitude = latitude;
         this.longitude = longitude;
         this.courseStartDate = courseStartDate;
@@ -56,11 +58,12 @@ public class Generation extends BaseTimeEntity {
         this.users = users;
     }
 
-    public void update(LocalDate courseStartDate, LocalDate courseEndDate, String description, String location, Double latitude, Double longitude, String recruitUrl, String submitUrl, String submitResultUrl) {
+    public void update(LocalDate courseStartDate, LocalDate courseEndDate, String description, String address1, String address2, Double latitude, Double longitude, String recruitUrl, String submitUrl, String submitResultUrl) {
         this.courseStartDate = courseStartDate;
         this.courseEndDate = courseEndDate;
         this.description = description;
-        this.location = location;
+        this.address1 = address1;
+        this.address2 = address2;
         this.latitude = latitude;
         this.longitude = longitude;
         this.recruitUrl = recruitUrl;

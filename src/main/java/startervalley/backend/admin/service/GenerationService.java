@@ -44,7 +44,8 @@ public class GenerationService {
                 .description(request.getDescription())
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
-                .location(request.getLocation())
+                .address1(request.getAddress1())
+                .address2(request.getAddress2())
                 .recruitUrl(request.getRecruitUrl())
                 .submitUrl(request.getSubmitUrl())
                 .build();
@@ -86,7 +87,8 @@ public class GenerationService {
         generation.update(request.getCourseStartDate(),
                 request.getCourseEndDate(),
                 request.getDescription() != null ? request.getDescription() : generation.getDescription(),
-                request.getLocation() != null ? request.getLocation() : generation.getLocation(),
+                request.getAddress1() != null ? request.getAddress1() : generation.getAddress1(),
+                request.getAddress2() != null ? request.getAddress2() : generation.getAddress2(),
                 request.getLatitude() != null ? request.getLatitude() : generation.getLatitude(),
                 request.getLongitude() != null ? request.getLongitude() : generation.getLongitude(),
                 request.getRecruitUrl() != null ? request.getRecruitUrl() : generation.getRecruitUrl(),
