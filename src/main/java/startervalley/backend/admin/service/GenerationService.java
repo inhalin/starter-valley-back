@@ -13,7 +13,7 @@ import startervalley.backend.entity.Devpart;
 import startervalley.backend.entity.Generation;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.ResourceNotValidException;
-import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.repository.devpart.DevpartRepository;
 import startervalley.backend.repository.generation.GenerationRepository;
 import startervalley.backend.util.CodeGenerator;
@@ -85,8 +85,8 @@ public class GenerationService {
         Generation generation = generationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Generation", "id", id.toString()));
 
-        generation.update(request.getCourseStartDate(),
-                request.getCourseEndDate(),
+        generation.update(request.getStartDate(),
+                request.getEndDate(),
                 request.getDescription() != null ? request.getDescription() : generation.getDescription(),
                 request.getAddress1() != null ? request.getAddress1() : generation.getAddress1(),
                 request.getAddress2() != null ? request.getAddress2() : generation.getAddress2(),
@@ -95,10 +95,6 @@ public class GenerationService {
                 request.getRecruitUrl() != null ? request.getRecruitUrl() : generation.getRecruitUrl(),
                 request.getSubmitUrl() != null ? request.getSubmitUrl() : generation.getSubmitUrl(),
                 request.getSubmitResultUrl() != null ? request.getSubmitResultUrl() : generation.getSubmitResultUrl());
-
-        if (request.getDevparts() != null) {
-            request.getDevparts().forEach(devpartDto -> updateDevpart(id, devpartDto));
-        }
 
         return BasicResponse.of(generation.getId(), "기수 상세 내용이 수정되었습니다.");
     }

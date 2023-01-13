@@ -10,7 +10,7 @@ import startervalley.backend.entity.AttendanceId;
 import startervalley.backend.entity.User;
 import startervalley.backend.repository.attendance.AttendanceRepository;
 import startervalley.backend.repository.HolidayRepository;
-import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.service.AttendanceService;
 
 import java.time.DayOfWeek;

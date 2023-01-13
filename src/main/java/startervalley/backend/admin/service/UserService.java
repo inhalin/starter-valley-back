@@ -12,7 +12,7 @@ import startervalley.backend.entity.User;
 import startervalley.backend.exception.CustomValidationException;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.UserNotValidException;
-import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.repository.adminuser.AdminUserRepository;
 import startervalley.backend.repository.attendance.AttendanceRepository;
 import startervalley.backend.repository.generation.GenerationRepository;
@@ -147,6 +147,13 @@ public class UserService {
 
         user.updateDropout(request.getDropoutDate(), request.getReason());
 
-        return BasicResponse.of(user.getId(),  "중도 하차 상세 내용이 정상적으로 변경되었습니다.");
+        return BasicResponse.of(user.getId(), "중도 하차 상세 내용이 정상적으로 변경되었습니다.");
+    }
+
+    public List<UserSimpleDto> listAvailableForTeamByGenerationId(Long generationId) {
+        return userRepository.listAvailableForTeamByGenerationId(generationId)
+                .stream()
+                .map(user -> UserSimpleDto.of(user.getId(), user.getName()))
+                .toList();
     }
 }

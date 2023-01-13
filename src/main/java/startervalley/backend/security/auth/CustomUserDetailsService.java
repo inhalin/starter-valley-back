@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import startervalley.backend.entity.User;
 import startervalley.backend.exception.ResourceNotFoundException;
-import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.user.UserRepository;
 
 @Service
 @RequiredArgsConstructor

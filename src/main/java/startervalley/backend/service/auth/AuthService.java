@@ -11,7 +11,7 @@ import startervalley.backend.dto.auth.SignupRequest;
 import startervalley.backend.entity.*;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.TokenNotValidException;
-import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.repository.devpart.DevpartRepository;
 import startervalley.backend.repository.generation.GenerationRepository;
 import startervalley.backend.security.auth.CustomUserDetails;
