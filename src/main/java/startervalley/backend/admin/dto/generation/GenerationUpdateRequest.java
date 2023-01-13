@@ -4,6 +4,7 @@ import lombok.Getter;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 public class GenerationUpdateRequest {
@@ -22,4 +23,5 @@ public class GenerationUpdateRequest {
     private String recruitUrl;
     private String submitUrl;
     private String submitResultUrl;
+    private List<DevpartDto> devparts;
 }
