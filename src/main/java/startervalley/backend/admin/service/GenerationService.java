@@ -85,8 +85,8 @@ public class GenerationService {
         Generation generation = generationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Generation", "id", id.toString()));
 
-        generation.update(request.getCourseStartDate(),
-                request.getCourseEndDate(),
+        generation.update(request.getStartDate(),
+                request.getEndDate(),
                 request.getDescription() != null ? request.getDescription() : generation.getDescription(),
                 request.getAddress1() != null ? request.getAddress1() : generation.getAddress1(),
                 request.getAddress2() != null ? request.getAddress2() : generation.getAddress2(),
