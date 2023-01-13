@@ -27,7 +27,8 @@ public class GenerationResponse {
     private String recruitUrl;
     private String submitUrl;
     private String submitResultUrl;
-    private String location;
+    private String address1;
+    private String address2;
     private Double latitude;
     private Double longitude;
     private int total;
@@ -41,7 +42,8 @@ public class GenerationResponse {
                 .startDate(generation.getCourseStartDate())
                 .endDate(generation.getCourseEndDate())
                 .description(generation.getDescription())
-                .location(generation.getLocation())
+                .address1(generation.getAddress1())
+                .address2(generation.getAddress2())
                 .latitude(generation.getLatitude())
                 .longitude(generation.getLongitude())
                 .recruitUrl(generation.getRecruitUrl())

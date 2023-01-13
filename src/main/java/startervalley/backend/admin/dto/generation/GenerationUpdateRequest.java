@@ -4,6 +4,7 @@ import lombok.Getter;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.List;
 
 @Getter
 public class GenerationUpdateRequest {
@@ -17,8 +18,10 @@ public class GenerationUpdateRequest {
     private String description;
     private Double latitude;
     private Double longitude;
-    private String location;
+    private String address1;
+    private String address2;
     private String recruitUrl;
     private String submitUrl;
     private String submitResultUrl;
+    private List<DevpartDto> devparts;
 }

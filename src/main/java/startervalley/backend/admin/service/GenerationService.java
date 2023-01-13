@@ -39,14 +39,16 @@ public class GenerationService {
         Generation generation = Generation.builder()
                 .id(request.getGeneration())
                 .code(CodeGenerator.generateRandom())
-                .courseStartDate(request.getCourseStartDate())
-                .courseEndDate(request.getCourseEndDate())
+                .courseStartDate(request.getStartDate())
+                .courseEndDate(request.getEndDate())
                 .description(request.getDescription())
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
-                .location(request.getLocation())
+                .address1(request.getAddress1())
+                .address2(request.getAddress2())
                 .recruitUrl(request.getRecruitUrl())
                 .submitUrl(request.getSubmitUrl())
+                .submitResultUrl(request.getSubmitResultUrl())
                 .build();
 
         generationRepository.save(generation);
@@ -86,22 +88,25 @@ public class GenerationService {
         generation.update(request.getCourseStartDate(),
                 request.getCourseEndDate(),
                 request.getDescription() != null ? request.getDescription() : generation.getDescription(),
-                request.getLocation() != null ? request.getLocation() : generation.getLocation(),
+                request.getAddress1() != null ? request.getAddress1() : generation.getAddress1(),
+                request.getAddress2() != null ? request.getAddress2() : generation.getAddress2(),
                 request.getLatitude() != null ? request.getLatitude() : generation.getLatitude(),
                 request.getLongitude() != null ? request.getLongitude() : generation.getLongitude(),
                 request.getRecruitUrl() != null ? request.getRecruitUrl() : generation.getRecruitUrl(),
                 request.getSubmitUrl() != null ? request.getSubmitUrl() : generation.getSubmitUrl(),
                 request.getSubmitResultUrl() != null ? request.getSubmitResultUrl() : generation.getSubmitResultUrl());
 
+        if (request.getDevparts() != null) {
+            request.getDevparts().forEach(devpartDto -> updateDevpart(id, devpartDto));
+        }
+
         return BasicResponse.of(generation.getId(), "기수 상세 내용이 수정되었습니다.");
     }
 
-    public BasicResponse deleteOne(Long id) {
+    public void deleteOne(Long id) {
         generationRepository.deleteById(id);
 
         log.info("기수 삭제 완료: {}기", id);
-
-        return BasicResponse.of(id, "기수가 정상적으로 삭제되었습니다.");
     }
 
     public BasicResponse updateDevpart(Long generationId, DevpartDto devpartDto) {
@@ -117,13 +122,11 @@ public class GenerationService {
         return BasicResponse.of(generationId, "해당 기수의 파트 한글명이 수정되었습니다. " + updated);
     }
 
-    public BasicResponse deleteDevpart(Long generationId, DevpartDto devpartDto) {
+    public void deleteDevpart(Long generationId, DevpartDto devpartDto) {
 
         String deleted = "[" + devpartDto.getName() + ", " + devpartDto.getKoname() + "]";
         devpartRepository.deleteByNameAndGenerationId(devpartDto.getName(), generationId);
 
         log.info("{}기 파트 삭제 {}", generationId, deleted);
-
-        return BasicResponse.of(generationId, "해당 기수의 개발 파트를 삭제하였습니다. " + deleted);
     }
 }

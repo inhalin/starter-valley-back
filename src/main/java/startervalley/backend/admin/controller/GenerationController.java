@@ -40,7 +40,8 @@ public class GenerationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<BasicResponse> delete(@PathVariable Long id) {
-        return ResponseEntity.ok(generationService.deleteOne(id));
+        generationService.deleteOne(id);
+        return ResponseEntity.noContent().build();
     }
 
     @PutMapping("/{generationId}/devparts")
@@ -52,6 +53,7 @@ public class GenerationController {
     @DeleteMapping("/{generationId}/devparts")
     public ResponseEntity<BasicResponse> deleteDevpart(@PathVariable Long generationId,
                                                        @RequestBody DevpartDto devpart) {
-        return ResponseEntity.ok(generationService.deleteDevpart(generationId, devpart));
+        generationService.deleteDevpart(generationId, devpart);
+        return ResponseEntity.noContent().build();
     }
 }
