@@ -102,12 +102,10 @@ public class GenerationService {
         return BasicResponse.of(generation.getId(), "기수 상세 내용이 수정되었습니다.");
     }
 
-    public BasicResponse deleteOne(Long id) {
+    public void deleteOne(Long id) {
         generationRepository.deleteById(id);
 
         log.info("기수 삭제 완료: {}기", id);
-
-        return BasicResponse.of(id, "기수가 정상적으로 삭제되었습니다.");
     }
 
     public BasicResponse updateDevpart(Long generationId, DevpartDto devpartDto) {
@@ -123,13 +121,11 @@ public class GenerationService {
         return BasicResponse.of(generationId, "해당 기수의 파트 한글명이 수정되었습니다. " + updated);
     }
 
-    public BasicResponse deleteDevpart(Long generationId, DevpartDto devpartDto) {
+    public void deleteDevpart(Long generationId, DevpartDto devpartDto) {
 
         String deleted = "[" + devpartDto.getName() + ", " + devpartDto.getKoname() + "]";
         devpartRepository.deleteByNameAndGenerationId(devpartDto.getName(), generationId);
 
         log.info("{}기 파트 삭제 {}", generationId, deleted);
-
-        return BasicResponse.of(generationId, "해당 기수의 개발 파트를 삭제하였습니다. " + deleted);
     }
 }
