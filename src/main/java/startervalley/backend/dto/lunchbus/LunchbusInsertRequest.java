@@ -1,11 +1,13 @@
 package startervalley.backend.dto.lunchbus;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 
 @Getter
 public class LunchbusInsertRequest {
@@ -13,7 +15,7 @@ public class LunchbusInsertRequest {
     @NotEmpty(message = "제목은 필수입니다.")
     private String title;
 
-    @NotEmpty(message = "상세 설명을 필수입니다.")
+    @NotEmpty(message = "상세 설명은 필수입니다.")
     @Size(max = 300, message = "상세 설명은 300자를 초과할 수 없습니다.")
     private String description;
 
@@ -23,4 +25,7 @@ public class LunchbusInsertRequest {
 
     private String storeName;
     private String storeUrl;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime closeAt;
 }

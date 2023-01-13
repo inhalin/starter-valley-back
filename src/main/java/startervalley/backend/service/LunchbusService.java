@@ -50,6 +50,7 @@ public class LunchbusService {
                 .count(1)
                 .storeName(request.getStoreName())
                 .storeUrl(request.getStoreUrl())
+                .closedDate(request.getCloseAt())
                 .active(true)
                 .build();
 
@@ -91,6 +92,7 @@ public class LunchbusService {
                 .passengers(passengers)
                 .storeName(bus.getStoreName())
                 .storeUrl(bus.getStoreUrl())
+                .closeAt(bus.getClosedDate())
                 .build();
     }
 
