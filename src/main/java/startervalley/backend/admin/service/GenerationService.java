@@ -96,10 +96,6 @@ public class GenerationService {
                 request.getSubmitUrl() != null ? request.getSubmitUrl() : generation.getSubmitUrl(),
                 request.getSubmitResultUrl() != null ? request.getSubmitResultUrl() : generation.getSubmitResultUrl());
 
-        if (request.getDevparts() != null) {
-            request.getDevparts().forEach(devpartDto -> updateDevpart(id, devpartDto));
-        }
-
         return BasicResponse.of(generation.getId(), "기수 상세 내용이 수정되었습니다.");
     }
 
