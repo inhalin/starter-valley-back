@@ -11,11 +11,12 @@ import startervalley.backend.admin.dto.generation.GenerationUpdateRequest;
 import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.entity.Devpart;
 import startervalley.backend.entity.Generation;
+import startervalley.backend.entity.User;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.ResourceNotValidException;
-import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.repository.devpart.DevpartRepository;
 import startervalley.backend.repository.generation.GenerationRepository;
+import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.util.CodeGenerator;
 
 import java.util.List;
@@ -57,7 +58,9 @@ public class GenerationService {
 
         request.getDevparts().stream()
                 .map(DevpartDto::validate)
-                .forEach(devpart -> devpartRepository.save(Devpart.mapToEntity(devpart.getName(), devpart.getKoname(), generation.getId())));
+                .peek(devpartDto -> validateDuplicates(generation.getId(), devpartDto))
+                .map(devpartDto -> Devpart.mapToEntity(devpartDto.getName(), devpartDto.getKoname(), generation.getId()))
+                .forEach(devpartRepository::save);
 
         log.info("파트 생성 완료: {}", request.getDevparts().stream().map(devpartDto -> "{" + devpartDto.getName() + ", " + devpartDto.getKoname() + "}").toList());
 
@@ -74,16 +77,16 @@ public class GenerationService {
     @Transactional(readOnly = true)
     public GenerationResponse getOne(Long id) {
 
-        Generation generation = generationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Generation", "id", id.toString()));
+        Generation generation = getGenerationOrElseThrow(id);
+        List<User> users = userRepository.findAllByGenerationId(generation.getId());
+        List<Devpart> devparts = devpartRepository.findAllByGenerationId(generation.getId());
 
-        return GenerationResponse.mapToResponse(generation, userRepository.findAllByGenerationId(generation.getId()), devpartRepository.findAllByGenerationId(generation.getId()));
+        return GenerationResponse.mapToResponse(generation, users, devparts);
     }
 
     public BasicResponse updateOne(Long id, GenerationUpdateRequest request) {
 
-        Generation generation = generationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Generation", "id", id.toString()));
+        Generation generation = getGenerationOrElseThrow(id);
 
         generation.update(request.getStartDate(),
                 request.getEndDate(),
@@ -100,14 +103,35 @@ public class GenerationService {
     }
 
     public void deleteOne(Long id) {
-        generationRepository.deleteById(id);
+
+        Generation generation = getGenerationOrElseThrow(id);
+
+        if (userRepository.existsByGeneration(generation)) {
+            throw new ResourceNotValidException("사용중인 기수는 삭제할 수 없습니다.");
+        }
+
+        generationRepository.delete(generation);
 
         log.info("기수 삭제 완료: {}기", id);
     }
 
+    public BasicResponse createDevpart(Long generationId, DevpartDto devpartDto) {
+
+        validateDuplicates(generationId, devpartDto);
+
+        Devpart devpart = Devpart.mapToEntity(devpartDto.getName(), devpartDto.getKoname(), generationId);
+        devpartRepository.save(devpart);
+
+        String created = "[" + devpart.getName() + ", " + devpart.getKoname() + "]";
+
+        log.info("{}기 파트 생성 {}", generationId, created);
+
+        return BasicResponse.of(generationId, "해당 기수에 새로운 파트가 생성되었습니다. " + created);
+    }
+
     public BasicResponse updateDevpart(Long generationId, DevpartDto devpartDto) {
 
-        Devpart devpart = devpartRepository.findByNameAndGenerationId(devpartDto.getName(), generationId);
+        Devpart devpart = getDevpartOrElseThrow(generationId, devpartDto);
         String oldKoname = devpart.getKoname();
         devpart.updateKoname(devpartDto.getKoname());
 
@@ -120,9 +144,31 @@ public class GenerationService {
 
     public void deleteDevpart(Long generationId, DevpartDto devpartDto) {
 
-        String deleted = "[" + devpartDto.getName() + ", " + devpartDto.getKoname() + "]";
-        devpartRepository.deleteByNameAndGenerationId(devpartDto.getName(), generationId);
+        Devpart devpart = getDevpartOrElseThrow(generationId, devpartDto);
+
+        if (userRepository.existsByDevpart(devpart)) {
+            throw new ResourceNotValidException("사용중인 파트는 삭제할 수 없습니다.");
+        }
+
+        String deleted = "[" + devpart.getName() + ", " + devpart.getKoname() + "]";
+        devpartRepository.delete(devpart);
 
         log.info("{}기 파트 삭제 {}", generationId, deleted);
+    }
+
+    private Generation getGenerationOrElseThrow(Long id) {
+        return generationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Generation", "id", id.toString()));
+    }
+
+    private void validateDuplicates(Long generationId, DevpartDto devpartDto) {
+        if (devpartRepository.existsByNameAndGenerationId(devpartDto.getName(), generationId)) {
+            throw new ResourceNotValidException("동일 기수 내에서 동일한 파트 영문명은 사용할 수 없습니다.");
+        }
+    }
+
+    private Devpart getDevpartOrElseThrow(Long generationId, DevpartDto devpartDto) {
+        return devpartRepository.findByNameAndGenerationId(devpartDto.getName(), generationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Devpart", "name", devpartDto.getName()));
     }
 }

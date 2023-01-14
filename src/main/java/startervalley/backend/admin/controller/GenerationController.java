@@ -44,6 +44,12 @@ public class GenerationController {
         return ResponseEntity.noContent().build();
     }
 
+    @PostMapping("/{generationId}/devparts")
+    public ResponseEntity<BasicResponse> createDevpart(@PathVariable Long generationId,
+                                                       @RequestBody DevpartDto devpart) {
+        return ResponseEntity.ok(generationService.createDevpart(generationId, devpart));
+    }
+
     @PutMapping("/{generationId}/devparts")
     public ResponseEntity<BasicResponse> updateDevpart(@PathVariable Long generationId,
                                                        @RequestBody DevpartDto devpart) {
