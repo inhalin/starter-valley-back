@@ -7,16 +7,15 @@ import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.DynamicInsert;
 
 import javax.persistence.*;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static javax.persistence.CascadeType.*;
-import static javax.persistence.EnumType.*;
-import static javax.persistence.FetchType.*;
-import static javax.persistence.GenerationType.*;
+import static javax.persistence.CascadeType.ALL;
+import static javax.persistence.EnumType.STRING;
+import static javax.persistence.FetchType.LAZY;
+import static javax.persistence.GenerationType.IDENTITY;
 
 @DynamicInsert
 @Entity
@@ -48,7 +47,7 @@ public class User extends BaseTimeEntity {
     @JoinColumn(name = "team_id")
     private Team team;
 
-    @Column(columnDefinition="tinyint(1) default 0")
+    @Column(columnDefinition = "tinyint(1) default 0")
     private Boolean isLeader;
 
     @ManyToOne(fetch = LAZY)
@@ -137,5 +136,15 @@ public class User extends BaseTimeEntity {
     public void setTeamInfo(Team team, boolean isLeader) {
         this.team = team;
         this.isLeader = isLeader;
+
+        if (!this.team.getUsers().contains(this)) {
+            this.team.getUsers().add(this);
+        }
+    }
+
+    public void removeTeamInfo() {
+        this.team.getUsers().remove(this);
+        this.team = null;
+        this.isLeader = false;
     }
 }

@@ -45,4 +45,11 @@ public class Team {
         this.users = users;
         this.generation = generation;
     }
+
+    public void update(String name, String description, String notionUrl, String releaseUrl) {
+        this.name = name;
+        this.description = description;
+        this.notionUrl = notionUrl;
+        this.releaseUrl = releaseUrl;
+    }
 }
