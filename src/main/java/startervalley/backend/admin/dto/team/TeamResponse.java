@@ -11,6 +11,7 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class TeamResponse {
+    private Long generation;
     private Long teamId;
     private String name;
     private String notionUrl;
@@ -20,6 +21,7 @@ public class TeamResponse {
 
     public static TeamResponse mapToResponse(Team team, List<TeamUserDto> teamUserDtos) {
         return TeamResponse.builder()
+                .generation(team.getGeneration().getId())
                 .teamId(team.getId())
                 .name(team.getName())
                 .notionUrl(team.getNotionUrl())
