@@ -12,7 +12,7 @@ import startervalley.backend.entity.Inquiry;
 import startervalley.backend.entity.InquiryTarget;
 import startervalley.backend.entity.Role;
 import startervalley.backend.entity.User;
-import startervalley.backend.event.InquiryEventPublisher;
+import startervalley.backend.event.inquiry.InquiryEventPublisher;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.inquiry.InquiryRepository;
 

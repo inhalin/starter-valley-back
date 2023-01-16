@@ -46,12 +46,12 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("available/generations")
+    @GetMapping("/available/generations")
     public ResponseEntity<List<Long>> listAvailableGenerations() {
         return ResponseEntity.ok(authService.getAvailableGenerations());
     }
 
-    @GetMapping("available/devpart")
+    @GetMapping("/available/devparts")
     public ResponseEntity<List<AvailableDevpart>> listAvailableDevparts(@RequestParam("generation") Long generationId) {
         return ResponseEntity.ok(authService.getAvailableDevparts(generationId));
     }
