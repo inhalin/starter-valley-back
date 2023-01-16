@@ -54,4 +54,8 @@ public class AdminUser extends BaseTimeEntity {
         this.profile = profile;
         this.refreshToken = refreshToken;
     }
+
+    public void setRefreshToken(String token) {
+        this.refreshToken = token;
+    }
 }

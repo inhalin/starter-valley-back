@@ -42,6 +42,16 @@ public class AuthService {
     }
 
     @Transactional
+    public BasicResponse logout(Long id) {
+        AdminUser adminUser = adminUserRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("AdminUser", "id", id.toString()));
+
+        adminUser.setRefreshToken(null);
+
+        return BasicResponse.of(adminUser.getId(), "로그아웃 하였습니다.");
+    }
+
+    @Transactional
     public BasicResponse register(AuthRegisterRequest request) {
 
         if (isExistingUsername(request.getUsername())) {

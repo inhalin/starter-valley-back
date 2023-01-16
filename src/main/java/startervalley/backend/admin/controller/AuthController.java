@@ -27,6 +27,11 @@ public class AuthController {
         return ResponseEntity.ok(authService.login(request));
     }
 
+    @PostMapping("/logout")
+    public ResponseEntity<BasicResponse> logout(@AuthenticationPrincipal AdminUserDetails userDetails) {
+        return ResponseEntity.ok(authService.logout(userDetails.getId()));
+    }
+
     @PostMapping("/register")
     public ResponseEntity<BasicResponse> register(@Valid @RequestBody AuthRegisterRequest request) {
         return new ResponseEntity<>(authService.register(request), HttpStatus.CREATED);
