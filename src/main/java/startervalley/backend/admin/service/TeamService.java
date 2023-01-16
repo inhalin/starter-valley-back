@@ -71,7 +71,7 @@ public class TeamService {
 
     @Transactional(readOnly = true)
     public List<TeamListDto> list() {
-        return generationRepository.findAllGenerations().stream()
+        return generationRepository.findAll().stream()
                 .map(TeamListDto::mapToDto)
                 .toList();
     }

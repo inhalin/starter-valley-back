@@ -44,7 +44,7 @@ public class AuthService {
         User user = User.builder()
                 .provider(AuthProvider.valueOf(userData.get("provider")))
                 .providerId(userData.get("provider") + "_" + userData.get("id"))
-                .role(Role.valueOf(userData.get("role")))
+                .role(Role.USER)
                 .githubUrl(userData.get("githubUrl"))
                 .imageUrl(userData.get("imageUrl"))
                 .email(userData.get("email"))
