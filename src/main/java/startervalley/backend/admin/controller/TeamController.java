@@ -3,6 +3,7 @@ package startervalley.backend.admin.controller;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import startervalley.backend.admin.dto.team.TeamListDto;
 import startervalley.backend.admin.dto.team.TeamRequest;
 import startervalley.backend.admin.dto.team.TeamResponse;
 import startervalley.backend.admin.dto.user.UserSimpleDto;
@@ -34,5 +35,10 @@ public class TeamController {
     @GetMapping("/{id}")
     public ResponseEntity<TeamResponse> get(@PathVariable Long id) {
         return ResponseEntity.ok(teamService.getOne(id));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<TeamListDto>> list() {
+        return ResponseEntity.ok(teamService.list());
     }
 }

@@ -41,8 +41,11 @@ public class Generation extends BaseTimeEntity {
     @OneToMany(mappedBy = "generation")
     private List<User> users = new ArrayList<>();
 
+    @OneToMany(mappedBy = "generation")
+    private List<Team> teams = new ArrayList<>();
+
     @Builder
-    public Generation(Long id, String code, String description, String address1, String address2, Double latitude, Double longitude, LocalDate courseStartDate, LocalDate courseEndDate, String recruitUrl, String submitUrl, String submitResultUrl, List<User> users) {
+    public Generation(Long id, String code, String description, String address1, String address2, Double latitude, Double longitude, LocalDate courseStartDate, LocalDate courseEndDate, String recruitUrl, String submitUrl, String submitResultUrl, List<User> users, List<Team> teams) {
         this.id = id;
         this.code = code;
         this.description = description;
@@ -56,6 +59,7 @@ public class Generation extends BaseTimeEntity {
         this.submitUrl = submitUrl;
         this.submitResultUrl = submitResultUrl;
         this.users = users;
+        this.teams = teams;
     }
 
     public void update(LocalDate courseStartDate, LocalDate courseEndDate, String description, String address1, String address2, Double latitude, Double longitude, String recruitUrl, String submitUrl, String submitResultUrl) {
@@ -69,5 +73,9 @@ public class Generation extends BaseTimeEntity {
         this.recruitUrl = recruitUrl;
         this.submitUrl = submitUrl;
         this.submitResultUrl = submitResultUrl;
+    }
+
+    public void setTeam(Team team) {
+        this.teams.add(team);
     }
 }
