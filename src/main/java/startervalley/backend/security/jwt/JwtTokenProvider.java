@@ -67,7 +67,11 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String createAccessToken(String username) {
+    public String createAccessToken(AdminUser adminUser) {
+
+        AdminUserDetails userDetails = new AdminUserDetails(adminUser);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_LENGTH);
@@ -77,7 +81,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 .setClaims(claims)
-                .setSubject(username)
+                .setSubject(adminUser.getUsername())
                 .setIssuer(ISSUER)
                 .setIssuedAt(now)
                 .setExpiration(validity)
@@ -102,9 +106,13 @@ public class JwtTokenProvider {
     }
 
     private void saveRefreshToken(Authentication authentication, String refreshToken) {
-        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        if (authentication.getPrincipal() instanceof AdminUserDetails userDetails) {
+            adminUserRepository.updateRefreshToken(userDetails.getId(), refreshToken);
+            return;
+        }
 
-        userRepository.updateRefreshToken(user.getId(), refreshToken);
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        userRepository.updateRefreshToken(userDetails.getId(), refreshToken);
     }
 
     public Authentication getAuthentication(String accessToken) {

@@ -7,4 +7,5 @@ import lombok.Getter;
 @AllArgsConstructor(staticName = "of")
 public class AuthLoginResponse {
     private String accessToken;
+    private String refreshToken;
 }

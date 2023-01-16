@@ -35,9 +35,10 @@ public class AuthService {
 
         validatePassword(request.getPassword(), adminUser.getPassword());
 
-        String accessToken = tokenProvider.createAccessToken(adminUser.getUsername());
+        String accessToken = tokenProvider.createAccessToken(adminUser);
+        String refreshToken = tokenProvider.createRefreshToken(tokenProvider.getAuthentication(accessToken));
 
-        return AuthLoginResponse.of(accessToken);
+        return AuthLoginResponse.of(accessToken, refreshToken);
     }
 
     @Transactional
