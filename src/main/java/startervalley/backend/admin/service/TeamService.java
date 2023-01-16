@@ -90,7 +90,7 @@ public class TeamService {
                 request.getNotionUrl() != null ? request.getNotionUrl() : team.getNotionUrl(),
                 request.getReleaseUrl() != null ? request.getReleaseUrl() : team.getReleaseUrl());
 
-        return BasicResponse.of(null, "팀 정보가 수정되었습니다.");
+        return BasicResponse.of(team.getId(), "팀 정보가 수정되었습니다.");
     }
 
     public void deleteOne(Long id) {
