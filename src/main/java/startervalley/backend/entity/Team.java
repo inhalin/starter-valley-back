@@ -34,6 +34,7 @@ public class Team {
     private List<User> users = new ArrayList<>();
 
     @ManyToOne(fetch = LAZY)
+    @JoinColumn(name = "generation_id")
     private Generation generation;
 
     @Builder
