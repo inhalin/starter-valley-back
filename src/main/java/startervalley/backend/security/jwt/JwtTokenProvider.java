@@ -96,6 +96,7 @@ public class JwtTokenProvider {
         String refreshToken = Jwts.builder()
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 .setIssuer(ISSUER)
+                .setSubject(authentication.getName())
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .compact();
@@ -152,6 +153,21 @@ public class JwtTokenProvider {
 
             return userRepository.existsRefreshTokenByUsername(getUsername(token)) != null
                     || parseClaims(token).get("email") != null;
+        } catch (ExpiredJwtException e) {
+            throw new TokenNotValidException("만료된 JWT 토큰입니다.");
+        } catch (UnsupportedJwtException e) {
+            throw new TokenNotValidException("지원되지 않는 JWT 토큰입니다.");
+        } catch (IllegalStateException e) {
+            throw new TokenNotValidException("JWT 토큰이 잘못되었습니다");
+        } catch (Exception e) {
+            throw new RuntimeException(e.getMessage());
+        }
+    }
+
+    public boolean validateRefreshToken(String token) {
+        try {
+            Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+            return true;
         } catch (ExpiredJwtException e) {
             throw new TokenNotValidException("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException e) {
