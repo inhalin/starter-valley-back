@@ -4,16 +4,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import startervalley.backend.dto.auth.*;
 import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.service.auth.AuthService;
 import startervalley.backend.service.auth.GithubAuthService;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -46,5 +44,15 @@ public class AuthController {
     public ResponseEntity<Void> logout(@AuthenticationPrincipal CustomUserDetails userDetails) {
         authService.logout(userDetails.getUsername());
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("available/generations")
+    public ResponseEntity<List<Long>> listAvailableGenerations() {
+        return ResponseEntity.ok(authService.getAvailableGenerations());
+    }
+
+    @GetMapping("available/devpart")
+    public ResponseEntity<List<AvailableDevpart>> listAvailableDevparts(@RequestParam("generation") Long generationId) {
+        return ResponseEntity.ok(authService.getAvailableDevparts(generationId));
     }
 }
