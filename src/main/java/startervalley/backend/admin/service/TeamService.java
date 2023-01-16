@@ -84,6 +84,33 @@ public class TeamService {
         return BasicResponse.of(null, "팀 정보가 수정되었습니다.");
     }
 
+    public void deleteOne(Long id) {
+
+        Team team = getTeamOrElseThrow(id);
+
+        if (team.getUsers().size() > 0) {
+            throw new ResourceNotValidException("사용중인 팀은 삭제할 수 없습니다.");
+        }
+
+        log.info("팀 삭제: id = {}, name = {}", team.getId(), team.getName());
+
+        teamRepository.delete(team);
+    }
+
+    public void deleteAllUsers(Long id) {
+        List<User> users = userRepository.findAllByTeamId(id);
+
+        if (users.size() == 0) {
+            throw new ResourceNotFoundException("Team", "id", id.toString());
+        }
+
+        String team = users.get(0).getTeam().getName();
+
+        users.forEach(User::removeTeamInfo);
+
+        log.info("delete all users from team {}", team);
+    }
+
     public BasicResponse addUser(Long teamId, Long userId, boolean isLeader) {
 
         User user = getUserOrElseThrow(userId);
@@ -104,7 +131,7 @@ public class TeamService {
         return BasicResponse.of(user.getId(), message);
     }
 
-    public BasicResponse deleteUser(Long id, Long userId) {
+    public void deleteUser(Long id, Long userId) {
 
         User user = getUserOrElseThrow(userId);
         Team team = getTeamOrElseThrow(id);
@@ -114,6 +141,7 @@ public class TeamService {
         String message = user.getName() + "님을 " + team.getName() + " 팀에서 제거하였습니다.";
 
         log.info("delete team user with id {}: message = {}", user.getId(), message);
+    }
 
         return BasicResponse.of(user.getId(), message);
     }

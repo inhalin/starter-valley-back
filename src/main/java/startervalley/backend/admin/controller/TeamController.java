@@ -47,6 +47,12 @@ public class TeamController {
         return ResponseEntity.ok(teamService.updateOne(id, request));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        teamService.deleteOne(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{id}/users/{userId}")
     public ResponseEntity<BasicResponse> addTeammate(@PathVariable Long id,
                                                      @PathVariable Long userId,
@@ -55,7 +61,14 @@ public class TeamController {
     }
 
     @DeleteMapping("/{id}/users/{userId}")
-    public ResponseEntity<BasicResponse> deleteTeammate(@PathVariable Long id, @PathVariable Long userId){
-        return ResponseEntity.ok(teamService.deleteUser(id, userId));
+    public ResponseEntity<Void> deleteTeammate(@PathVariable Long id, @PathVariable Long userId){
+        teamService.deleteUser(id, userId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}/users")
+    public ResponseEntity<Void> deleteAllTeammates(@PathVariable Long id) {
+        teamService.deleteAllUsers(id);
+        return ResponseEntity.noContent().build();
     }
 }
