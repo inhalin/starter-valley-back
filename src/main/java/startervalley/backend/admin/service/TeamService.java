@@ -15,6 +15,7 @@ import startervalley.backend.repository.generation.GenerationRepository;
 import startervalley.backend.repository.team.TeamRepository;
 import startervalley.backend.repository.user.UserRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,22 +33,30 @@ public class TeamService {
 
         Generation generation = getGenerationOrElseThrow(request);
 
+        Optional<Team> optionalTeam = teamRepository.findByNameAndGeneration(request.getName(), generation);
+
+        if (optionalTeam.isPresent()) {
+            throw new ResourceNotValidException("동일 기수 내에 동일한 이름의 팀을 생성할 수 없습니다.");
+        }
+
         Team team = Team.builder()
                 .name(request.getName())
                 .description(request.getDescription())
                 .notionUrl(request.getNotionUrl())
                 .releaseUrl(request.getReleaseUrl())
                 .generation(generation)
+                .users(new ArrayList<>())
                 .build();
         teamRepository.save(team);
-
         generation.setTeam(team);
 
         User user = getUserOrElseThrow(request.getLeader());
+        validateDuplicateUser(user);
         user.setTeamInfo(team, true);
 
         request.getTeammates().stream()
                 .map(this::getUserOrElseThrow)
+                .peek(this::validateDuplicateUser)
                 .forEach(teammate -> teammate.setTeamInfo(team, false));
 
         return BasicResponse.of(team.getId(), "팀이 생성되었습니다.");
@@ -114,6 +123,8 @@ public class TeamService {
     public BasicResponse addUser(Long teamId, Long userId, boolean isLeader) {
 
         User user = getUserOrElseThrow(userId);
+        validateDuplicateUser(user);
+
         Team team = getTeamOrElseThrow(teamId);
 
         Optional<User> leader = team.getUsers().stream().filter(User::getIsLeader).findFirst();
@@ -143,7 +154,10 @@ public class TeamService {
         log.info("delete team user with id {}: message = {}", user.getId(), message);
     }
 
-        return BasicResponse.of(user.getId(), message);
+    private void validateDuplicateUser(User user) {
+        if (user.getTeam() != null) {
+            throw new ResourceNotValidException(String.format("이미 팀이 지정된 수강생입니다. id = %d, name = %s", user.getId(), user.getName()));
+        }
     }
 
     private Generation getGenerationOrElseThrow(TeamRequest request) {
