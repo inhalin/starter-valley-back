@@ -1,26 +1,6 @@
-spring:
-  config:
-    activate:
-      on-profile: prod
-
-  jpa:
-    database-platform: org.hibernate.dialect.MySQL5InnoDBDialect
-    hibernate:
-      ddl-auto: validate
-
-  datasource:
-    driver-class-name: org.mariadb.jdbc.Driver
-    url: ${db.rds.url}
-    username: ${db.rds.username}
-    password: ${db.rds.password}
-
-  jackson:
-    serialization:
-      fail-on-empty-beans: false
-
 app:
   oauth2:
     client:
       github:
-        client-id: ${github.prod.client-id}
-        client-secret: ${github.prod.client-secret}
+        client-id: e731c1d25d4cc09e1cb5
+        client-secret: f29e579c65c8ac58cbe7317295adfe619dd876c4

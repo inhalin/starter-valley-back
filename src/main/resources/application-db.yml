@@ -1,0 +1,52 @@
+spring:
+  config:
+    activate:
+      on-profile: test
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+  jpa:
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb
+    username: sa
+    password:
+---
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  jpa:
+    database-platform: org.hibernate.dialect.MariaDB103Dialect
+    hibernate:
+      ddl-auto: none
+    properties:
+        format-sql: true
+    show-sql: true
+
+  datasource:
+    url: jdbc:mariadb://database-starter-valley.czfim5awnvs3.ap-northeast-2.rds.amazonaws.com:3306/valley_dev
+    username: starterAdmin
+    password: BUI71oZkxZxKixSQknHh
+---
+spring:
+  config:
+    activate:
+      on-profile: prod, prod1, prod2
+
+  jpa:
+    database-platform: org.hibernate.dialect.MariaDB103Dialect
+    hibernate:
+      ddl-auto: none
+
+  datasource:
+    url: jdbc:mariadb://database-starter-valley.czfim5awnvs3.ap-northeast-2.rds.amazonaws.com:3306/valley
+    username: starterAdmin
+    password: BUI71oZkxZxKixSQknHh

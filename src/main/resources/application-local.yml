@@ -1,11 +1,8 @@
 spring:
-  config:
-    activate:
-      on-profile: local
-
   jpa:
+    database-platform: org.hibernate.dialect.MariaDB103Dialect
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     show-sql: true
     properties:
       hibernate:
@@ -13,13 +10,13 @@ spring:
 
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: ${db.local.url}
-    username: ${db.local.username}
-    password: ${db.local.password}
+    url: jdbc:mariadb://localhost:3306/valley
+    username: root
+    password: starters12
 
 app:
   oauth2:
     client:
       github:
-        client-id: ${github.local.client-id}
-        client-secret: ${github.local.client-secret}
+        client-id: 53f31b9dbff19b8be1e0
+        client-secret: c8045e05f9084f78aa4b9c6cb2108e101d85bba1

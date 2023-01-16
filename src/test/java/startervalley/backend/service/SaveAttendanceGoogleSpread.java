@@ -16,7 +16,7 @@ import startervalley.backend.repository.user.UserRepository;
 import java.util.List;
 
 @Transactional
-@ActiveProfiles("local")
+@ActiveProfiles("test")
 @SpringBootTest
 public class SaveAttendanceGoogleSpread {
 

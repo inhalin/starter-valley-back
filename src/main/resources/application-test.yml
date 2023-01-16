@@ -1,0 +1,6 @@
+app:
+  oauth2:
+    client:
+      github:
+        client-id: 53f31b9dbff19b8be1e0
+        client-secret: c8045e05f9084f78aa4b9c6cb2108e101d85bba1
