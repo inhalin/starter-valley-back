@@ -55,4 +55,9 @@ public class AuthController {
     public ResponseEntity<List<AvailableDevpart>> listAvailableDevparts(@RequestParam("generation") Long generationId) {
         return ResponseEntity.ok(authService.getAvailableDevparts(generationId));
     }
+
+    @PostMapping("/token/refresh")
+    public ResponseEntity<JwtTokenDto> refreshToken(@RequestBody JwtRefreshDto dto) {
+        return ResponseEntity.ok(authService.refreshToken(dto.getRefreshToken()));
+    }
 }

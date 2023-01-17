@@ -2,6 +2,8 @@ package startervalley.backend.dto.auth;
 
 import lombok.*;
 
+import java.util.Date;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -9,5 +11,7 @@ import lombok.*;
 @Builder
 public class AuthResponse {
     private String accessToken;
+    private String refreshToken;
+    private Date expiration;
     private Boolean isNewMember;
 }

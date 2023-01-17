@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         http.authorizeRequests()
-                .antMatchers("/auth/login/**", "/admin/auth/login/**", "/auth/available/**").permitAll()
+                .antMatchers("/auth/login/**", "/admin/auth/login/**", "/auth/available/**", "/auth/token/refresh", "/admin/auth/token/refresh").permitAll()
                 .antMatchers("/api/**", "/auth/**").authenticated()
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll();

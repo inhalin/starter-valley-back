@@ -12,9 +12,8 @@ import org.springframework.util.StringUtils;
 import startervalley.backend.entity.AdminUser;
 import startervalley.backend.entity.Role;
 import startervalley.backend.entity.User;
-import startervalley.backend.exception.TokenNotValidException;
-import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.repository.adminuser.AdminUserRepository;
+import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.security.auth.AdminUserDetails;
 import startervalley.backend.security.auth.CustomUserDetails;
 
@@ -67,7 +66,11 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String createAccessToken(String username) {
+    public String createAccessToken(AdminUser adminUser) {
+
+        AdminUserDetails userDetails = new AdminUserDetails(adminUser);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + ACCESS_TOKEN_EXPIRE_LENGTH);
@@ -77,7 +80,7 @@ public class JwtTokenProvider {
         return Jwts.builder()
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 .setClaims(claims)
-                .setSubject(username)
+                .setSubject(adminUser.getUsername())
                 .setIssuer(ISSUER)
                 .setIssuedAt(now)
                 .setExpiration(validity)
@@ -92,6 +95,7 @@ public class JwtTokenProvider {
         String refreshToken = Jwts.builder()
                 .signWith(SignatureAlgorithm.HS512, SECRET_KEY)
                 .setIssuer(ISSUER)
+                .setSubject(authentication.getName())
                 .setIssuedAt(now)
                 .setExpiration(validity)
                 .compact();
@@ -102,9 +106,13 @@ public class JwtTokenProvider {
     }
 
     private void saveRefreshToken(Authentication authentication, String refreshToken) {
-        CustomUserDetails user = (CustomUserDetails) authentication.getPrincipal();
+        if (authentication.getPrincipal() instanceof AdminUserDetails userDetails) {
+            adminUserRepository.updateRefreshToken(userDetails.getId(), refreshToken);
+            return;
+        }
 
-        userRepository.updateRefreshToken(user.getId(), refreshToken);
+        CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+        userRepository.updateRefreshToken(userDetails.getId(), refreshToken);
     }
 
     public Authentication getAuthentication(String accessToken) {
@@ -145,14 +153,31 @@ public class JwtTokenProvider {
             return userRepository.existsRefreshTokenByUsername(getUsername(token)) != null
                     || parseClaims(token).get("email") != null;
         } catch (ExpiredJwtException e) {
-            throw new TokenNotValidException("만료된 JWT 토큰입니다.");
+            log.info("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException e) {
-            throw new TokenNotValidException("지원되지 않는 JWT 토큰입니다.");
+            log.info("지원되지 않는 JWT 토큰입니다.");
         } catch (IllegalStateException e) {
-            throw new TokenNotValidException("JWT 토큰이 잘못되었습니다");
+            log.info("JWT 토큰이 잘못되었습니다");
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            log.info(e.getMessage());
         }
+        return false;
+    }
+
+    public boolean validateRefreshToken(String token) {
+        try {
+            Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+            return true;
+        } catch (ExpiredJwtException e) {
+            log.info("만료된 JWT 토큰입니다.");
+        } catch (UnsupportedJwtException e) {
+            log.info("지원되지 않는 JWT 토큰입니다.");
+        } catch (IllegalStateException e) {
+            log.info("JWT 토큰이 잘못되었습니다");
+        } catch (Exception e) {
+            log.info(e.getMessage());
+        }
+        return false;
     }
 
     public String parseBearerToken(HttpServletRequest request) {
@@ -176,6 +201,10 @@ public class JwtTokenProvider {
         return resolveClaims(accessToken, Claims::getSubject);
     }
 
+    public Date getExpiration(String accessToken) {
+        return resolveClaims(accessToken, Claims::getExpiration);
+    }
+
     private <T> T resolveClaims(String accessToken, Function<Claims, T> claimsResolver) {
         final Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(accessToken).getBody();
         return claimsResolver.apply(claims);
@@ -193,5 +222,15 @@ public class JwtTokenProvider {
         attributes.put("role", (String) claims.get("role"));
 
         return attributes;
+    }
+
+    public void removeExpiredToken(String token) {
+        Claims claims = parseClaims(token);
+        String username = claims.getSubject();
+        if (claims.get(AUTHORITIES_KEY).equals(Role.ADMIN.getRole())) {
+            adminUserRepository.deleteRefreshToken(username);
+            return;
+        }
+        userRepository.deleteRefreshToken(username);
     }
 }

@@ -12,16 +12,13 @@ import startervalley.backend.dto.auth.SignupRequest;
 import startervalley.backend.entity.*;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.TokenNotValidException;
-import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.repository.devpart.DevpartRepository;
 import startervalley.backend.repository.generation.GenerationRepository;
+import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.security.jwt.JwtTokenProvider;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -70,12 +67,10 @@ public class AuthService {
 
     private JwtTokenDto createJwtToken(User user) {
         String accessToken = tokenProvider.createAccessToken(user, new HashMap<>());
+        Date expiration = tokenProvider.getExpiration(accessToken);
         String refreshToken = tokenProvider.createRefreshToken(tokenProvider.getAuthentication(accessToken));
 
-        return JwtTokenDto.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+        return JwtTokenDto.of(accessToken, refreshToken, expiration);
     }
 
     public User getLoginUser() {
@@ -113,5 +108,22 @@ public class AuthService {
         return devpartRepository.findAllByGenerationId(generation.getId()).stream()
                 .map(AvailableDevpart::mapToResponse)
                 .toList();
+    }
+
+    public JwtTokenDto refreshToken(String refreshToken) {
+        if (!tokenProvider.validateRefreshToken(refreshToken)) {
+            throw new TokenNotValidException("토큰 정보가 확인되지 않습니다.");
+        }
+
+        String username = tokenProvider.getUsername(refreshToken);
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User", "username", username));
+
+        if (!user.getRefreshToken().equals(refreshToken)) {
+            throw new TokenNotValidException("유저 토큰과 일치하지 않습니다.");
+        }
+
+        return createJwtToken(user);
     }
 }
