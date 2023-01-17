@@ -6,12 +6,9 @@ import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import static javax.persistence.CascadeType.*;
-import static javax.persistence.FetchType.*;
-import static javax.persistence.GenerationType.*;
+import static javax.persistence.CascadeType.ALL;
+import static javax.persistence.FetchType.LAZY;
+import static javax.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Getter
@@ -32,15 +29,11 @@ public class Notice extends BaseTimeEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
-    @OneToMany(mappedBy = "notice", cascade = ALL, orphanRemoval = true)
-    private List<NoticeImage> images = new ArrayList<>();
-
     @Builder
-    public Notice(Long id, AdminUser adminUser, String title, String content, List<NoticeImage> images) {
+    public Notice(Long id, AdminUser adminUser, String title, String content) {
         this.id = id;
         this.adminUser = adminUser;
         this.title = title;
         this.content = content;
-        this.images = images;
     }
 }
