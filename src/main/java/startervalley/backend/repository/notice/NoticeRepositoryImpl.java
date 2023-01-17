@@ -4,13 +4,11 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import startervalley.backend.admin.dto.notice.NoticeDto;
-import startervalley.backend.admin.dto.notice.NoticeImageDto;
 import startervalley.backend.admin.dto.notice.NoticeListDto;
 import startervalley.backend.admin.dto.notice.NoticeRequest;
 import startervalley.backend.entity.Notice;
 import startervalley.backend.entity.QAdminUser;
 import startervalley.backend.entity.QNotice;
-import startervalley.backend.entity.QNoticeImage;
 
 import java.util.List;
 
@@ -21,7 +19,6 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
     private final JPAQueryFactory queryFactory;
     private final QNotice notice = QNotice.notice;
     private final QAdminUser adminUser = QAdminUser.adminUser;
-    private final QNoticeImage noticeImage = QNoticeImage.noticeImage;
 
     @Override
     public NoticeDto findOneById(Long id) {
@@ -36,12 +33,6 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
                 .content(noticeEntity.getContent())
                 .postedBy(noticeEntity.getAdminUser().getName())
                 .createdDate(noticeEntity.getCreatedDate())
-                .images(noticeEntity.getImages().stream()
-                        .map(img -> NoticeImageDto.builder()
-                                .name(img.getImgName())
-                                .url(img.getPath())
-                                .build())
-                        .toList())
                 .build();
     }
 
@@ -58,7 +49,6 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
                         .title(notice.getTitle())
                         .postedBy(notice.getAdminUser().getName())
                         .createdDate(notice.getCreatedDate())
-                        .hasImage(notice.getImages().size() > 0)
                         .build())
                 .toList();
     }
@@ -74,10 +64,6 @@ public class NoticeRepositoryImpl implements NoticeRepositoryCustom {
 
     @Override
     public void deleteOneById(Long id) {
-        queryFactory.delete(noticeImage)
-                .where(noticeImage.notice.id.eq(id))
-                .execute();
-
         queryFactory.delete(notice)
                 .where(notice.id.eq(id))
                 .execute();
