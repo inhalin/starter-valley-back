@@ -12,9 +12,8 @@ import org.springframework.util.StringUtils;
 import startervalley.backend.entity.AdminUser;
 import startervalley.backend.entity.Role;
 import startervalley.backend.entity.User;
-import startervalley.backend.exception.TokenNotValidException;
-import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.repository.adminuser.AdminUserRepository;
+import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.security.auth.AdminUserDetails;
 import startervalley.backend.security.auth.CustomUserDetails;
 
@@ -154,14 +153,15 @@ public class JwtTokenProvider {
             return userRepository.existsRefreshTokenByUsername(getUsername(token)) != null
                     || parseClaims(token).get("email") != null;
         } catch (ExpiredJwtException e) {
-            throw new TokenNotValidException("만료된 JWT 토큰입니다.");
+            log.info("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException e) {
-            throw new TokenNotValidException("지원되지 않는 JWT 토큰입니다.");
+            log.info("지원되지 않는 JWT 토큰입니다.");
         } catch (IllegalStateException e) {
-            throw new TokenNotValidException("JWT 토큰이 잘못되었습니다");
+            log.info("JWT 토큰이 잘못되었습니다");
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            log.info(e.getMessage());
         }
+        return false;
     }
 
     public boolean validateRefreshToken(String token) {
@@ -169,14 +169,15 @@ public class JwtTokenProvider {
             Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
             return true;
         } catch (ExpiredJwtException e) {
-            throw new TokenNotValidException("만료된 JWT 토큰입니다.");
+            log.info("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException e) {
-            throw new TokenNotValidException("지원되지 않는 JWT 토큰입니다.");
+            log.info("지원되지 않는 JWT 토큰입니다.");
         } catch (IllegalStateException e) {
-            throw new TokenNotValidException("JWT 토큰이 잘못되었습니다");
+            log.info("JWT 토큰이 잘못되었습니다");
         } catch (Exception e) {
-            throw new RuntimeException(e.getMessage());
+            log.info(e.getMessage());
         }
+        return false;
     }
 
     public String parseBearerToken(HttpServletRequest request) {
@@ -221,5 +222,15 @@ public class JwtTokenProvider {
         attributes.put("role", (String) claims.get("role"));
 
         return attributes;
+    }
+
+    public void removeExpiredToken(String token) {
+        Claims claims = parseClaims(token);
+        String username = claims.getSubject();
+        if (claims.get(AUTHORITIES_KEY).equals(Role.ADMIN.getRole())) {
+            adminUserRepository.deleteRefreshToken(username);
+            return;
+        }
+        userRepository.deleteRefreshToken(username);
     }
 }

@@ -17,4 +17,9 @@ public interface AdminUserRepository extends JpaRepository<AdminUser, Long>, Adm
     @Modifying
     @Query("update AdminUser u set u.refreshToken = :token where u.id = :id")
     void updateRefreshToken(@Param("id") Long id, @Param("token") String token);
+
+    @Transactional
+    @Modifying
+    @Query("update AdminUser u set u.refreshToken = null where u.username = :username")
+    void deleteRefreshToken(@Param("username") String username);
 }
