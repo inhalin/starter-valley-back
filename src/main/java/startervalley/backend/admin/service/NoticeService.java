@@ -64,7 +64,6 @@ public class NoticeService {
                         title(notice.getTitle())
                         .postedBy(notice.getAdminUser().getName())
                         .createdDate(notice.getCreatedDate())
-                        .hasImage(notice.getImages().size() > 0)
                         .build())
                 .toList();
 
