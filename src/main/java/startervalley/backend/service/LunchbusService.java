@@ -11,6 +11,8 @@ import startervalley.backend.dto.lunchbus.LunchbusUserDto;
 import startervalley.backend.entity.Lunchbus;
 import startervalley.backend.entity.Passenger;
 import startervalley.backend.entity.User;
+import startervalley.backend.event.webhook.SlackWebhookDto;
+import startervalley.backend.event.webhook.SlackWebhookEventPublisher;
 import startervalley.backend.exception.CustomLimitExceededException;
 import startervalley.backend.exception.LunchbusInvalidJobException;
 import startervalley.backend.exception.ResourceNotFoundException;
@@ -33,6 +35,7 @@ public class LunchbusService {
     private final PassengerRepository passengerRepository;
     private final UserService userService;
     private final AuthService authService;
+    private final SlackWebhookEventPublisher eventPublisher;
 
     @Transactional
     public BasicResponse saveLunchbus(Long userId, LunchbusInsertRequest request) {
@@ -55,6 +58,8 @@ public class LunchbusService {
                 .build();
 
         lunchbusRepository.save(bus);
+
+        eventPublisher.publishEvent(SlackWebhookDto.of(bus));
 
         return BasicResponse.of(bus.getId(), "버스가 정상적으로 생성되었습니다.");
     }
