@@ -24,7 +24,7 @@ public class Notice extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = LAZY, cascade = ALL)
-    @JoinColumn(name = "admin_user_id")
+    @JoinColumn(name = "admin_user_id", foreignKey = @ForeignKey(ConstraintMode.NO_CONSTRAINT))
     private AdminUser adminUser;
 
     private String title;
