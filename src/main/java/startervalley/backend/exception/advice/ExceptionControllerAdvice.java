@@ -111,4 +111,10 @@ public class ExceptionControllerAdvice {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ErrorResult.of(e.getMessage(), request.getDescription(false)));
     }
+
+    @ExceptionHandler(ResourceNotValidException.class)
+    public ResponseEntity<ErrorResult> handleResourceNotValidException(ResourceNotValidException e, WebRequest request) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ErrorResult.of(e.getMessage(), request.getDescription(false)));
+    }
 }

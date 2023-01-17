@@ -35,7 +35,3 @@ out/
 
 ### VS Code ###
 .vscode/
-
-# Config
-/src/main/resources/application-SECRET.yml
-/src/main/resources/credentials.json

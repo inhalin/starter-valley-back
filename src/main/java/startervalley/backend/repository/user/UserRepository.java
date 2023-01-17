@@ -1,4 +1,4 @@
-package startervalley.backend.repository;
+package startervalley.backend.repository.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -6,12 +6,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.entity.AuthProvider;
+import startervalley.backend.entity.Devpart;
+import startervalley.backend.entity.Generation;
 import startervalley.backend.entity.User;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long>, UserRepositoryCustom {
 
     @Query("select u from User u join fetch u.generation where u.id = :userId")
     Optional<User> findByIdWithGeneration(@Param("userId") Long userId);
@@ -40,4 +42,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("select u from User u where u.username = :username")
     User existsRefreshTokenByUsername(@Param("username") String username);
+
+    boolean existsByDevpart(Devpart devpart);
+
+    boolean existsByGeneration(Generation generation);
 }

@@ -1,8 +1,10 @@
 package startervalley.backend.dto.lunchbus;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -19,4 +21,7 @@ public class LunchbusDto {
     private String description;
     private String storeName;
     private String storeUrl;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 E요일 HH시 mm분")
+    private LocalDateTime closeAt;
 }

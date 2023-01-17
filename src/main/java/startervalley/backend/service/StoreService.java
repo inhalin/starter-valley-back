@@ -21,6 +21,7 @@ import startervalley.backend.entity.*;
 import startervalley.backend.exception.NotOwnerException;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.*;
+import startervalley.backend.repository.user.UserRepository;
 
 import java.io.IOException;
 import java.util.*;

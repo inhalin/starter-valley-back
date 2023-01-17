@@ -1,4 +1,4 @@
-package startervalley.backend.event;
+package startervalley.backend.event.inquiry;
 
 import lombok.Getter;
 

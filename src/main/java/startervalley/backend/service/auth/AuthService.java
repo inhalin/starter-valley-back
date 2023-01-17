@@ -6,19 +6,21 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import startervalley.backend.dto.auth.AvailableDevpart;
 import startervalley.backend.dto.auth.JwtTokenDto;
 import startervalley.backend.dto.auth.SignupRequest;
 import startervalley.backend.entity.*;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.TokenNotValidException;
-import startervalley.backend.repository.DevpartRepository;
+import startervalley.backend.repository.user.UserRepository;
+import startervalley.backend.repository.devpart.DevpartRepository;
 import startervalley.backend.repository.generation.GenerationRepository;
-import startervalley.backend.repository.UserRepository;
 import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.security.jwt.JwtTokenProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -42,7 +44,7 @@ public class AuthService {
         User user = User.builder()
                 .provider(AuthProvider.valueOf(userData.get("provider")))
                 .providerId(userData.get("provider") + "_" + userData.get("id"))
-                .role(Role.valueOf(userData.get("role")))
+                .role(Role.USER)
                 .githubUrl(userData.get("githubUrl"))
                 .imageUrl(userData.get("imageUrl"))
                 .email(userData.get("email"))
@@ -95,5 +97,21 @@ public class AuthService {
         if (authority.equalsIgnoreCase(Role.ADMIN.getRole())) return Role.ADMIN;
 
         return Role.USER;
+    }
+
+    public List<Long> getAvailableGenerations() {
+        return generationRepository.findAll().stream()
+                .map(Generation::getId)
+                .toList();
+    }
+
+    public List<AvailableDevpart> getAvailableDevparts(Long generationId) {
+
+        Generation generation = generationRepository.findById(generationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Generation", "id", generationId.toString()));
+
+        return devpartRepository.findAllByGenerationId(generation.getId()).stream()
+                .map(AvailableDevpart::mapToResponse)
+                .toList();
     }
 }

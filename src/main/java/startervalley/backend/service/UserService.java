@@ -10,7 +10,7 @@ import startervalley.backend.entity.*;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.exception.UserNotValidException;
 import startervalley.backend.repository.attendance.AttendanceRepository;
-import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.user.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,0 +1,27 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+      location: ${user.home}/images
+
+  jpa:
+    open-in-view: false
+
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
+logging:
+  level:
+    com:
+      amazonaws:
+        util:
+          EC2MetadataUtils: ERROR
+
+google-form:
+  key: 1FAIpQLSd7A2PRigVgoBGjRZGtDHCVSFxJVI8nl8m3lGp7ZTXmSEuqDQ
+  entry:
+    name: entry.246568632
+    reason: entry.1336473987
+    status: entry.199576355

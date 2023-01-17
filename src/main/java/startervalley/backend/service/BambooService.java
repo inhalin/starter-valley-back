@@ -7,7 +7,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
-import startervalley.backend.config.WebClientConfig;
 import startervalley.backend.dto.request.BambooRequestDto;
 import startervalley.backend.dto.request.PageRequestDto;
 import startervalley.backend.dto.response.BambooResponseDto;
@@ -15,7 +14,7 @@ import startervalley.backend.dto.response.PageResultDTO;
 import startervalley.backend.entity.Bamboo;
 import startervalley.backend.entity.User;
 import startervalley.backend.repository.BambooRepository;
-import startervalley.backend.repository.UserRepository;
+import startervalley.backend.repository.user.UserRepository;
 
 import java.util.List;
 
