@@ -218,8 +218,6 @@ public class JwtTokenProvider {
         attributes.put("imageUrl", (String) claims.get("imageUrl"));
         attributes.put("githubUrl", (String) claims.get("githubUrl"));
         attributes.put("id", (String) claims.get("id"));
-        attributes.put("provider", (String) claims.get("provider"));
-        attributes.put("role", (String) claims.get("role"));
 
         return attributes;
     }

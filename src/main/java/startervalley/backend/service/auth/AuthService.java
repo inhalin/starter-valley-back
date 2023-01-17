@@ -39,7 +39,7 @@ public class AuthService {
                 .orElseThrow(() -> new ResourceNotFoundException("Generation", "id", String.valueOf(signupRequest.getGenerationId())));
 
         User user = User.builder()
-                .provider(AuthProvider.valueOf(userData.get("provider")))
+                .provider(AuthProvider.GITHUB)
                 .providerId(userData.get("provider") + "_" + userData.get("id"))
                 .role(Role.USER)
                 .githubUrl(userData.get("githubUrl"))
