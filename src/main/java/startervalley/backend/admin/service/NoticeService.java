@@ -18,6 +18,8 @@ import startervalley.backend.entity.Notice;
 import startervalley.backend.event.alert.WebsocketAlertEventPublisher;
 import startervalley.backend.event.alert.dto.AlertDto;
 import startervalley.backend.event.alert.dto.AlertType;
+import startervalley.backend.event.webhook.SlackWebhookDto;
+import startervalley.backend.event.webhook.SlackWebhookEventPublisher;
 import startervalley.backend.exception.CustomValidationException;
 import startervalley.backend.exception.ResourceNotFoundException;
 import startervalley.backend.repository.adminuser.AdminUserRepository;
@@ -27,7 +29,8 @@ import javax.xml.bind.ValidationException;
 import java.util.Arrays;
 import java.util.List;
 
-import static startervalley.backend.util.PaginationConstants.*;
+import static startervalley.backend.util.PaginationConstants.ALLOWED_PAGE_SIZE;
+import static startervalley.backend.util.PaginationConstants.MINIMUM_PAGE_NUMBER;
 
 @Slf4j
 @Service
@@ -38,6 +41,7 @@ public class NoticeService {
     private final AdminUserRepository adminUserRepository;
     private final NoticeRepository noticeRepository;
     private final WebsocketAlertEventPublisher alertEventPublisher;
+    private final SlackWebhookEventPublisher webhookEventPublisher;
 
     public NoticeResponse getAll(int page, int size, String sort, String dir) {
         try {
@@ -124,6 +128,8 @@ public class NoticeService {
         noticeRepository.save(notice);
         AlertDto alertDto = new AlertDto(AlertType.NOTICE, notice.getId(), notice.getTitle());
         alertEventPublisher.publishEvent(alertDto);
+        webhookEventPublisher.publishEvent(SlackWebhookDto.of(notice));
+
         return BasicResponse.of(notice.getId(), "공지사항이 정상적으로 등록되었습니다.");
     }
 }

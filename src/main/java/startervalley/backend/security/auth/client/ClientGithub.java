@@ -13,7 +13,6 @@ import reactor.core.publisher.Mono;
 import startervalley.backend.dto.auth.GithubEmailResponse;
 import startervalley.backend.dto.auth.GithubTokenResponse;
 import startervalley.backend.dto.auth.GithubUserResponse;
-import startervalley.backend.entity.AuthProvider;
 import startervalley.backend.exception.TokenNotValidException;
 
 @Slf4j
@@ -60,20 +59,19 @@ public class ClientGithub implements ClientProxy {
 
     @Override
     public GithubUserResponse getUserData(String accessToken) {
-	GithubUserResponse githubUserResponse = webClient.get()
-            .uri(userDataUri)
-            .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
-            .retrieve()
-            .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new TokenNotValidException("UserData: Social Access Token is unauthorized")))
-            .onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new TokenNotValidException("UserData: Internal Server Error")))
-            .bodyToMono(GithubUserResponse.class)
-            .block();
+        GithubUserResponse githubUserResponse = webClient.get()
+                .uri(userDataUri)
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
+                .retrieve()
+                .onStatus(HttpStatus::is4xxClientError, response -> Mono.error(new TokenNotValidException("UserData: Social Access Token is unauthorized")))
+                .onStatus(HttpStatus::is5xxServerError, response -> Mono.error(new TokenNotValidException("UserData: Internal Server Error")))
+                .bodyToMono(GithubUserResponse.class)
+                .block();
 
         if (githubUserResponse.getEmail() == null) {
             githubUserResponse.setEmail(fetchEmail(accessToken));
         }
 
-        githubUserResponse.setProvider(AuthProvider.GITHUB);
         return githubUserResponse;
     }
 

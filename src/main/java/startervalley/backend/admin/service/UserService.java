@@ -1,11 +1,13 @@
 package startervalley.backend.admin.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.admin.dto.user.*;
 import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.dto.request.AttendanceYearMonthDto;
+import startervalley.backend.entity.AdminUser;
 import startervalley.backend.entity.Attendance;
 import startervalley.backend.entity.Generation;
 import startervalley.backend.entity.User;
@@ -22,6 +24,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 @Service(value = "UserServiceBO")
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -155,5 +158,24 @@ public class UserService {
                 .stream()
                 .map(user -> UserSimpleDto.of(user.getId(), user.getName()))
                 .toList();
+    }
+
+    @Transactional
+    public void deleteAdminUser(Long loginId, Long id) {
+
+        if (loginId != 1) {
+            throw new UserNotValidException("최고 관리자만 운영진 삭제가 가능합니다");
+        }
+
+        if (id == 1) {
+            throw new UserNotValidException("최고 관리자는 삭제할 수 없습니다.");
+        }
+
+        AdminUser adminUser = adminUserRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("AdminUser", "id", id.toString()));
+
+        log.info("관리자 삭제: id = {}, username = {}",adminUser.getId(), adminUser.getUsername());
+
+        adminUserRepository.delete(adminUser);
     }
 }

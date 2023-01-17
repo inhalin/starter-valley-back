@@ -5,16 +5,19 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import startervalley.backend.admin.dto.auth.AuthLoginRequest;
-import startervalley.backend.admin.dto.auth.AuthLoginResponse;
 import startervalley.backend.admin.dto.auth.AuthPasswordRequest;
 import startervalley.backend.admin.dto.auth.AuthRegisterRequest;
+import startervalley.backend.dto.auth.JwtTokenDto;
 import startervalley.backend.dto.common.BasicResponse;
 import startervalley.backend.entity.AdminUser;
 import startervalley.backend.exception.PasswordNotValidException;
 import startervalley.backend.exception.ResourceDuplicateException;
 import startervalley.backend.exception.ResourceNotFoundException;
+import startervalley.backend.exception.TokenNotValidException;
 import startervalley.backend.repository.adminuser.AdminUserRepository;
 import startervalley.backend.security.jwt.JwtTokenProvider;
+
+import java.util.Date;
 
 @Service(value = "AuthServiceBO")
 @RequiredArgsConstructor
@@ -25,7 +28,7 @@ public class AuthService {
     private final JwtTokenProvider tokenProvider;
 
     @Transactional(readOnly = true)
-    public AuthLoginResponse login(AuthLoginRequest request) {
+    public JwtTokenDto login(AuthLoginRequest request) {
 
         if (!isExistingUsername(request.getUsername())) {
             throw new ResourceNotFoundException("Admin User", "username", request.getUsername());
@@ -35,9 +38,17 @@ public class AuthService {
 
         validatePassword(request.getPassword(), adminUser.getPassword());
 
-        String accessToken = tokenProvider.createAccessToken(adminUser.getUsername());
+        return createJwtToken(adminUser);
+    }
 
-        return AuthLoginResponse.of(accessToken);
+    @Transactional
+    public BasicResponse logout(Long id) {
+        AdminUser adminUser = adminUserRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("AdminUser", "id", id.toString()));
+
+        adminUser.setRefreshToken(null);
+
+        return BasicResponse.of(adminUser.getId(), "로그아웃 하였습니다.");
     }
 
     @Transactional
@@ -87,5 +98,28 @@ public class AuthService {
         if (!passwordEncoder.matches(inputPassword, originalPassword)) {
             throw new PasswordNotValidException("기존 비밀번호가 일치하지 않습니다.");
         }
+    }
+
+    public JwtTokenDto refreshToken(String refreshToken) {
+        if (!tokenProvider.validateRefreshToken(refreshToken)) {
+            throw new TokenNotValidException("토큰 정보가 확인되지 않습니다.");
+        }
+
+        String username = tokenProvider.getUsername(refreshToken);
+        AdminUser adminUser = adminUserRepository.findByUsername(username);
+
+        if (!adminUser.getRefreshToken().equals(refreshToken)) {
+            throw new TokenNotValidException("유저 토큰과 일치하지 않습니다.");
+        }
+
+        return createJwtToken(adminUser);
+    }
+
+    private JwtTokenDto createJwtToken(AdminUser adminUser) {
+        String accessToken = tokenProvider.createAccessToken(adminUser);
+        Date expiration = tokenProvider.getExpiration(accessToken);
+        String refreshToken = tokenProvider.createRefreshToken(tokenProvider.getAuthentication(accessToken));
+
+        return JwtTokenDto.of(accessToken, refreshToken, expiration);
     }
 }
