@@ -27,15 +27,14 @@ public class GithubAuthService {
         String githubAccessToken = clientGithub.getAccessToken(authRequest.getCode());
         GithubUserResponse userData = clientGithub.getUserData(githubAccessToken);
 
-        User user = userRepository.findByEmailAndProvider(userData.getEmail(), userData.getProvider());
+        User user = userRepository.findByUsername(userData.getLogin()).orElse(new User());
         boolean isNewMember = false;
         Map<String, String> attributes = new HashMap<>();
 
         String accessToken;
         String refreshToken = null;
 
-        if (user == null) {
-            user = new User();
+        if (user.getName() == null) {
             isNewMember = true;
             attributes = userData.getAttributes();
         } else {
