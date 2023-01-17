@@ -166,7 +166,7 @@ public class JwtTokenProvider {
 
     public boolean validateRefreshToken(String token) {
         try {
-            Claims claims = Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
+            Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token).getBody();
             return true;
         } catch (ExpiredJwtException e) {
             throw new TokenNotValidException("만료된 JWT 토큰입니다.");
@@ -198,6 +198,10 @@ public class JwtTokenProvider {
 
     public String getUsername(String accessToken) {
         return resolveClaims(accessToken, Claims::getSubject);
+    }
+
+    public Date getExpiration(String accessToken) {
+        return resolveClaims(accessToken, Claims::getExpiration);
     }
 
     private <T> T resolveClaims(String accessToken, Function<Claims, T> claimsResolver) {

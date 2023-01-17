@@ -5,12 +5,12 @@ import org.springframework.stereotype.Service;
 import startervalley.backend.dto.auth.AuthRequest;
 import startervalley.backend.dto.auth.AuthResponse;
 import startervalley.backend.dto.auth.GithubUserResponse;
-import startervalley.backend.entity.Role;
 import startervalley.backend.entity.User;
 import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.security.auth.client.ClientGithub;
 import startervalley.backend.security.jwt.JwtTokenProvider;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,25 +24,36 @@ public class GithubAuthService {
     private final UserRepository userRepository;
 
     public AuthResponse login(AuthRequest authRequest) {
-        String accessToken = clientGithub.getAccessToken(authRequest.getCode());
-	GithubUserResponse userData = clientGithub.getUserData(accessToken);
+        String githubAccessToken = clientGithub.getAccessToken(authRequest.getCode());
+        GithubUserResponse userData = clientGithub.getUserData(githubAccessToken);
 
         User user = userRepository.findByEmailAndProvider(userData.getEmail(), userData.getProvider());
         boolean isNewMember = false;
         Map<String, String> attributes = new HashMap<>();
+
+        String accessToken;
+        String refreshToken = null;
 
         if (user == null) {
             user = new User();
             isNewMember = true;
             attributes = userData.getAttributes();
         } else {
-            attributes.put("role", Role.USER.name());
             userRepository.updateImageUrl(userData.getLogin(), userData.getAvatarUrl());
+        }
+
+        accessToken = tokenProvider.createAccessToken(user, attributes);
+        Date expiration = tokenProvider.getExpiration(accessToken);
+
+        if (!isNewMember) {
+            refreshToken = tokenProvider.createRefreshToken(tokenProvider.getAuthentication(accessToken));
         }
 
         return AuthResponse.builder()
                 .isNewMember(isNewMember)
-                .accessToken(tokenProvider.createAccessToken(user, attributes))
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .expiration(expiration)
                 .build();
     }
 }

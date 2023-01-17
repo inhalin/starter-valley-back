@@ -18,10 +18,7 @@ import startervalley.backend.repository.user.UserRepository;
 import startervalley.backend.security.auth.CustomUserDetails;
 import startervalley.backend.security.jwt.JwtTokenProvider;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -70,9 +67,10 @@ public class AuthService {
 
     private JwtTokenDto createJwtToken(User user) {
         String accessToken = tokenProvider.createAccessToken(user, new HashMap<>());
+        Date expiration = tokenProvider.getExpiration(accessToken);
         String refreshToken = tokenProvider.createRefreshToken(tokenProvider.getAuthentication(accessToken));
 
-        return JwtTokenDto.of(accessToken, refreshToken);
+        return JwtTokenDto.of(accessToken, refreshToken, expiration);
     }
 
     public User getLoginUser() {

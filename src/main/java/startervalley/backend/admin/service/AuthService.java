@@ -17,6 +17,8 @@ import startervalley.backend.exception.TokenNotValidException;
 import startervalley.backend.repository.adminuser.AdminUserRepository;
 import startervalley.backend.security.jwt.JwtTokenProvider;
 
+import java.util.Date;
+
 @Service(value = "AuthServiceBO")
 @RequiredArgsConstructor
 public class AuthService {
@@ -115,8 +117,9 @@ public class AuthService {
 
     private JwtTokenDto createJwtToken(AdminUser adminUser) {
         String accessToken = tokenProvider.createAccessToken(adminUser);
+        Date expiration = tokenProvider.getExpiration(accessToken);
         String refreshToken = tokenProvider.createRefreshToken(tokenProvider.getAuthentication(accessToken));
 
-        return JwtTokenDto.of(accessToken, refreshToken);
+        return JwtTokenDto.of(accessToken, refreshToken, expiration);
     }
 }
