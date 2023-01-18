@@ -30,7 +30,7 @@ public class SlackWebhookDto {
                     .append("제목: ").append(bus.getTitle()).append("\n")
                     .append("운전자: ").append(bus.getDriver().getName()).append("\n")
                     .append("모집인원: ").append(bus.getOccupancy()).append("\n")
-                    .append("출발시간: ").append(bus.getClosedDate() != null ? bus.getClosedDate().format(DateTimeFormatter.ofPattern("MM.dd. E요일 HH시 mm분")) : "미정").append("\n\n")
+                    .append("출발시간: ").append(bus.getClosedDate() != null ? bus.getClosedDate().format(DateTimeFormatter.ofPattern("MM.dd. E HH시 mm분")) : "미정").append("\n\n")
                     .append("바로가기 👉 ").append(releaseUri).append("/lunchbus/").append(bus.getId())
                     .toString();
         } else if (o.getClass() == Notice.class) {

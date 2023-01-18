@@ -22,6 +22,6 @@ public class LunchbusDto {
     private String storeName;
     private String storeUrl;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 E요일 HH시 mm분")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy년 MM월 dd일 E HH시 mm분")
     private LocalDateTime closeAt;
 }
