@@ -34,7 +34,7 @@ spring:
   datasource:
     url: jdbc:mariadb://database-starter-valley.czfim5awnvs3.ap-northeast-2.rds.amazonaws.com:3306/valley_dev
     username: starterAdmin
-    password: BUI71oZkxZxKixSQknHh
+    password:
 ---
 spring:
   config:
@@ -49,4 +49,4 @@ spring:
   datasource:
     url: jdbc:mariadb://database-starter-valley.czfim5awnvs3.ap-northeast-2.rds.amazonaws.com:3306/valley
     username: starterAdmin
-    password: BUI71oZkxZxKixSQknHh
+    password:

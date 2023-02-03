@@ -3,4 +3,4 @@ app:
     client:
       github:
         client-id: e731c1d25d4cc09e1cb5
-        client-secret: f29e579c65c8ac58cbe7317295adfe619dd876c4
+        client-secret:
